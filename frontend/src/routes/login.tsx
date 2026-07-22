@@ -1,14 +1,22 @@
 import { GalleryVerticalEnd } from "lucide-react";
-
 import { LoginForm } from "@/components/login-form";
 
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/login")({
-  component: RouteComponent,
+  validateSearch: (search) => ({
+    redirect: (search.redirect as string) || "/employee",
+  }),
+  beforeLoad: ({ context, search }) => {
+    // Redirect if already authenticated
+    if (context.auth.isAuthenticated) {
+      throw redirect({ to: search.redirect });
+    }
+  },
+  component: LoginComponent,
 });
 
-function RouteComponent() {
+function LoginComponent() {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
