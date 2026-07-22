@@ -2,7 +2,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import EmployeeSidebar from "./-components/EmployeeSidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-export const Route = createFileRoute("/employee")({
+export const Route = createFileRoute("/_authenticated/employee")({
   component: RouteComponent,
 });
 

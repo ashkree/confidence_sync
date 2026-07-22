@@ -21,9 +21,16 @@ export default defineConfig([
   },
 
   {
-    files: ["src/routes/**/*.{ts,tsx}"],
+    files: ["src/routes/**/*.{ts,tsx}", "src/auth.tsx"],
     rules: {
       "react-refresh/only-export-components": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
     },
   },
 ]);

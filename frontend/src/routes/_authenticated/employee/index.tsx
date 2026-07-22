@@ -4,11 +4,11 @@ import QuickActions from "@/components/sections/QuickActions";
 import PendingRequestsSection from "@/components/sections/PendingRequestsSection";
 import TopicSection from "@/components/sections/TopicsSection";
 
-export const Route = createFileRoute("/employee/")({
-  component: EmployeeDashboard,
+export const Route = createFileRoute("/_authenticated/employee/")({
+  component: Component,
 });
 
-function EmployeeDashboard() {
+function Component() {
   return (
     <>
       <HeroSection />

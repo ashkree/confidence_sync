@@ -10,23 +10,16 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as EmployeeRouteRouteImport } from './routes/employee/route'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as AdminDepartmentRouteRouteImport } from './routes/admin/$department/route'
-import { Route as AdminTicketsRouteImport } from './routes/admin/tickets'
-import { Route as EmployeeIndexRouteImport } from './routes/employee/index'
-import { Route as EmployeeKbRouteImport } from './routes/employee/kb'
-import { Route as EmployeeProfileRouteImport } from './routes/employee/profile'
-import { Route as EmployeeTicketSubmitRouteImport } from './routes/employee/ticket.submit'
+import { Route as AuthenticatedEmployeeRouteRouteImport } from './routes/_authenticated/employee/route'
+import { Route as AuthenticatedEmployeeIndexRouteImport } from './routes/_authenticated/employee/index'
+import { Route as AuthenticatedEmployeeKbRouteImport } from './routes/_authenticated/employee/kb'
+import { Route as AuthenticatedEmployeeProfileRouteImport } from './routes/_authenticated/employee/profile'
+import { Route as AuthenticatedEmployeeTicketSubmitRouteImport } from './routes/_authenticated/employee/ticket.submit'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EmployeeRouteRoute = EmployeeRouteRouteImport.update({
-  id: '/employee',
-  path: '/employee',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -34,78 +27,69 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminDepartmentRouteRoute = AdminDepartmentRouteRouteImport.update({
-  id: '/admin/$department',
-  path: '/admin/$department',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminTicketsRoute = AdminTicketsRouteImport.update({
-  id: '/tickets',
-  path: '/tickets',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const EmployeeIndexRoute = EmployeeIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => EmployeeRouteRoute,
-} as any)
-const EmployeeKbRoute = EmployeeKbRouteImport.update({
+const AuthenticatedEmployeeRouteRoute =
+  AuthenticatedEmployeeRouteRouteImport.update({
+    id: '/_authenticated/employee',
+    path: '/employee',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedEmployeeIndexRoute =
+  AuthenticatedEmployeeIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedEmployeeRouteRoute,
+  } as any)
+const AuthenticatedEmployeeKbRoute = AuthenticatedEmployeeKbRouteImport.update({
   id: '/kb',
   path: '/kb',
-  getParentRoute: () => EmployeeRouteRoute,
+  getParentRoute: () => AuthenticatedEmployeeRouteRoute,
 } as any)
-const EmployeeProfileRoute = EmployeeProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => EmployeeRouteRoute,
-} as any)
-const EmployeeTicketSubmitRoute = EmployeeTicketSubmitRouteImport.update({
-  id: '/ticket/submit',
-  path: '/ticket/submit',
-  getParentRoute: () => EmployeeRouteRoute,
-} as any)
+const AuthenticatedEmployeeProfileRoute =
+  AuthenticatedEmployeeProfileRouteImport.update({
+    id: '/profile',
+    path: '/profile',
+    getParentRoute: () => AuthenticatedEmployeeRouteRoute,
+  } as any)
+const AuthenticatedEmployeeTicketSubmitRoute =
+  AuthenticatedEmployeeTicketSubmitRouteImport.update({
+    id: '/ticket/submit',
+    path: '/ticket/submit',
+    getParentRoute: () => AuthenticatedEmployeeRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/employee': typeof EmployeeRouteRouteWithChildren
   '/login': typeof LoginRoute
-  '/admin/$department': typeof AdminDepartmentRouteRoute
-  '/admin/tickets': typeof AdminTicketsRoute
-  '/employee/kb': typeof EmployeeKbRoute
-  '/employee/profile': typeof EmployeeProfileRoute
-  '/employee/': typeof EmployeeIndexRoute
-  '/employee/ticket/submit': typeof EmployeeTicketSubmitRoute
+  '/employee': typeof AuthenticatedEmployeeRouteRouteWithChildren
+  '/employee/kb': typeof AuthenticatedEmployeeKbRoute
+  '/employee/profile': typeof AuthenticatedEmployeeProfileRoute
+  '/employee/': typeof AuthenticatedEmployeeIndexRoute
+  '/employee/ticket/submit': typeof AuthenticatedEmployeeTicketSubmitRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/admin/$department': typeof AdminDepartmentRouteRoute
-  '/admin/tickets': typeof AdminTicketsRoute
-  '/employee/kb': typeof EmployeeKbRoute
-  '/employee/profile': typeof EmployeeProfileRoute
-  '/employee': typeof EmployeeIndexRoute
-  '/employee/ticket/submit': typeof EmployeeTicketSubmitRoute
+  '/employee/kb': typeof AuthenticatedEmployeeKbRoute
+  '/employee/profile': typeof AuthenticatedEmployeeProfileRoute
+  '/employee': typeof AuthenticatedEmployeeIndexRoute
+  '/employee/ticket/submit': typeof AuthenticatedEmployeeTicketSubmitRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/employee': typeof EmployeeRouteRouteWithChildren
   '/login': typeof LoginRoute
-  '/admin/$department': typeof AdminDepartmentRouteRoute
-  '/admin/tickets': typeof AdminTicketsRoute
-  '/employee/kb': typeof EmployeeKbRoute
-  '/employee/profile': typeof EmployeeProfileRoute
-  '/employee/': typeof EmployeeIndexRoute
-  '/employee/ticket/submit': typeof EmployeeTicketSubmitRoute
+  '/_authenticated/employee': typeof AuthenticatedEmployeeRouteRouteWithChildren
+  '/_authenticated/employee/kb': typeof AuthenticatedEmployeeKbRoute
+  '/_authenticated/employee/profile': typeof AuthenticatedEmployeeProfileRoute
+  '/_authenticated/employee/': typeof AuthenticatedEmployeeIndexRoute
+  '/_authenticated/employee/ticket/submit': typeof AuthenticatedEmployeeTicketSubmitRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/employee'
     | '/login'
-    | '/admin/$department'
-    | '/admin/tickets'
+    | '/employee'
     | '/employee/kb'
     | '/employee/profile'
     | '/employee/'
@@ -114,8 +98,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
-    | '/admin/$department'
-    | '/admin/tickets'
     | '/employee/kb'
     | '/employee/profile'
     | '/employee'
@@ -123,21 +105,18 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/employee'
     | '/login'
-    | '/admin/$department'
-    | '/admin/tickets'
-    | '/employee/kb'
-    | '/employee/profile'
-    | '/employee/'
-    | '/employee/ticket/submit'
+    | '/_authenticated/employee'
+    | '/_authenticated/employee/kb'
+    | '/_authenticated/employee/profile'
+    | '/_authenticated/employee/'
+    | '/_authenticated/employee/ticket/submit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  EmployeeRouteRoute: typeof EmployeeRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
-  AdminDepartmentRouteRoute: typeof AdminDepartmentRouteRoute
+  AuthenticatedEmployeeRouteRoute: typeof AuthenticatedEmployeeRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -149,13 +128,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/employee': {
-      id: '/employee'
-      path: '/employee'
-      fullPath: '/employee'
-      preLoaderRoute: typeof EmployeeRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -163,74 +135,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/$department': {
-      id: '/admin/$department'
-      path: '/admin/$department'
-      fullPath: '/admin/$department'
-      preLoaderRoute: typeof AdminDepartmentRouteRouteImport
+    '/_authenticated/employee': {
+      id: '/_authenticated/employee'
+      path: '/employee'
+      fullPath: '/employee'
+      preLoaderRoute: typeof AuthenticatedEmployeeRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/tickets': {
-      id: '/admin/tickets'
-      path: '/tickets'
-      fullPath: '/admin/tickets'
-      preLoaderRoute: typeof AdminTicketsRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/employee/': {
-      id: '/employee/'
+    '/_authenticated/employee/': {
+      id: '/_authenticated/employee/'
       path: '/'
       fullPath: '/employee/'
-      preLoaderRoute: typeof EmployeeIndexRouteImport
-      parentRoute: typeof EmployeeRouteRoute
+      preLoaderRoute: typeof AuthenticatedEmployeeIndexRouteImport
+      parentRoute: typeof AuthenticatedEmployeeRouteRoute
     }
-    '/employee/kb': {
-      id: '/employee/kb'
+    '/_authenticated/employee/kb': {
+      id: '/_authenticated/employee/kb'
       path: '/kb'
       fullPath: '/employee/kb'
-      preLoaderRoute: typeof EmployeeKbRouteImport
-      parentRoute: typeof EmployeeRouteRoute
+      preLoaderRoute: typeof AuthenticatedEmployeeKbRouteImport
+      parentRoute: typeof AuthenticatedEmployeeRouteRoute
     }
-    '/employee/profile': {
-      id: '/employee/profile'
+    '/_authenticated/employee/profile': {
+      id: '/_authenticated/employee/profile'
       path: '/profile'
       fullPath: '/employee/profile'
-      preLoaderRoute: typeof EmployeeProfileRouteImport
-      parentRoute: typeof EmployeeRouteRoute
+      preLoaderRoute: typeof AuthenticatedEmployeeProfileRouteImport
+      parentRoute: typeof AuthenticatedEmployeeRouteRoute
     }
-    '/employee/ticket/submit': {
-      id: '/employee/ticket/submit'
+    '/_authenticated/employee/ticket/submit': {
+      id: '/_authenticated/employee/ticket/submit'
       path: '/ticket/submit'
       fullPath: '/employee/ticket/submit'
-      preLoaderRoute: typeof EmployeeTicketSubmitRouteImport
-      parentRoute: typeof EmployeeRouteRoute
+      preLoaderRoute: typeof AuthenticatedEmployeeTicketSubmitRouteImport
+      parentRoute: typeof AuthenticatedEmployeeRouteRoute
     }
   }
 }
 
-interface EmployeeRouteRouteChildren {
-  EmployeeKbRoute: typeof EmployeeKbRoute
-  EmployeeProfileRoute: typeof EmployeeProfileRoute
-  EmployeeIndexRoute: typeof EmployeeIndexRoute
-  EmployeeTicketSubmitRoute: typeof EmployeeTicketSubmitRoute
+interface AuthenticatedEmployeeRouteRouteChildren {
+  AuthenticatedEmployeeKbRoute: typeof AuthenticatedEmployeeKbRoute
+  AuthenticatedEmployeeProfileRoute: typeof AuthenticatedEmployeeProfileRoute
+  AuthenticatedEmployeeIndexRoute: typeof AuthenticatedEmployeeIndexRoute
+  AuthenticatedEmployeeTicketSubmitRoute: typeof AuthenticatedEmployeeTicketSubmitRoute
 }
 
-const EmployeeRouteRouteChildren: EmployeeRouteRouteChildren = {
-  EmployeeKbRoute: EmployeeKbRoute,
-  EmployeeProfileRoute: EmployeeProfileRoute,
-  EmployeeIndexRoute: EmployeeIndexRoute,
-  EmployeeTicketSubmitRoute: EmployeeTicketSubmitRoute,
-}
+const AuthenticatedEmployeeRouteRouteChildren: AuthenticatedEmployeeRouteRouteChildren =
+  {
+    AuthenticatedEmployeeKbRoute: AuthenticatedEmployeeKbRoute,
+    AuthenticatedEmployeeProfileRoute: AuthenticatedEmployeeProfileRoute,
+    AuthenticatedEmployeeIndexRoute: AuthenticatedEmployeeIndexRoute,
+    AuthenticatedEmployeeTicketSubmitRoute:
+      AuthenticatedEmployeeTicketSubmitRoute,
+  }
 
-const EmployeeRouteRouteWithChildren = EmployeeRouteRoute._addFileChildren(
-  EmployeeRouteRouteChildren,
-)
+const AuthenticatedEmployeeRouteRouteWithChildren =
+  AuthenticatedEmployeeRouteRoute._addFileChildren(
+    AuthenticatedEmployeeRouteRouteChildren,
+  )
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  EmployeeRouteRoute: EmployeeRouteRouteWithChildren,
   LoginRoute: LoginRoute,
-  AdminDepartmentRouteRoute: AdminDepartmentRouteRoute,
+  AuthenticatedEmployeeRouteRoute: AuthenticatedEmployeeRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

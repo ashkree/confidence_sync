@@ -7,7 +7,7 @@ export type TicketSubmitSearch = {
   ticketType?: 'hardware_issue' | 'software_issue'
 }
 
-export const Route = createFileRoute('/employee/ticket/submit')({
+export const Route = createFileRoute('/_authenticated/employee/ticket/submit')({
   component: TicketSubmissionPage,
   validateSearch: (search: Record<string, unknown>): TicketSubmitSearch => {
     return {
