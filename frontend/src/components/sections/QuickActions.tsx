@@ -30,7 +30,7 @@ export default function QuickActions() {
       </CardHeader>
       <CardContent className="grid grid-cols-4 gap-2">
         {quick_actions.map((action) => (
-          <Link to="/employee/ticket/submit">
+          <Link to="/ticket/submit">
             <Button className="w-full justify-start" variant="outline">
               <action.icon />
               <span> {action.name} </span>

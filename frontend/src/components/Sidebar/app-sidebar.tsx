@@ -14,15 +14,8 @@ import {
 } from "@/components/ui/sidebar";
 import { type LucideIcon } from "lucide-react";
 import { SidebarToggle } from "./sidebar-toggle";
-
-// This is sample data.
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-};
+import { useAuth } from "@/auth";
+import { useNavigate } from "@tanstack/react-router";
 
 export type DashboardItem = {
   name: string;
@@ -42,6 +35,19 @@ export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ dashboards, links, ...props }: AppSidebarProps) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate({
+      to: "/login",
+      search: {
+        redirect: "/employee",
+      },
+    });
+  };
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -52,7 +58,7 @@ export function AppSidebar({ dashboards, links, ...props }: AppSidebarProps) {
         <NavMain items={links} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} onLogout={handleLogout} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

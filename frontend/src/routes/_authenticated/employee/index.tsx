@@ -3,15 +3,17 @@ import HeroSection from "@/components/sections/HeroSection";
 import QuickActions from "@/components/sections/QuickActions";
 import PendingRequestsSection from "@/components/sections/PendingRequestsSection";
 import TopicSection from "@/components/sections/TopicsSection";
+import { useAuth } from "@/auth";
 
 export const Route = createFileRoute("/_authenticated/employee/")({
   component: Component,
 });
 
 function Component() {
+  const { user } = useAuth();
   return (
     <>
-      <HeroSection />
+      <HeroSection title={`Hello, ${user?.name}`} />
       <div className="flex flex-1 flex-col gap-4 px-32 py-8">
         <div className="grid auto-rows-min gap-4 md:grid-cols-3">
           <div className="flex flex-col gap-4 col-span-2">

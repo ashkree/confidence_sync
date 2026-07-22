@@ -29,17 +29,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Field, FieldLabel, FieldError, FieldContent } from "@/components/ui/field";
+import {
+  Field,
+  FieldLabel,
+  FieldContent,
+} from "@/components/ui/field";
 
-const routeApi = getRouteApi('/employee/ticket/submit');
+const routeApi = getRouteApi("/_authenticated/ticket/submit");
 
 export function TicketSubmissionPage() {
   const search = routeApi.useSearch();
 
   const [department, setDepartment] = useState<string>(search.department || "");
-  const [hrRequestType, setHrRequestType] = useState<string>(search.requestType || "");
-  const [itTicketType, setItTicketType] = useState<string>(search.ticketType || "");
-  
+  const [hrRequestType, setHrRequestType] = useState<string>(
+    search.requestType || "",
+  );
+  const [itTicketType, setItTicketType] = useState<string>(
+    search.ticketType || "",
+  );
+
   const [fromDate, setFromDate] = useState<Date | undefined>();
   const [toDate, setToDate] = useState<Date | undefined>();
 
@@ -55,36 +63,52 @@ export function TicketSubmissionPage() {
         <CardHeader>
           <CardTitle>Submit a Request</CardTitle>
           <CardDescription>
-            Fill out the form below to submit a new ticket to the HR or IT department.
+            Fill out the form below to submit a new ticket to the HR or IT
+            department.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            
             <Field>
               <FieldLabel>Subject</FieldLabel>
               <FieldContent>
-                <Input required placeholder="Brief summary of the issue or request" name="subject" />
+                <Input
+                  required
+                  placeholder="Brief summary of the issue or request"
+                  name="subject"
+                />
               </FieldContent>
             </Field>
 
             <Field>
               <FieldLabel>Description</FieldLabel>
               <FieldContent>
-                <Textarea required placeholder="Please provide details..." name="description" className="min-h-[100px]" />
+                <Textarea
+                  required
+                  placeholder="Please provide details..."
+                  name="description"
+                  className="min-h-[100px]"
+                />
               </FieldContent>
             </Field>
 
             <Field>
               <FieldLabel>Department</FieldLabel>
               <FieldContent>
-                <Select required value={department} onValueChange={setDepartment} name="department">
+                <Select
+                  required
+                  value={department}
+                  onValueChange={(val) => setDepartment(val ?? "")}
+                  name="department"
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select department" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="hr">Human Resources (HR)</SelectItem>
-                    <SelectItem value="it">Information Technology (IT)</SelectItem>
+                    <SelectItem value="it">
+                      Information Technology (IT)
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </FieldContent>
@@ -96,13 +120,22 @@ export function TicketSubmissionPage() {
                 <Field>
                   <FieldLabel>Request Type</FieldLabel>
                   <FieldContent>
-                    <Select required value={hrRequestType} onValueChange={setHrRequestType} name="request_type">
+                    <Select
+                      required
+                      value={hrRequestType}
+                      onValueChange={(val) => setHrRequestType(val ?? "")}
+                      name="request_type"
+                    >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select request type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="leave_request">Leave Request</SelectItem>
-                        <SelectItem value="document_request">Document Request</SelectItem>
+                        <SelectItem value="leave_request">
+                          Leave Request
+                        </SelectItem>
+                        <SelectItem value="document_request">
+                          Document Request
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </FieldContent>
@@ -114,16 +147,21 @@ export function TicketSubmissionPage() {
                       <FieldLabel>From Date</FieldLabel>
                       <FieldContent>
                         <Popover>
+                          {/* @ts-expect-error Base UI doesn't strongly type asChild */}
                           <PopoverTrigger asChild>
                             <Button
                               variant={"outline"}
                               className={cn(
                                 "w-full justify-start text-left font-normal",
-                                !fromDate && "text-muted-foreground"
+                                !fromDate && "text-muted-foreground",
                               )}
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />
-                              {fromDate ? format(fromDate, "PPP") : <span>Pick a date</span>}
+                              {fromDate ? (
+                                format(fromDate, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
@@ -131,7 +169,6 @@ export function TicketSubmissionPage() {
                               mode="single"
                               selected={fromDate}
                               onSelect={setFromDate}
-                              initialFocus
                             />
                           </PopoverContent>
                         </Popover>
@@ -141,16 +178,21 @@ export function TicketSubmissionPage() {
                       <FieldLabel>To Date</FieldLabel>
                       <FieldContent>
                         <Popover>
+                          {/* @ts-expect-error Base UI doesn't strongly type asChild */}
                           <PopoverTrigger asChild>
                             <Button
                               variant={"outline"}
                               className={cn(
                                 "w-full justify-start text-left font-normal",
-                                !toDate && "text-muted-foreground"
+                                !toDate && "text-muted-foreground",
                               )}
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />
-                              {toDate ? format(toDate, "PPP") : <span>Pick a date</span>}
+                              {toDate ? (
+                                format(toDate, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
@@ -158,7 +200,6 @@ export function TicketSubmissionPage() {
                               mode="single"
                               selected={toDate}
                               onSelect={setToDate}
-                              initialFocus
                             />
                           </PopoverContent>
                         </Popover>
@@ -176,8 +217,12 @@ export function TicketSubmissionPage() {
                           <SelectValue placeholder="Select document" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="salary_certificate">Salary Certificate</SelectItem>
-                          <SelectItem value="noc">NOC (No Objection Certificate)</SelectItem>
+                          <SelectItem value="salary_certificate">
+                            Salary Certificate
+                          </SelectItem>
+                          <SelectItem value="noc">
+                            NOC (No Objection Certificate)
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </FieldContent>
@@ -192,13 +237,22 @@ export function TicketSubmissionPage() {
                 <Field>
                   <FieldLabel>Ticket Type</FieldLabel>
                   <FieldContent>
-                    <Select required value={itTicketType} onValueChange={setItTicketType} name="it_ticket_type">
+                    <Select
+                      required
+                      value={itTicketType}
+                      onValueChange={(val) => setItTicketType(val ?? "")}
+                      name="it_ticket_type"
+                    >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select ticket type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="hardware_issue">Hardware Issue</SelectItem>
-                        <SelectItem value="software_issue">Software Issue</SelectItem>
+                        <SelectItem value="hardware_issue">
+                          Hardware Issue
+                        </SelectItem>
+                        <SelectItem value="software_issue">
+                          Software Issue
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </FieldContent>
@@ -209,13 +263,22 @@ export function TicketSubmissionPage() {
                     <Field>
                       <FieldLabel>Device Type</FieldLabel>
                       <FieldContent>
-                        <Input required placeholder="e.g. Laptop, Monitor" name="device_type" />
+                        <Input
+                          required
+                          placeholder="e.g. Laptop, Monitor"
+                          name="device_type"
+                        />
                       </FieldContent>
                     </Field>
                     <Field>
                       <FieldLabel>Fault Code</FieldLabel>
                       <FieldContent>
-                        <Input required placeholder="e.g. E012" maxLength={4} name="fault_code" />
+                        <Input
+                          required
+                          placeholder="e.g. E012"
+                          maxLength={4}
+                          name="fault_code"
+                        />
                       </FieldContent>
                     </Field>
                   </div>
@@ -225,14 +288,20 @@ export function TicketSubmissionPage() {
                   <Field>
                     <FieldLabel>Software Name</FieldLabel>
                     <FieldContent>
-                      <Input required placeholder="e.g. Microsoft Outlook, Slack" name="software_type" />
+                      <Input
+                        required
+                        placeholder="e.g. Microsoft Outlook, Slack"
+                        name="software_type"
+                      />
                     </FieldContent>
                   </Field>
                 )}
               </div>
             )}
 
-            <Button type="submit" className="w-full sm:w-auto">Submit Request</Button>
+            <Button type="submit" className="w-full sm:w-auto">
+              Submit Request
+            </Button>
           </form>
         </CardContent>
       </Card>

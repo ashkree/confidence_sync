@@ -1,7 +1,17 @@
 import { GalleryVerticalEnd } from "lucide-react";
-import { LoginForm } from "@/components/login-form";
+import { Button } from "@/components/ui/button";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldError,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import * as z from "zod";
+import { useForm } from "@tanstack/react-form";
 
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { useAuth } from "@/auth";
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search) => ({
@@ -15,6 +25,106 @@ export const Route = createFileRoute("/login")({
   },
   component: LoginComponent,
 });
+
+const loginSchema = z.object({
+  email: z.email("Invalid email").min(1, "Email is required"),
+  password: z.string().min(1, "Password is required"),
+});
+
+function LoginForm() {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const form = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    validators: {
+      onSubmit: loginSchema,
+    },
+    onSubmit: async ({ value }) => {
+      await login(value.email, value.password);
+      navigate({ to: "/employee" });
+    },
+  });
+
+  return (
+    <form
+      className="flex flex-col gap-6"
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.handleSubmit();
+      }}
+    >
+      <FieldGroup>
+        <div className="flex flex-col items-center gap-1 text-center">
+          <h1 className="text-2xl font-bold">Login to your account</h1>
+          <p className="text-sm text-balance text-muted-foreground">
+            Enter your email below to login to your account
+          </p>
+        </div>
+
+        <form.Field name="email">
+          {(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                <Input
+                  id={field.name}
+                  type="email"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                  placeholder="m@example.com"
+                  autoComplete="email"
+                />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
+        </form.Field>
+
+        <form.Field name="password">
+          {(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <div className="flex items-center">
+                  <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                  <a
+                    href="#"
+                    className="ml-auto text-sm underline-offset-4 hover:underline"
+                  >
+                    Forgot your password?
+                  </a>
+                </div>
+                <Input
+                  id={field.name}
+                  type="password"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                  autoComplete="current-password"
+                />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
+        </form.Field>
+
+        <Field>
+          <Button type="submit">Login</Button>
+        </Field>
+      </FieldGroup>
+    </form>
+  );
+}
 
 function LoginComponent() {
   return (
