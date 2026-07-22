@@ -1,6 +1,7 @@
 "use client";
 
 import { type LucideIcon } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 import {
   SidebarGroup,
@@ -34,7 +35,7 @@ export function NavMain({
         {items.map((item) => (
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton
-              render={<a href={item.url} />}
+              render={<Link to={item.url} />}
               tooltip={item.title}
               isActive={item.isActive}
             >
@@ -45,7 +46,7 @@ export function NavMain({
               <SidebarMenuSub>
                 {item.items.map((subItem) => (
                   <SidebarMenuSubItem key={subItem.title}>
-                    <SidebarMenuSubButton render={<a href={subItem.url} />}>
+                    <SidebarMenuSubButton render={<Link to={subItem.url} />}>
                       <span>{subItem.title}</span>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>

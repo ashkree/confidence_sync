@@ -12,15 +12,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import {
-  GalleryVerticalEndIcon,
-  BookOpenIcon,
-  LayoutDashboard,
-  Plus,
-  User,
-  Computer,
-  PersonStanding,
-} from "lucide-react";
+import { type LucideIcon } from "lucide-react";
 import { SidebarToggle } from "./sidebar-toggle";
 
 // This is sample data.
@@ -30,54 +22,34 @@ const data = {
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
-  dashboards: [
-    {
-      name: "Employee Portal",
-      icon: GalleryVerticalEndIcon,
-    },
-    {
-      name: "IT Dashboard",
-      icon: Computer,
-    },
-    {
-      name: "HR Dashboard",
-      icon: PersonStanding,
-    },
-  ],
-  navMain: [
-    {
-      title: "Overview",
-      url: "#",
-      icon: LayoutDashboard,
-      isActive: true,
-    },
-    {
-      title: "Submit a request",
-      url: "#",
-      icon: Plus,
-    },
-    {
-      title: "Knowledge Base",
-      url: "#",
-      icon: BookOpenIcon,
-    },
-    {
-      title: "My Profile",
-      url: "#",
-      icon: User,
-    },
-  ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export type DashboardItem = {
+  name: string;
+  icon: LucideIcon;
+};
+
+export type LinkItem = {
+  title: string;
+  url: string;
+  icon?: LucideIcon;
+  isActive?: boolean;
+};
+
+export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  dashboards?: DashboardItem[];
+  links: LinkItem[];
+}
+
+export function AppSidebar({ dashboards, links, ...props }: AppSidebarProps) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarToggle />
-        <DashboardSwitcher dashboards={data.dashboards} />
+        <DashboardSwitcher dashboards={dashboards} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={links} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

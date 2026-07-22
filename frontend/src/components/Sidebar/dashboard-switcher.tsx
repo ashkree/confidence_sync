@@ -16,21 +16,18 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { ChevronsUpDownIcon, type LucideIcon } from "lucide-react";
-
-type Dashboard = {
-  name: string;
-  icon: LucideIcon;
-};
+import { ChevronsUpDownIcon } from "lucide-react";
+import type { DashboardItem } from "./app-sidebar";
 
 type DashboardSwitcherProps = {
-  dashboards: Dashboard[];
+  dashboards?: DashboardItem[];
 };
 
 export function DashboardSwitcher({ dashboards }: DashboardSwitcherProps) {
   const { isMobile } = useSidebar();
-  const [activeDashboard, setDashboard] = React.useState(dashboards[0]);
-  if (!activeDashboard) {
+  const [activeDashboard, setDashboard] = React.useState(dashboards?.[0]);
+
+  if (!dashboards || dashboards.length === 0 || !activeDashboard) {
     return null;
   }
   return (
@@ -46,7 +43,7 @@ export function DashboardSwitcher({ dashboards }: DashboardSwitcherProps) {
             }
           >
             <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-              <activeDashboard.icon size="1em"></activeDashboard.icon>
+              {activeDashboard.icon && <activeDashboard.icon />}
             </div>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">
