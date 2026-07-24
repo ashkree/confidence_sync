@@ -4,7 +4,6 @@ import * as React from "react";
 
 import { NavMain } from "@/components/Sidebar/nav-main";
 import { NavUser } from "@/components/Sidebar/nav-user";
-import { DashboardSwitcher } from "@/components/Sidebar/dashboard-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -17,24 +16,22 @@ import { SidebarToggle } from "./sidebar-toggle";
 import { useAuth } from "@/auth";
 import { useNavigate } from "@tanstack/react-router";
 
-export type DashboardItem = {
-  name: string;
-  icon: LucideIcon;
-};
-
 export type LinkItem = {
   title: string;
   url: string;
   icon?: LucideIcon;
-  isActive?: boolean;
+};
+
+export type LinkGroup = {
+  name: string;
+  items: LinkItem[];
 };
 
 export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  dashboards?: DashboardItem[];
-  links: LinkItem[];
+  groups: LinkGroup[];
 }
 
-export function AppSidebar({ dashboards, links, ...props }: AppSidebarProps) {
+export function AppSidebar({ groups, ...props }: AppSidebarProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -52,10 +49,9 @@ export function AppSidebar({ dashboards, links, ...props }: AppSidebarProps) {
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarToggle />
-        <DashboardSwitcher dashboards={dashboards} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={links} />
+        <NavMain groups={groups} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} onLogout={handleLogout} />

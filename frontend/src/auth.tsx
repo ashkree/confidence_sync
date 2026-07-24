@@ -15,8 +15,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return !!localStorage.getItem("auth-token");
   });
 
+  // checks if the user is authenticated
   const isAuthenticated = user !== null;
 
+  // checks for token existance and validates if it exists
+  // early return otherwise
   useEffect(() => {
     const token = localStorage.getItem("auth-token");
     if (!token) return;
@@ -30,15 +33,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .finally(() => setIsLoading(false));
   }, []);
 
+  // Sends login request to backend
   const login = async (username: string, password: string) => {
     const { token, user } = await apiLogin(username, password);
     localStorage.setItem("auth-token", token);
     setUser(user);
   };
 
+  // logout user and remove auth-token
   const logout = () => {
     localStorage.removeItem("auth-token");
     setUser(null);
+  };
+
+  // checks for role
+  const hasRole = (role: string) => {
+    return user?.role.includes(role) ?? false;
+  };
+
+  // checks for department
+  const hasDepartment = (department: string | null): boolean => {
+    return user?.department === department;
   };
 
   if (isLoading) {
@@ -51,7 +66,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, isLoading, user, login, logout }}
+      value={{
+        isAuthenticated,
+        isLoading,
+        user,
+        hasRole,
+        hasDepartment,
+        login,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
