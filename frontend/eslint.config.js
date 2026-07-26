@@ -33,4 +33,11 @@ export default defineConfig([
       ],
     },
   },
+
+  {
+    files: ["**/columns/**", "**/data-table*", "**/ticket-table*"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
 ]);

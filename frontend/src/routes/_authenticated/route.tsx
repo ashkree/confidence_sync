@@ -60,7 +60,7 @@ const it_group = {
   items: [
     {
       title: "Tickets",
-      url: "admin/it/",
+      url: "/admin/it/tickets",
       icon: Tickets,
     },
   ],
