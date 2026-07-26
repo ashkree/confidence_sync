@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { User } from "@/types";
 
-const MOCK_USERS: Record<string, User> = {
+export const MOCK_USERS: Record<string, User> = {
   // Employees
   "employee1@example.com": {
     id: "e1",

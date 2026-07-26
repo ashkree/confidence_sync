@@ -1,24 +1,13 @@
 import { User, Mail, Phone, Building, Briefcase, CalendarHeart, CalendarDays } from "lucide-react";
 import { format } from "date-fns";
+import { useAuth } from "@/auth";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
-// Mock Hook to simulate fetching current user state
-function useCurrentUser() {
-  return {
-    id: "123e4567-e89b-12d3-a456-426614174000",
-    name: "Jane Doe",
-    email: "jane.doe@example.com",
-    role: "employee",
-    department: "hr",
-    phone_number: "+1 (555) 123-4567",
-    leave_days: 14,
-    created_at: new Date("2025-01-15T09:30:00Z"),
-  };
-}
-
 export function ProfilePage() {
-  const user = useCurrentUser();
+  const { user } = useAuth();
+
+  if (!user) return null;
 
   return (
     <div className="container mx-auto p-6 max-w-4xl space-y-8">
@@ -54,7 +43,7 @@ export function ProfilePage() {
                 <Building className="w-5 h-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">Department</p>
-                  <p className="text-sm text-muted-foreground uppercase">{user.department}</p>
+                  <p className="text-sm text-muted-foreground uppercase">{user.department || "N/A"}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -71,7 +60,7 @@ export function ProfilePage() {
                 <div>
                   <p className="text-sm font-medium">Joined</p>
                   <p className="text-sm text-muted-foreground">
-                    {format(user.created_at, "MMMM d, yyyy")}
+                    {format(new Date(user.created_at), "MMMM d, yyyy")}
                   </p>
                 </div>
               </div>

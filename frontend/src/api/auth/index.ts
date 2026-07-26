@@ -5,3 +5,5 @@ import * as service from "./auth.service";
 const useMock = import.meta.env.VITE_USE_MOCK === "true";
 
 export const { login, validateToken } = useMock ? mock : service;
+
+export const MOCK_USERS = useMock ? mock.MOCK_USERS : null;

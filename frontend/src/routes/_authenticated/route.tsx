@@ -71,7 +71,7 @@ const hr_group = {
   items: [
     {
       title: "Requests",
-      url: "admin/hr/",
+      url: "/admin/hr/requests",
       icon: Tickets,
     },
   ],

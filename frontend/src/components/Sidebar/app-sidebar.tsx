@@ -32,7 +32,7 @@ export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ groups, ...props }: AppSidebarProps) {
-  const { user, logout } = useAuth();
+  const { user, logout, login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -54,7 +54,7 @@ export function AppSidebar({ groups, ...props }: AppSidebarProps) {
         <NavMain groups={groups} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} onLogout={handleLogout} />
+        <NavUser user={user} onLogout={handleLogout} onSwitchUser={login} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

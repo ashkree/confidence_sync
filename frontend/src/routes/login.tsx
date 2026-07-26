@@ -7,11 +7,22 @@ import {
   FieldError,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import * as z from "zod";
 import { useForm } from "@tanstack/react-form";
 
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/auth";
+import { MOCK_USERS } from "@/api/auth";
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search) => ({
@@ -31,6 +42,18 @@ const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+const useMock = import.meta.env.VITE_USE_MOCK === "true";
+
+function getMockUsersByRole() {
+  if (!MOCK_USERS) return { employees: [], hrAdmins: [], itAdmins: [] };
+  const entries = Object.entries(MOCK_USERS);
+  return {
+    employees: entries.filter(([, u]) => u.role === "employee"),
+    hrAdmins: entries.filter(([, u]) => u.role === "admin" && u.department === "hr"),
+    itAdmins: entries.filter(([, u]) => u.role === "admin" && u.department === "it"),
+  };
+}
+
 function LoginForm() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -49,6 +72,14 @@ function LoginForm() {
     },
   });
 
+  const handleQuickLogin = async (email: string | null) => {
+    if (!email) return;
+    await login(email, "mock");
+    navigate({ to: "/employee" });
+  };
+
+  const { employees, hrAdmins, itAdmins } = getMockUsersByRole();
+
   return (
     <form
       className="flex flex-col gap-6"
@@ -64,6 +95,45 @@ function LoginForm() {
             Enter your email below to login to your account
           </p>
         </div>
+
+        {useMock && MOCK_USERS && (
+          <Field>
+            <FieldLabel>Quick Login (Mock)</FieldLabel>
+            <Select onValueChange={handleQuickLogin}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a mock user..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Employees</SelectLabel>
+                  {employees.map(([email, user]) => (
+                    <SelectItem key={email} value={email}>
+                      {user.name} — {email}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+                <SelectSeparator />
+                <SelectGroup>
+                  <SelectLabel>HR Admins</SelectLabel>
+                  {hrAdmins.map(([email, user]) => (
+                    <SelectItem key={email} value={email}>
+                      {user.name} — {email}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+                <SelectSeparator />
+                <SelectGroup>
+                  <SelectLabel>IT Admins</SelectLabel>
+                  {itAdmins.map(([email, user]) => (
+                    <SelectItem key={email} value={email}>
+                      {user.name} — {email}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </Field>
+        )}
 
         <form.Field name="email">
           {(field) => {

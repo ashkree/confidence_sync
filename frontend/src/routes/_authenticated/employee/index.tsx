@@ -4,13 +4,24 @@ import QuickActions from "@/components/sections/QuickActions";
 import PendingRequestsSection from "@/components/sections/PendingRequestsSection";
 import TopicSection from "@/components/sections/TopicsSection";
 import { useAuth } from "@/auth";
+import { fetchTickets } from "@/api/tickets";
+import type { Ticket } from "@/types";
 
 export const Route = createFileRoute("/_authenticated/employee/")({
   component: Component,
+  loader: async () => {
+    const hr = await fetchTickets("hr");
+    const it = await fetchTickets("it");
+    return [...hr, ...it];
+  },
 });
 
 function Component() {
   const { user } = useAuth();
+  const allTickets = Route.useLoaderData() as Ticket[];
+  // Filter to show only the current user's tickets
+  const myTickets = allTickets.filter((t) => t.poster_id === user?.id);
+
   return (
     <>
       <HeroSection title={`Hello, ${user?.name}`} />
@@ -21,7 +32,7 @@ function Component() {
             <TopicSection />
           </div>
           <div className="flex flex-col gap-4 col-span-1">
-            <PendingRequestsSection />
+            <PendingRequestsSection tickets={myTickets} />
           </div>
         </div>
       </div>

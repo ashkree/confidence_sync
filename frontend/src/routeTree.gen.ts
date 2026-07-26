@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as R404RouteImport } from './routes/404'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
@@ -19,12 +20,19 @@ import { Route as AuthenticatedAdminItRouteRouteImport } from './routes/_authent
 import { Route as AuthenticatedEmployeeIndexRouteImport } from './routes/_authenticated/employee/index'
 import { Route as AuthenticatedKbIndexRouteImport } from './routes/_authenticated/kb/index'
 import { Route as AuthenticatedProfileIndexRouteImport } from './routes/_authenticated/profile/index'
+import { Route as AuthenticatedTicketTicketIdRouteImport } from './routes/_authenticated/ticket/$ticketId'
 import { Route as AuthenticatedTicketSubmitRouteImport } from './routes/_authenticated/ticket/submit'
+import { Route as AuthenticatedAdminHrRequestsRouteImport } from './routes/_authenticated/admin/hr/requests'
 import { Route as AuthenticatedAdminItTicketsRouteImport } from './routes/_authenticated/admin/it/tickets'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R404Route = R404RouteImport.update({
+  id: '/404',
+  path: '/404',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -75,11 +83,23 @@ const AuthenticatedProfileIndexRoute =
     path: '/profile/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedTicketTicketIdRoute =
+  AuthenticatedTicketTicketIdRouteImport.update({
+    id: '/ticket/$ticketId',
+    path: '/ticket/$ticketId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedTicketSubmitRoute =
   AuthenticatedTicketSubmitRouteImport.update({
     id: '/ticket/submit',
     path: '/ticket/submit',
     getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminHrRequestsRoute =
+  AuthenticatedAdminHrRequestsRouteImport.update({
+    id: '/requests',
+    path: '/requests',
+    getParentRoute: () => AuthenticatedAdminHrRouteRoute,
   } as any)
 const AuthenticatedAdminItTicketsRoute =
   AuthenticatedAdminItTicketsRouteImport.update({
@@ -90,91 +110,110 @@ const AuthenticatedAdminItTicketsRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/404': typeof R404Route
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
-  '/admin/hr': typeof AuthenticatedAdminHrRouteRoute
+  '/admin/hr': typeof AuthenticatedAdminHrRouteRouteWithChildren
   '/admin/it': typeof AuthenticatedAdminItRouteRouteWithChildren
+  '/ticket/$ticketId': typeof AuthenticatedTicketTicketIdRoute
   '/ticket/submit': typeof AuthenticatedTicketSubmitRoute
   '/employee/': typeof AuthenticatedEmployeeIndexRoute
   '/kb/': typeof AuthenticatedKbIndexRoute
   '/profile/': typeof AuthenticatedProfileIndexRoute
+  '/admin/hr/requests': typeof AuthenticatedAdminHrRequestsRoute
   '/admin/it/tickets': typeof AuthenticatedAdminItTicketsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/404': typeof R404Route
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
-  '/admin/hr': typeof AuthenticatedAdminHrRouteRoute
+  '/admin/hr': typeof AuthenticatedAdminHrRouteRouteWithChildren
   '/admin/it': typeof AuthenticatedAdminItRouteRouteWithChildren
+  '/ticket/$ticketId': typeof AuthenticatedTicketTicketIdRoute
   '/ticket/submit': typeof AuthenticatedTicketSubmitRoute
   '/employee': typeof AuthenticatedEmployeeIndexRoute
   '/kb': typeof AuthenticatedKbIndexRoute
   '/profile': typeof AuthenticatedProfileIndexRoute
+  '/admin/hr/requests': typeof AuthenticatedAdminHrRequestsRoute
   '/admin/it/tickets': typeof AuthenticatedAdminItTicketsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/404': typeof R404Route
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
-  '/_authenticated/admin/hr': typeof AuthenticatedAdminHrRouteRoute
+  '/_authenticated/admin/hr': typeof AuthenticatedAdminHrRouteRouteWithChildren
   '/_authenticated/admin/it': typeof AuthenticatedAdminItRouteRouteWithChildren
+  '/_authenticated/ticket/$ticketId': typeof AuthenticatedTicketTicketIdRoute
   '/_authenticated/ticket/submit': typeof AuthenticatedTicketSubmitRoute
   '/_authenticated/employee/': typeof AuthenticatedEmployeeIndexRoute
   '/_authenticated/kb/': typeof AuthenticatedKbIndexRoute
   '/_authenticated/profile/': typeof AuthenticatedProfileIndexRoute
+  '/_authenticated/admin/hr/requests': typeof AuthenticatedAdminHrRequestsRoute
   '/_authenticated/admin/it/tickets': typeof AuthenticatedAdminItTicketsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/404'
     | '/login'
     | '/unauthorized'
     | '/admin'
     | '/admin/hr'
     | '/admin/it'
+    | '/ticket/$ticketId'
     | '/ticket/submit'
     | '/employee/'
     | '/kb/'
     | '/profile/'
+    | '/admin/hr/requests'
     | '/admin/it/tickets'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/404'
     | '/login'
     | '/unauthorized'
     | '/admin'
     | '/admin/hr'
     | '/admin/it'
+    | '/ticket/$ticketId'
     | '/ticket/submit'
     | '/employee'
     | '/kb'
     | '/profile'
+    | '/admin/hr/requests'
     | '/admin/it/tickets'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/404'
     | '/login'
     | '/unauthorized'
     | '/_authenticated/admin'
     | '/_authenticated/admin/hr'
     | '/_authenticated/admin/it'
+    | '/_authenticated/ticket/$ticketId'
     | '/_authenticated/ticket/submit'
     | '/_authenticated/employee/'
     | '/_authenticated/kb/'
     | '/_authenticated/profile/'
+    | '/_authenticated/admin/hr/requests'
     | '/_authenticated/admin/it/tickets'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  R404Route: typeof R404Route
   LoginRoute: typeof LoginRoute
   UnauthorizedRoute: typeof UnauthorizedRoute
 }
@@ -186,6 +225,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/404': {
+      id: '/404'
+      path: '/404'
+      fullPath: '/404'
+      preLoaderRoute: typeof R404RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -251,12 +297,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/ticket/$ticketId': {
+      id: '/_authenticated/ticket/$ticketId'
+      path: '/ticket/$ticketId'
+      fullPath: '/ticket/$ticketId'
+      preLoaderRoute: typeof AuthenticatedTicketTicketIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/ticket/submit': {
       id: '/_authenticated/ticket/submit'
       path: '/ticket/submit'
       fullPath: '/ticket/submit'
       preLoaderRoute: typeof AuthenticatedTicketSubmitRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/hr/requests': {
+      id: '/_authenticated/admin/hr/requests'
+      path: '/requests'
+      fullPath: '/admin/hr/requests'
+      preLoaderRoute: typeof AuthenticatedAdminHrRequestsRouteImport
+      parentRoute: typeof AuthenticatedAdminHrRouteRoute
     }
     '/_authenticated/admin/it/tickets': {
       id: '/_authenticated/admin/it/tickets'
@@ -267,6 +327,20 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedAdminHrRouteRouteChildren {
+  AuthenticatedAdminHrRequestsRoute: typeof AuthenticatedAdminHrRequestsRoute
+}
+
+const AuthenticatedAdminHrRouteRouteChildren: AuthenticatedAdminHrRouteRouteChildren =
+  {
+    AuthenticatedAdminHrRequestsRoute: AuthenticatedAdminHrRequestsRoute,
+  }
+
+const AuthenticatedAdminHrRouteRouteWithChildren =
+  AuthenticatedAdminHrRouteRoute._addFileChildren(
+    AuthenticatedAdminHrRouteRouteChildren,
+  )
 
 interface AuthenticatedAdminItRouteRouteChildren {
   AuthenticatedAdminItTicketsRoute: typeof AuthenticatedAdminItTicketsRoute
@@ -283,13 +357,13 @@ const AuthenticatedAdminItRouteRouteWithChildren =
   )
 
 interface AuthenticatedAdminRouteRouteChildren {
-  AuthenticatedAdminHrRouteRoute: typeof AuthenticatedAdminHrRouteRoute
+  AuthenticatedAdminHrRouteRoute: typeof AuthenticatedAdminHrRouteRouteWithChildren
   AuthenticatedAdminItRouteRoute: typeof AuthenticatedAdminItRouteRouteWithChildren
 }
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
-    AuthenticatedAdminHrRouteRoute: AuthenticatedAdminHrRouteRoute,
+    AuthenticatedAdminHrRouteRoute: AuthenticatedAdminHrRouteRouteWithChildren,
     AuthenticatedAdminItRouteRoute: AuthenticatedAdminItRouteRouteWithChildren,
   }
 
@@ -300,6 +374,7 @@ const AuthenticatedAdminRouteRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
+  AuthenticatedTicketTicketIdRoute: typeof AuthenticatedTicketTicketIdRoute
   AuthenticatedTicketSubmitRoute: typeof AuthenticatedTicketSubmitRoute
   AuthenticatedEmployeeIndexRoute: typeof AuthenticatedEmployeeIndexRoute
   AuthenticatedKbIndexRoute: typeof AuthenticatedKbIndexRoute
@@ -308,6 +383,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
+  AuthenticatedTicketTicketIdRoute: AuthenticatedTicketTicketIdRoute,
   AuthenticatedTicketSubmitRoute: AuthenticatedTicketSubmitRoute,
   AuthenticatedEmployeeIndexRoute: AuthenticatedEmployeeIndexRoute,
   AuthenticatedKbIndexRoute: AuthenticatedKbIndexRoute,
@@ -320,6 +396,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  R404Route: R404Route,
   LoginRoute: LoginRoute,
   UnauthorizedRoute: UnauthorizedRoute,
 }
