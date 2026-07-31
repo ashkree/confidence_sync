@@ -1,23 +1,10 @@
+import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import jwt
-from fastapi.security import OAuth2PasswordBearer
-from pwdlib import PasswordHash
 
 from app.config import settings
-
-password_hash = PasswordHash.recommended()
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/token")
-
-
-def hash_password(password: str) -> str:
-    return password_hash.hash(password)
-
-
-def verify_password(plain_password: str, hash_password: str) -> bool:
-    return password_hash.verify(plain_password, hash_password)
 
 
 def create_access_token(
@@ -41,8 +28,7 @@ def create_access_token(
     return encoded_jwt
 
 
-def verify_access_token(token: str) -> str | None:
-
+def verify_access_token(token: str) -> uuid.UUID | None:
     try:
         payload = jwt.decode(
             token,
@@ -50,7 +36,9 @@ def verify_access_token(token: str) -> str | None:
             algorithms=[settings.algorithm],
             options={"require": ["exp", "sub"]},
         )
-    except jwt.InvalidTokenError:
+        sub = payload.get("sub")
+        if not sub:
+            return None
+        return uuid.UUID(sub)
+    except (jwt.InvalidTokenError, ValueError):
         return None
-    else:
-        return payload.get("sub")

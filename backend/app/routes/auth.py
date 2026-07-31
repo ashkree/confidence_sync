@@ -1,4 +1,3 @@
-import uuid
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, status
@@ -6,17 +5,15 @@ from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth import (
-    create_access_token,
-    oauth2_scheme,
-    verify_access_token,
-    verify_password,
-)
+from app.auth.dependencies import get_current_user
+from app.auth.jwt import create_access_token
+from app.auth.passwords import verify_password
 from app.config import settings
 from app.database import get_db
-from app.schemas.users import UserBase, UserToken
-from app.services.auth import find_user_by_email, find_user_by_id
-from app.services.users import to_user_base
+from app.models import User
+from app.schemas.users import UserBase, UserProfile, UserToken
+from app.services.auth import find_user_by_email
+from app.services.users import to_user_base, to_user_profile
 
 auth_router = APIRouter(prefix="/auth")
 
@@ -31,8 +28,7 @@ async def login_for_access_token(
 
     Raises 401 if credentials are invalid
     """
-
-    user = await find_user_by_email(db, form_data)
+    user = await find_user_by_email(db, form_data.username)
 
     if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(
@@ -41,7 +37,6 @@ async def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Create access token with user id as subject
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
     access_token = create_access_token(
         data={"sub": str(user.id)},
@@ -52,40 +47,20 @@ async def login_for_access_token(
 
 
 @auth_router.get("/me", response_model=UserBase)
-async def get_current_user(
-    db: AsyncSession = Depends(get_db), token: str = Depends(oauth2_scheme)
-):
+async def get_current_user_route(current_user: User = Depends(get_current_user)):
     """
     Get the current user.
 
-    Reaises 401 if credentials are invlaid
+    Raises 401 if credentials are invalid
     """
+    return to_user_base(current_user)
 
-    user_id = verify_access_token(token)
 
-    if not user_id:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+@auth_router.get("/profile", response_model=UserProfile)
+async def get_current_user_profile_route(current_user: User = Depends(get_current_user)):
+    """
+    Get the current user's full profile.
 
-    try:
-        user_uuid = uuid.UUID(user_id)
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    user = await find_user_by_id(db, user_uuid)
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    return to_user_base(user)
+    Raises 401 if credentials are invalid
+    """
+    return to_user_profile(current_user)
