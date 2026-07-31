@@ -12,14 +12,12 @@ from app.models.base import Base
 
 class UserRole(str, enum.Enum):
     EMPLOYEE = "employee"
-    HR_ADMIN = "hr_admin"
-    IT_ADMIN = "it_admin"
+    ADMIN = "admin"
 
 
 class UserDepartment(str, enum.Enum):
     HR = "hr"
     IT = "it"
-    OTHER = "other"
 
 
 class User(Base):
@@ -32,10 +30,9 @@ class User(Base):
     role: Mapped[UserRole] = mapped_column(
         SAEnum(UserRole, name="user_role"), default=UserRole.EMPLOYEE, nullable=False
     )
-    department: Mapped[UserDepartment] = mapped_column(
+    department: Mapped[UserDepartment | None] = mapped_column(
         SAEnum(UserDepartment, name="user_department"),
-        default=UserDepartment.OTHER,
-        nullable=False,
+        nullable=True,
     )
     phone_number: Mapped[str] = mapped_column(String(15), nullable=False)
     leave_days: Mapped[int] = mapped_column(default=0, nullable=False)

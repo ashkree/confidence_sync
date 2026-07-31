@@ -1,64 +1,91 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+import uuid
+from datetime import timedelta
 
-from app.schemas.users import UserBase, UserLogin, UserProfile
+from fastapi import APIRouter, Depends, status
+from fastapi.exceptions import HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.auth import (
+    create_access_token,
+    oauth2_scheme,
+    verify_access_token,
+    verify_password,
+)
+from app.config import settings
+from app.database import get_db
+from app.schemas.users import UserBase, UserToken
+from app.services.auth import find_user_by_email, find_user_by_id
+from app.services.users import to_user_base
 
 auth_router = APIRouter(prefix="/auth")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
-
-def get_current_user(token: str = Depends(oauth2_scheme)) -> UserBase:
+@auth_router.post("/token", response_model=UserToken)
+async def login_for_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: AsyncSession = Depends(get_db),
+):
     """
-    Resolves the current user from the bearer token.
+    Login route to get token.
 
-    TODO: replace with real token verification + DB lookup once queries are wired up.
-    For now this just rejects empty/missing tokens so the dependency chain
-    and 401 behavior are in place.
+    Raises 401 if credentials are invalid
     """
-    if not token:
+
+    user = await find_user_by_email(db, form_data)
+
+    if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials",
+            detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Placeholder — will become something like:
-    # user = decode_token_and_fetch_user(token, db)
-    # if user is None: raise HTTPException(401, ...)
-    raise NotImplementedError("User lookup not yet implemented")
-
-
-@auth_router.post("/login", response_model=UserBase)
-def login(login: UserLogin):
-    """
-    Authenticate a user and return session token.
-    Raises 401 if credentials are invalid.
-    """
-    # TODO: look up user by login.email, verify password against password_hash,
-    # issue a real token. For now, raise instead of silently returning None,
-    # since response_model=UserBase can't validate a None body anyway.
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid credentials",
+    # Create access token with user id as subject
+    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+    access_token = create_access_token(
+        data={"sub": str(user.id)},
+        expires_delta=access_token_expires,
     )
+
+    return UserToken(access_token=access_token, token_type="bearer")
 
 
 @auth_router.get("/me", response_model=UserBase)
-def get_current_user_route(current_user: UserBase):
+async def get_current_user(
+    db: AsyncSession = Depends(get_db), token: str = Depends(oauth2_scheme)
+):
     """
-    Rehydrates user on refresh.
-    Raises 401 if credentials are invalid.
-    """
-    return current_user
+    Get the current user.
 
+    Reaises 401 if credentials are invlaid
+    """
 
-@auth_router.get("/profile", response_model=UserProfile)
-def get_current_user_profile(current_user: UserBase):
-    """
-    Returns the full user profile for the authenticated user.
-    Raises 401 if credentials are invalid.
-    """
-    # TODO: fetch full profile fields (leave_days, department, etc.) from DB
-    # using current_user.id once query layer exists.
-    raise NotImplementedError("Profile fetch not yet implemented")
+    user_id = verify_access_token(token)
+
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    try:
+        user_uuid = uuid.UUID(user_id)
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user = await find_user_by_id(db, user_uuid)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return to_user_base(user)

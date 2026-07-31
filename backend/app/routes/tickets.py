@@ -1,8 +1,10 @@
 # app/routers/tickets.py
 import uuid
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
+from app.database import get_db
 from app.schemas.tickets import (
     Ticket,
     TicketComment,
@@ -14,20 +16,6 @@ ticket_router = APIRouter(prefix="/tickets")
 
 
 # HELPERS
-def own_tickets_query():
-    """
-    Queries the database for the current user's tickets.
-    """
-    # TODO(tomorrow): implement with SQLAlchemy, needs current_user + db session
-    raise NotImplementedError
-
-
-def department_tickets_query():
-    """
-    A query scoped to the current user's department and access level.
-    """
-    # TODO(tomorrow): implement with SQLAlchemy, needs current_user + db session
-    raise NotImplementedError
 
 
 @ticket_router.post("/", response_model=Ticket)
@@ -41,9 +29,9 @@ def create_ticket():
 
 
 @ticket_router.get("/", response_model=list[Ticket])
-def get_tickets():
+def get_tickets(db: Session = Depends(get_db)):
     """
-    List tickets, scoped: employees see their own, admins see their department.
+    List tickets, scoped: admins see their department.
     """
     # TODO(tomorrow): current_user, db session, branch on role
     raise NotImplementedError
