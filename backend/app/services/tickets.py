@@ -35,6 +35,9 @@ def is_in_scope(
     user_department: UserDepartment | None, ticket_type: TicketType
 ) -> bool:
 
+    if user_department == None:
+        return False
+
     if ticket_type == TicketType.IT_TICKET and user_department != UserDepartment.IT:
         return False
 
