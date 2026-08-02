@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.jwt import verify_access_token
 from app.database import get_db
 from app.models import User
-from app.services.auth import find_user_by_id
+from app.services.auth import read_user_by_id
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
@@ -23,7 +23,7 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user = await find_user_by_id(db, user_id)
+    user = await read_user_by_id(db, user_id)
 
     if user is None:
         raise HTTPException(
