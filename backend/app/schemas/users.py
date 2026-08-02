@@ -1,14 +1,7 @@
 from datetime import datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, EmailStr, Field
-
-
-class UserLogin(BaseModel):
-    """Schema for validating user login credentials."""
-
-    email: EmailStr
-    password: str = Field(min_length=8)
+from pydantic import BaseModel, Field
 
 
 class UserCommon(BaseModel):
@@ -45,10 +38,3 @@ class UserProfile(UserCommon):
     leave_days: int
     created_at: datetime
     updated_at: datetime
-
-
-class UserToken(BaseModel):
-    """Schema for the authentication token response upon successful login."""
-
-    access_token: str
-    token_type: str
