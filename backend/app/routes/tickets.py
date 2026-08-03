@@ -39,7 +39,7 @@ ticket_router = APIRouter(prefix="/tickets")
     status_code=status.HTTP_201_CREATED,
     summary="Create a ticket",
 )
-async def create_ticket_endpoint(
+async def create_ticket_route(
     payload: TicketCreate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
