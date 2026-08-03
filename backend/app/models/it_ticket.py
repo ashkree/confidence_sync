@@ -22,7 +22,7 @@ class ItTicket(Ticket):
         SAEnum(ITRequestType, name="it_request_type"), nullable=False
     )
     device_type: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    fault_code: Mapped[str | None] = mapped_column(String(4), nullable=True)
+    fault_code: Mapped[str | None] = mapped_column(String(20), nullable=True)
     software_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
     __mapper_args__ = {"polymorphic_identity": TicketType.IT_TICKET}

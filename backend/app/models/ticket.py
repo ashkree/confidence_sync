@@ -67,7 +67,7 @@ class Ticket(Base):
     # PROPERTIES
     @property
     def poster_name(self) -> str:
-        return self.poster_name
+        return self.poster.name
 
     @property
     def assignee_name(self) -> str | None:

@@ -84,10 +84,10 @@ async def create_ticket(
     return ticket
 
 
-async def read_ticket_by_id(db: AsyncSession, id: uuid.UUID) -> Ticket | None:
+async def read_ticket_by_id(db: AsyncSession, target_id: uuid.UUID) -> Ticket | None:
 
-    result = await db.scalars(select(Ticket).where(Ticket.id == id))
-    return result.first()
+    result = await db.scalar(select(Ticket).where(Ticket.id == target_id))
+    return result
 
 
 async def update_ticket_status(
