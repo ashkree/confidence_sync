@@ -19,6 +19,9 @@ from app.services.tickets import (
 @pytest.mark.asyncio
 @pytest.mark.usefixtures("seed_db")
 class TestReadTickets:
+    """Tests for read_tickets_by_poster, read_tickets_by_department,
+    and read_ticket_by_id service functions."""
+
     async def test_read_tickets_by_poster_returns_current_users_tickets(
         self, db_session, employee_1
     ):
@@ -96,6 +99,8 @@ class TestReadTickets:
 @pytest.mark.asyncio
 @pytest.mark.usefixtures("seed_db")
 class TestCreateTickets:
+    """Tests for create_ticket — verifies returned objects and DB persistence."""
+
     async def test_create_ticket_returns_ticket(self, db_session, employee_1):
         """Verify that creating an IT ticket returns a properly populated ticket object."""
 
@@ -174,6 +179,9 @@ class TestCreateTickets:
 @pytest.mark.asyncio
 @pytest.mark.usefixtures("seed_db")
 class TestUpdateTickets:
+    """Tests for update_ticket_status and update_ticket_priority — verifies
+    both the returned value and DB persistence."""
+
     async def test_update_ticket_status_updates_ticket(
         self, db_session, hr_ticket_resolved
     ):

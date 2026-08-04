@@ -28,4 +28,4 @@ class TicketComment(Base):
     # PROPERTIES
     @property
     def author_name(self) -> str:
-        return self.author_name
+        return self.author.name

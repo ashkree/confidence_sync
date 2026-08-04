@@ -37,8 +37,6 @@ class HrRequestCreate(TicketCreateBase):
     type: Literal["hr_request"] = "hr_request"
     request_type: Literal["leave_request", "document_request"]
     document_type: Literal["noc", "salary_certificate"] | None = None
-    from_date: datetime.datetime | None = None
-    to_date: datetime.datetime | None = None
 
     def to_orm(self, poster_id: uuid.UUID) -> HrRequest:
         return HrRequest(**self.model_dump(exclude={"type"}), poster_id=poster_id)
@@ -94,7 +92,7 @@ class TicketDetailResponseBase(BaseModel):
 
     id: uuid.UUID
     poster_id: uuid.UUID
-    assignee_id: uuid.UUID
+    assignee_id: uuid.UUID | None
     type: Literal["hr_request", "it_ticket"]
     status: Literal["open", "pending", "resolved", "closed"]
     priority: Literal["high", "medium", "low"]

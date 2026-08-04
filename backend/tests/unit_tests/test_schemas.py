@@ -74,6 +74,25 @@ class TestSchemaToOrm:
         assert db_model.request_type == "software_issue"
         assert db_model.software_name == "VSCode"
 
+    def test_hr_request_create_to_orm(self):
+        """HrRequestCreate.to_orm() produces an HrRequest ORM model
+        with the correct poster_id and request_type."""
+
+        poster_id = uuid.uuid4()
+        schema = HrRequestCreate(
+            subject="Salary Certificate",
+            description="Need cert for bank loan.",
+            request_type="document_request",
+            document_type="salary_certificate",
+        )
+
+        db_model = schema.to_orm(poster_id)
+
+        assert isinstance(db_model, HrRequest)
+        assert db_model.poster_id == poster_id
+        assert db_model.request_type == "document_request"
+        assert db_model.document_type == "salary_certificate"
+
     def test_ticket_comment_create_to_orm(self):
         ticket_id = uuid.uuid4()
         author_id = uuid.uuid4()
