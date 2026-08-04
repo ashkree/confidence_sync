@@ -83,7 +83,11 @@ export function TicketSubmissionPage() {
         type: value.department === "hr" ? "hr_request" : "it_ticket",
         priority: value.priority as "low" | "medium" | "high" | "critical",
       } as unknown as Partial<Ticket>);
-      navigate({ to: `/ticket/${newTicket.id}` });
+      navigate({
+        to: "/ticket/$ticketId",
+        params: { ticketId: newTicket.id },
+        search: { department: newTicket.type === "hr_request" ? "hr" : "it" },
+      });
     },
   });
 

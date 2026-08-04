@@ -4,6 +4,7 @@ import type { Ticket } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { getPriorityColor, getStatusColor } from "@/lib/ticket-colors";
+import { useNavigate } from "@tanstack/react-router";
 
 
 
@@ -63,10 +64,19 @@ export function TicketTable<TData extends Ticket>({
   columns = [],
   data,
 }: TicketTableProps<TData>) {
+  const navigate = useNavigate();
+
   return (
     <DataTable
       columns={[...getBaseColumns<TData>(), ...columns]}
       data={data}
+      onRowClick={(row) => {
+        navigate({
+          to: "/ticket/$ticketId",
+          params: { ticketId: row.id },
+          search: { department: row.type === "hr_request" ? "hr" : "it" },
+        });
+      }}
     />
   );
 }

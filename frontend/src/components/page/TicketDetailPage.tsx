@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getRouteApi, Link } from "@tanstack/react-router";
+import { getRouteApi } from "@tanstack/react-router";
 import { useAuth } from "@/auth";
 import { usePermissions } from "@/hooks/usePermission";
 import { fetchTicketComments, addTicketComment, updateTicketStatus } from "@/api/tickets";
@@ -58,9 +58,12 @@ export function TicketDetailPage() {
   return (
     <div className="container mx-auto p-6 max-w-4xl space-y-6">
       {/* Back link */}
-      <Link to=".." className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+      <button 
+        onClick={() => window.history.back()} 
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="w-4 h-4" /> Back
-      </Link>
+      </button>
 
       {/* Header Card */}
       <Card>

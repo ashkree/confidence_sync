@@ -10,6 +10,8 @@ interface BaseUser {
   updated_at: string;
 }
 
+export interface UserProfile extends BaseUser {}
+
 export interface Employee extends BaseUser {
   role: "employee";
   department: null;

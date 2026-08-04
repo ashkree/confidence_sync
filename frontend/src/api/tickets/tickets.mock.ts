@@ -1,6 +1,6 @@
 import type { Ticket, HrRequest, ItTicket, TicketComment, TicketStatus } from "@/types";
 
-let mockHrRequests: HrRequest[] = [
+const defaultHrRequests: HrRequest[] = [
   {
     id: "uuid-hr-1",
     poster_id: "e1",
@@ -12,6 +12,8 @@ let mockHrRequests: HrRequest[] = [
     description: "I need to take a leave for a family emergency.",
     information: null,
     ai_summary: null,
+    poster_name: "Employee One",
+    assignee_name: "HR Admin One",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     request_type: "leave_request",
@@ -30,6 +32,8 @@ let mockHrRequests: HrRequest[] = [
     description: "I need a salary certificate to apply for a loan.",
     information: null,
     ai_summary: null,
+    poster_name: "Employee Two",
+    assignee_name: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     request_type: "document_request",
@@ -39,7 +43,12 @@ let mockHrRequests: HrRequest[] = [
   },
 ];
 
-let mockItTickets: ItTicket[] = [
+let mockHrRequests: HrRequest[] = (() => {
+  try { return JSON.parse(sessionStorage.getItem("mockHrRequests") || "null") || defaultHrRequests; } catch { return defaultHrRequests; }
+})();
+const saveHrRequests = () => sessionStorage.setItem("mockHrRequests", JSON.stringify(mockHrRequests));
+
+const defaultItTickets: ItTicket[] = [
   {
     id: "uuid-it-1",
     poster_id: "e1",
@@ -51,6 +60,8 @@ let mockItTickets: ItTicket[] = [
     description: "My laptop screen keeps flickering since yesterday.",
     information: null,
     ai_summary: null,
+    poster_name: "Employee One",
+    assignee_name: "IT Admin One",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     request_type: "hardware_issue",
@@ -69,6 +80,8 @@ let mockItTickets: ItTicket[] = [
     description: "I need Photoshop for the new design project.",
     information: null,
     ai_summary: null,
+    poster_name: "Employee Three",
+    assignee_name: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     request_type: "software_issue",
@@ -77,6 +90,11 @@ let mockItTickets: ItTicket[] = [
     software_name: "Adobe Photoshop",
   },
 ];
+
+let mockItTickets: ItTicket[] = (() => {
+  try { return JSON.parse(sessionStorage.getItem("mockItTickets") || "null") || defaultItTickets; } catch { return defaultItTickets; }
+})();
+const saveItTickets = () => sessionStorage.setItem("mockItTickets", JSON.stringify(mockItTickets));
 
 export async function fetchTickets(department: string): Promise<Ticket[]> {
   await new Promise((resolve) => setTimeout(resolve, 500));
@@ -98,7 +116,7 @@ export async function fetchTicket(id: string, department: string): Promise<Ticke
   return ticket || null;
 }
 
-let mockComments: TicketComment[] = [
+const defaultComments: TicketComment[] = [
   {
     id: "comment-1",
     ticket_id: "uuid-hr-1",
@@ -115,6 +133,11 @@ let mockComments: TicketComment[] = [
   },
 ];
 
+let mockComments: TicketComment[] = (() => {
+  try { return JSON.parse(sessionStorage.getItem("mockComments") || "null") || defaultComments; } catch { return defaultComments; }
+})();
+const saveComments = () => sessionStorage.setItem("mockComments", JSON.stringify(mockComments));
+
 export async function createTicket(data: Partial<Ticket>): Promise<Ticket> {
   await new Promise((resolve) => setTimeout(resolve, 500));
   const newTicket = {
@@ -123,6 +146,8 @@ export async function createTicket(data: Partial<Ticket>): Promise<Ticket> {
     status: "open" as const,
     priority: "medium" as const,
     assignee_id: null,
+    poster_name: "Current User",
+    assignee_name: null,
     information: null,
     ai_summary: null,
     created_at: new Date().toISOString(),
@@ -131,8 +156,10 @@ export async function createTicket(data: Partial<Ticket>): Promise<Ticket> {
 
   if (data.type === "hr_request") {
     mockHrRequests = [...mockHrRequests, newTicket as HrRequest];
+    saveHrRequests();
   } else {
     mockItTickets = [...mockItTickets, newTicket as ItTicket];
+    saveItTickets();
   }
   return newTicket;
 }
@@ -147,12 +174,14 @@ export async function updateTicketStatus(
     mockHrRequests = mockHrRequests.map((t) =>
       t.id === id ? { ...t, status, updated_at: new Date().toISOString() } : t,
     );
+    saveHrRequests();
     return mockHrRequests.find((t) => t.id === id) || null;
   }
   if (department === "it") {
     mockItTickets = mockItTickets.map((t) =>
       t.id === id ? { ...t, status, updated_at: new Date().toISOString() } : t,
     );
+    saveItTickets();
     return mockItTickets.find((t) => t.id === id) || null;
   }
   return null;
@@ -179,5 +208,6 @@ export async function addTicketComment(
     created_at: new Date().toISOString(),
   };
   mockComments = [...mockComments, comment];
+  saveComments();
   return comment;
 }
