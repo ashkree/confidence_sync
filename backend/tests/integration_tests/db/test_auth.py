@@ -2,7 +2,7 @@ import uuid
 
 import pytest
 
-from app.services.auth import read_user_by_cognito_sub
+from app.repository.users import read_user_by_cognito_sub
 
 
 @pytest.mark.asyncio

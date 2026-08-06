@@ -1,0 +1,21 @@
+{
+  "Clients": {
+    "4bybp1pwnbcfyqjk4jv7hvd28": {
+      "ClientId": "4bybp1pwnbcfyqjk4jv7hvd28",
+      "ClientName": "confidence_sync_test_client",
+      "ClientSecret": "76d1ffrpe1cjmax1sxphsbvc4",
+      "CreationDate": "2026-08-06T06:02:02.249Z",
+      "ExplicitAuthFlows": [
+        "ALLOW_USER_PASSWORD_AUTH",
+        "ALLOW_REFRESH_TOKEN_AUTH"
+      ],
+      "LastModifiedDate": "2026-08-06T06:13:57.419Z",
+      "TokenValidityUnits": {
+        "AccessToken": "hours",
+        "IdToken": "minutes",
+        "RefreshToken": "days"
+      },
+      "UserPoolId": "local_3Z6Efhtn"
+    }
+  }
+}

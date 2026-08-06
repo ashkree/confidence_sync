@@ -8,14 +8,12 @@ def to_user_base(user: User) -> UserBase:
         if user.department is None:
             raise ValueError(f"Admin user {user.id} has no department set")
         return Admin(
-            id=str(user.id),
             name=user.name,
             email=user.email,
             role=user.role.value,
             department=user.department.value,
         )
     return Employee(
-        id=str(user.id),
         name=user.name,
         email=user.email,
         role=user.role.value,

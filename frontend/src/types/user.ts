@@ -4,13 +4,14 @@ interface BaseUser {
   id: string;
   name: string;
   email: string;
+}
+
+export interface UserProfile extends BaseUser {
   phone_number: string;
   leave_days: number;
   created_at: string;
   updated_at: string;
 }
-
-export interface UserProfile extends BaseUser {}
 
 export interface Employee extends BaseUser {
   role: "employee";

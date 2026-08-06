@@ -16,11 +16,11 @@ function getBaseColumns<TData extends Ticket>(): ColumnDef<TData, any>[] {
       header: "Subject",
       cell: (info) => info.getValue(),
     }),
-    helper.accessor("poster_id" as any, {
+    helper.accessor("poster_name" as any, {
       header: "Poster",
       cell: (info) => info.getValue(),
     }),
-    helper.accessor("assignee_id" as any, {
+    helper.accessor("assignee_name" as any, {
       header: "Assignee",
       cell: (info) => info.getValue() ?? "Unassigned",
     }),

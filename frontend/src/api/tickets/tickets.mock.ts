@@ -146,7 +146,7 @@ export async function createTicket(data: Partial<Ticket>): Promise<Ticket> {
     status: "open" as const,
     priority: "medium" as const,
     assignee_id: null,
-    poster_name: "Current User",
+    poster_name: data.poster_name || "Current User",
     assignee_name: null,
     information: null,
     ai_summary: null,

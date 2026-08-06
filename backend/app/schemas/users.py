@@ -7,7 +7,6 @@ from pydantic import BaseModel, Field
 class UserCommon(BaseModel):
     """Base schema containing common attributes shared across all user types."""
 
-    id: str
     name: str
     email: str
 

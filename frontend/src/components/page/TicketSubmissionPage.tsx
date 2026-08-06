@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/field";
 import { createTicket } from "@/api/tickets";
 import type { Ticket } from "@/types";
+import { useAuth } from "@/auth";
 
 const routeApi = getRouteApi("/_authenticated/ticket/submit");
 
@@ -58,6 +59,7 @@ const schema = z.object({
 export function TicketSubmissionPage() {
   const search = routeApi.useSearch();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const form = useForm({
     defaultValues: {
@@ -82,6 +84,8 @@ export function TicketSubmissionPage() {
         ...value,
         type: value.department === "hr" ? "hr_request" : "it_ticket",
         priority: value.priority as "low" | "medium" | "high" | "critical",
+        poster_id: user?.id,
+        poster_name: user?.name,
       } as unknown as Partial<Ticket>);
       navigate({
         to: "/ticket/$ticketId",

@@ -1,0 +1,294 @@
+{
+  "Users": {
+    "e6f63de0-bfde-42f6-bddb-6847125f74ff": {
+      "Username": "e6f63de0-bfde-42f6-bddb-6847125f74ff",
+      "Password": "TestPassword123!",
+      "Attributes": [
+        {
+          "Name": "email",
+          "Value": "dummy@example.com"
+        },
+        {
+          "Name": "email_verified",
+          "Value": "true"
+        },
+        {
+          "Name": "sub",
+          "Value": "e6f63de0-bfde-42f6-bddb-6847125f74ff"
+        }
+      ],
+      "Enabled": true,
+      "UserStatus": "CONFIRMED",
+      "UserCreateDate": "2026-08-06T06:07:52.971Z",
+      "UserLastModifiedDate": "2026-08-06T06:08:55.143Z",
+      "RefreshTokens": [
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NTk5NzA1MiwianRpIjoiZjE1MTk3ZDUtMDVkMS00OTAwLTgyZmYtOTI0YzgwODJlNWMxIiwiZXhwIjoxNzg2NjAxODUyLCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.U6Vnj4mkQQM8AyVlblvIwqTwy9QRjR_QCbNf0GtJcbro838JIcvZ-zqHTU0P7f7OwlOl7sz0jjXHDF9smNXQgf8JHEkb4N3b9CSEPfXdj0spdxNy2cRG1c2Rz9j8wG3Y7N3Tf0z2AzJ6EN_RjMPJLUQ-tXFFXqmKw8XZh_cgQHT74R1JIT3Ix9aBwCIyeIru__nqDU5g2zg3g2CfbJDPIyQ6_LS1vaAGjNO4qe03MX7kLMiuVrCzD4_xQUyLZRTKIhjjn0_Q3zlVXXLfCw1l93jPAGsI4RXCI1QlK3T6Qul9jCzS9VNTxVF97B8phkKkXYR5fSqlYdaXd-J0_LrpwQ",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NTk5NzA4MiwianRpIjoiOWY5ZTU2NWMtMWJmMy00N2ZlLWE2NWYtY2RjM2Y5ZDQxYzE2IiwiZXhwIjoxNzg2NjAxODgyLCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.gU-uXxQctYlkJ2OivCkE-99fqKFMgGEZK78yy6MfpKU1CAiSIQj5iXJwT8TqrFQbMdx8nBUTNL0Tath8KhVxJN5eER6bABs2pAd1tmpZ23ElvQx0HxX6vR29CQ3j0m1xmXh5V8AZD49R2kgLVY_IgFP2qPYCmC9CSTFp1z7NeKY1QaRJWwgCgKnGnMLL90xMBKM6lQo1AQ-F15PsEHjxFoPcgePNUT8itniWSZOPaxog6LKpjPlV0yCId7ewgoSw5EMrrz9zuYrZTzK93MLmQ-rnoljgqFot23yBIbZwJBQk8gSeD7kF4KP2iwoJ19Cz1R9jeHFPgAswFSYvcs-Y4A",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NTk5NzU3OSwianRpIjoiZTBiNmMyZWQtMTcxZS00ZjZiLTg0M2MtMmU2MDUyNTYwNGMxIiwiZXhwIjoxNzg2NjAyMzc5LCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.EmtKBojHmHf3FMp5LJOVXK0wPAkA7QaoVoouc4C2aTM8irjL3WtoHfwMUzoszd37R4J5-JcMSrqmGzy612c_-ak-Dgl2sa04qSW5Y7EC8lIhKZwFYsdMwdVFP3_Pl_Rm3QVpoYMJL3xyfjlPEKRBHl5b1loHNCL4xJd302YnFFKQPMfjyOWxa0SgoYE9JvX0SiyLozA-H-YY8pczDVjLlaNkqzBAyXZGe_PNfgCuSaeAvMmpZzEdMrfzyxYs-5uoIY_tKkASy-SjAv1t6Z4t2hNmEw6WfieAkI9DD2FrUWobDamA01VFojFoyvBTH7WiDSgqGQeQ1HOlDb6N9StJxQ",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NTk5NzYxOCwianRpIjoiODBmZTY0YTctMTQ3Yi00NmZiLWJkNGYtM2RlNmJiOTJhNzQ3IiwiZXhwIjoxNzg2NjAyNDE4LCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.VIm45-8en0FNi5yQjU1aT3-PQ40X5qSsLss1iApZepO-HB29Jg9vHcO78ejct3sHpGSwn3M1hZiRg3MQnzH0PrN9TKy7LNbfPMapYO-dZOkI4oXSTg_WMxK0n1a_JP15u404f58vHNAzuqFVOiqilzXoS_9GwG-P-oUZ6Qv4OTeeAKrS8FYSdV1HUB2Azlua41SmSxErOaldfBgRH6aQ3abfBpJ1W8sUomD3vbgqNX4nXKHyNU3i3cULS2BBUBAmagsxVdvcz0HIWfxu1b5FsUPw9WaaPAAjUzAQRwkjjRu37daWHx_jlcbULI8JCaMsR0pAbvtob3P0QahT1YjKMA",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NTk5Nzc4MSwianRpIjoiY2ViMDQ2MzEtMDYyMS00MDFkLWIzY2YtNWU1YjZlNTc2NmM4IiwiZXhwIjoxNzg2NjAyNTgxLCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.GTqyB4ACnI5j4tdWoBXRg9e290hPHtp7z98aPP2K2ovcdgjhGsCPKbyuc-5wK1nBPBN7IEu0aPIgi6SW_n2nUq-TIj452HxTpsXjjE3SiZsPKTlh3i5WQo8NBpasI9r5goYNiWaL4xLdfV_4fOkTqSltfa5RQBU3-DRaeTDje-mDMxRLvmWtyhG_3sk3V1qu_n-8dKpPWWoVAosKAWJi1ioiIq0fJAkx3ETzc6A7Lf8kiBiTZaMsql-nDDDFJCMc95LeJA2pFyDz0tAT4efojJpnnICj-x9HmmKWRFjkkwR_g3kNSgZBb2uQDXF7teP3MN1tyqqZY5d9-jtzf4vG0A",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NTk5Nzk2OSwianRpIjoiMzkyYzY0NDgtYjBhZC00MDU5LTlkZWYtOWQ4YjIxYWFhMTViIiwiZXhwIjoxNzg2NjAyNzY5LCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.eYJMOyw4d6nKm89E61lbRcQ-p_wlttvDb9_V29Ll9klgfl7BI8U1-bIKwPbM9QYf7JWcl5s2DV9RGra2_09Lk3-ngm2hQB_eV8KkNJ5CIu2MQMEyqXjlTYYAUs4QYcyMLML2mSJ3q9-u3iLXmYZ2MarOIKmVrZMW09hVg_JoFLHtaJ3y3RY15EW4x_My5QIme_BX4CTXB7A5NkacPAtHK53hM-T9z9w8dlJxxX66cbrKgJjO0b3HR39WiXpLLvMM0Fa1R8yirFVOibOEuCCzjVUprXDLNjs4RRtlDusALE8J3vwOHkow7GUA372pWuX0SXlDA1Vcwb2nVAkpxj1Qkw",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NTk5Nzk4NiwianRpIjoiNmI2ZGYzMmMtODg0ZC00MjRiLTkxY2MtN2YyMWY5MWZiNjIwIiwiZXhwIjoxNzg2NjAyNzg2LCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.m_ioIsoB8Jvm9D31waPk34Gf7I17_qFk4GZa2W__TUZX_lpXBCtD7gSp5eeFyF_K26YsxxO_HazJueknvJZZX5CAm4VSZ-TgUx-WW3axNVjEZycEFKFVCROU6u-R8wsGqc9uAcFfNPsO0hAJM0rQ9DUZUNw6GmHXQA7ocVOpnPvAUSTBZeAriIfWbYO5TpGDasEo8odYM5lnzvu2qevFQ_n9iwK8IRcQncuN0ay-2Lz3qbDd_CsA3cbtdZK1D3Bb5DNAR2ReEIkam9Xms6nx15BHImWxOUDpAKxD6XS_Y5W3WBDJb-BeS_iDW2ltNDs6y_tMP5lAJ75T_JtHY36qlw",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NTk5ODkxMiwianRpIjoiZTYyZTRjNzgtMTIwMy00ZjY3LWIyZTktNzhlNjM4NmNmODc1IiwiZXhwIjoxNzg2NjAzNzEyLCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.zw0AoV9gI5HhrxyecDU1-F1z9VerjDkmsiqbL6Yk-gytKI3HtWwI_CZM8m8PEUgcnWn50hYYWs7r6eXLlvM1JlxltbweAxlGhAtwfkq_GyeQw1Opli7rQQmPOKUg6ITXMCG9_F-C4rWkNMvqPVmikllnwclDDyK0KYZm8JtvwSlqDtyYIbAvGuO2V8xJVaayNEqvC71u8HKiV_pvu_eN76KrI23ENyrnYIBixy75sxO62mRgmrQdtfTtT6cU3_6M91h6v1Rzh5kWwkWkQBCfYfz46UcJNPxkd78xLH0D1WFZ6XjevSFs3dOPPk_sG6vhV5PU6uOLgQ862junWbLgrg",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NTk5OTAzNywianRpIjoiMzJkYWYwYTMtOWQ5MS00ZDJiLTlkZDAtY2Q0NDY4MjA2NDFjIiwiZXhwIjoxNzg2NjAzODM3LCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.mctBPVCSv9uwfDPWIeQ_n68mDgz0_gBFx0ZtW91ky-7CzfcIBmQfPm8N6-fwZw4zuftimUdhw6Ew-nVI5QoUnurcKk6BoWxx41OXU7KRQ1wR_YnQ1uOD0ctz3wqEIaK6Hzz1I9uGqBCNi4_WYavDMfwqNHXnEOxz-UZWS8qi9_ArHK5ULVA-BzsNX8RQZ0t_MnK442UM4pzw7WOeCaiPe23yDN2m9gnriJ7UphhEdQmXdK2VL60mfKTONngYrm6yfAGfDKDfR49r8NHV9J0f7V-2-4usVCI2q1ShiroLkzhKuUFNiPIv1cvzTT2VjAdTqP6BQzCvzEZpQfqhyxpciA",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NTk5OTEwNCwianRpIjoiMDNmYzkyYjktYmY4Ny00NjgxLWExN2YtNDBiNGJkZGMwOTRiIiwiZXhwIjoxNzg2NjAzOTA0LCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.EKtn_OzTWfGR3_bAQqiPUy11zSyRoar-pUuyz_qTS0RVvHA3Sogu_TulUG7_6iiKeb4dULg-bXmGxefNtmU4AhrGBRajzCdj6WFihq8jeSaJ8aCIdz_Wsr-S6RPk2FZDTZ26Qo3vUiyqSkEbev0ujS6jN9-wgrKl8be90K73SSKtTKXPKKsJV8vGzayoEIo_3e_C9ZKP4i_vyJJrPm_2mqjlhQaVUD5wydTl7foNVYbhtl--G6SGUwQ1uscDXTBS-isIViqICOs-5tJYpui2D8BcoxFS69iSaWH6nQ0PGnz5JRwty1FuQMWNY9cyGAtwv4Tz5Y8dDQww1TEpY6XIkQ",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NTk5OTExOSwianRpIjoiNWNkNzk1NmMtYTRjYy00NjY4LTk4NmYtYWU3NDk0MmM0YzM2IiwiZXhwIjoxNzg2NjAzOTE5LCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.jq3X_kyyvIOSSPzsMXKvGZeATRqfdX5bckuDLu1JIliTY-67Wi4eBTWcBzgSUu7Tn8_47n9Mws7dJ8VmpiiJ-lhiI_SkhQBzNisq9-Tj9vcm7ZeRwiLzCbwdwbeywGr2jOBAh6cF7olmh8A2ZAUq5hQpikmInI8WqUz9h1EO0J89lPjPOhSPsQ7d6b32FaTPK6pa1web1d8dOhtTnR3EM_DnZFOleYe01t0Bt1iuNWtr9irYrbIdR0LrxBXJ1YyVU1fsaSm7YIv2bSNgARE3ur7m9PJvIlmQxl2T9LUF70AK6piIlxn55dTKy-50-0OfTbY48GsrTbJrOQG-e5izrw",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NjAwOTk2MSwianRpIjoiMmFkODczZDItODk0Ny00MzliLWJlNmYtYjhkOWM0ZWZkNTkyIiwiZXhwIjoxNzg2NjE0NzYxLCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.B5jKk5S8B-ICcnE8Ffk4KMcEqKEhuYQPpkFF6FtQZqcg7skYQWcoy_G7hFv_zyMpiv-Wf3FsLcPQm8NKRqlGMHDDzq1u5CZ7YCXitJ5mLxo0i59pJZaF_kp87IiOVZOTVR2MB2vyPY-xbDOJDth0npVsqAlTu78JHpSiiuQI7d_qdGoqkiMTtZ9RrUGzxJ1aGBuhaAFaleMHBUcCUVu6UDmdQPDgX6kXvdqi4zOCs7zZKNMFClv-4Ia8FXLpJY1pA18_JJzh7XIpihgOrG4RLlFp92VcEeNK_eHmob9Mxf6oQ1ovkcpHbn-y0E8vu3AiiIIPjHZ3WSMjZso5Xbb3cA",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NjAxMTM4MCwianRpIjoiNGUxNjc5YjYtOGVlOS00NmY4LWI0ODMtYmYxODFiM2E0NTE3IiwiZXhwIjoxNzg2NjE2MTgwLCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.khBHJM62zED5_atER4KbYrDljQPvPp3Izzm_Sqqq8ghjZ1EhxUZRJS0vyi_qMf_PTtxgEQQuc3E2oyQrndVB_RvS-Y-NopNA6iPMt5W4UQr2rZrLCA6yRiAtKElWezHvaMbDcXIgOan6TsrChZeObNFoUE9PoRgf65ngJoAH3YSccEIlgAwNtTSki3A2nnI4_EIax6UN_gfyQxwV5eZJMwEx_x8FmPwD4TZ9Gj-wSKICYDn6629MtdJy3mB8Dr45aPY-9m3jhqJPtIYfjDQ86oQFzA2P9rNOR3m9EF0ulcfwp91DSVPWjLmhAphtdAPwZ9wqVYpPOyRHUkmox9hFyA",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NjAxMTM4OSwianRpIjoiYWE0NGQ2Y2MtY2U5Ny00Mjc3LWE3OTItNTEwMTI0N2I0OTFjIiwiZXhwIjoxNzg2NjE2MTg5LCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.PpOOg2D4g6B0hGkdMO1rzSbYSTuIaUe3kjuXDWrHEbIOlCC1sA04SaqObbOmka1d9f8yT-H90wO6C4WEmU_G3tXH43hQyqmOYZzCEcrPllehMOtTXirGGHmwFXK2D2v1sAiTd-jT8UvZYdKWP1zIijL06DQ-U6TNCGd_ZMzQ64Vrw3tE4JRZF-hnC9nu-w7vAMmwCUPyl1r0ZY8SwGDBJiLaON4CJ8gRoyu3IzcqDj8bvGqlEqAao3gblM_JCOUstLcBnhz3TegoQS1Tzg_FminjYNEa_jTSUBZUJcsmirGj4mFMvfiZ92D0NYlNl1jNyPeet-wpaVncVXACYxQnSQ",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NjAxMTQzMiwianRpIjoiMThhNWM0NTItNzJhMi00NGFhLTg5ZDAtZGQzNDIzNjQwNGM0IiwiZXhwIjoxNzg2NjE2MjMyLCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.nbxJGEd9e4wqmiWbI1lUixCtzZzIzsLCLWTJ1UVKjxXEpmp5X5QkkLC72qxqtKnS6CwrzK7savLRHkX-AOjYRLNkrvpYQDpcAFGt5o3SQNcGA_yIsJx7erh-IfCKVPDi7GUDGS3VodX5DCkTGydguyHrb8ah4LV-CeFbHZEDDlh2gZEkBqWHgn3ctNTQp0PmCIiJA5dunk4XGMPuCqAn0rQiH4DEJNEk2P7rySz-XUti-RWNM3sWxT31rWM0JunAhKfxQpuovttp45U_L-1rT4b7fWDROAo2wFNHITqLqJxfuMyW-AW7hIFdCKaVyro5IOCTcd8FiKcuixHyw11Q6g",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NjAxMTY2NSwianRpIjoiM2Q1OWExNzUtNzQwNS00Yjg4LTg2MDAtNjVkMGY2ZjkzMGY4IiwiZXhwIjoxNzg2NjE2NDY1LCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.Aex-SNWwerLxPPYDglYbPrHoAzdhg8WLC4xwTgFK8mAs2HRiiaXCulPHG-WqiZtXN-g3EcKxVdkvbPw6vJ_toiUe4PlQI_gBIpiPXHpfdnWTVYiKZ2_ZJPJD2CVxycn-J_3TEc2yfcf5re_I4tofiaPDEYpUmFMJoWFMly300WNFtwngY_aiqLImpwUcQXS6X7xQVpVzOfhq9pEvuczmH1N8I5tLu9knSJhpyTX1YRjW6o997QEfRYSjYjlxr2roU5ve6Ao8nC5zcqXeKD7dLIynOVw4Vbsenoe6cdQHcBpP-QFphrTVbnsVSswTW03vOuxq4sqqbxOxLCVnKdnl9g",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NjAxMTg0MCwianRpIjoiZjRjOWVlYjUtYjBlMy00MWM0LTk3Y2MtOWVkY2Q4MTU2Y2IzIiwiZXhwIjoxNzg2NjE2NjQwLCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.Lje1IbMWuXq38C-bZTx1WV4Pf1J8I5PMfOOiaxUr1F56jY-Rt_cax_FUW0gXIzN7q-W_hWpejCp-MO5-YFfxdsVxx4JjihjrCsVu3UcA2QPPggh9lXUNCo3VnnP386kf5tKiYk-zFYKHnaCUc44ejnshkjINt5lBbsZeQ9yiJhjW-fbDmjRtUyGfPbQOl2xuASVOe2lFXXtrqEhp6ed5Bfo7-5ZMTyqMPxDrdHREnF7Nr7iRo7uaVIcPXMLEna-ophsO4z2mIaQHBUaqGVhAYYl4tM6rPniNeabIjBSU-JZ76NO424Mm-p5e8I_oUDUD3tTNLJ616PGXxivaQYZBWw",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NjAxMjA1NSwianRpIjoiY2JmNDI2Y2ItZmQ3OS00ZGNiLTk1ZTctMzVlNzgxYTg0YjAwIiwiZXhwIjoxNzg2NjE2ODU1LCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.ohNNfH9oPPfKaBFv1uG-MkGODVlEH_zojrreNjPxVbPkYl8UxsqniSAgXj0ZC2zXuBasz5fE9L-gBHYdz0NIAO852jcer464-OPK6Zs6QKQyBit6Nu0C-MBAdwsr5YK2j0G6yUOyNH7W8pmReXQ5PV2waC1jQOIIZaKaJTc1iv_CaL4KmkidVSj_bDE_25OF_eFmaY5pnXrDmt0d9qrnZaOdlnc76spehpESEUNGHyrsuXjnaNUxgSYoobAKBHROcIP7cMTG1JsryZIpAh0UFWZFutsU7-iqZsVHf6bN3gYYc-ibcQA-AxAZio-dDJehAc9-sjma-9ATv0_6l8Itug",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NjAxMjEzNywianRpIjoiY2NkZjgwMmItYWEzMi00NjVlLWJiZmYtZTNmMmIyMTYwM2NkIiwiZXhwIjoxNzg2NjE2OTM3LCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.VTz9qgfoXSOB4amtA6Fp1wH2qbMk0G33gAHncOiLpcpsK0CyKpT_HwfofhxHZxl6njxlj4ND_25x6wl29EOh-mGd5OwyVrOdA8sw89-YvixliVfKf5Qnt1piHI8BIpoG_I5NRuLHQf3DuC2WwGPo4ZbJyiCDV7B2chZEQ1DRpKwHbz49idwp28fov_xXIR4R7TwuEBmar2rKylsQa80nGQs1gnvpiDuGosO_DjBhfCFfJ39DZHLi7iAuAdggUQ172ddt-_-WbDVCQpE9vnrHrL01K-oqWHlxOnCvjBDMu15K6EV3vP0EW1E-PFz1douUODNawGcjH8uR0MbPxNkR8w",
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2duaXRvOnVzZXJuYW1lIjoiZTZmNjNkZTAtYmZkZS00MmY2LWJkZGItNjg0NzEyNWY3NGZmIiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsImlhdCI6MTc4NjAxMjE3MCwianRpIjoiYWNjYjdlN2QtOGRmZi00MDkzLTlmZWMtMDRmNDZjMGQwNDM0IiwiZXhwIjoxNzg2NjE2OTcwLCJpc3MiOiJodHRwOi8vMC4wLjAuMDo5MjI5L2xvY2FsXzNaNkVmaHRuIn0.ipHJGYy70ttxpF6vm9g-rtjPJtnikJnhZrI83NptlBxL_vopjoqyjE6TAMhbNdogvaJRvXp9ma9uctNVSlm-lGn4VT5hYZGfR113xJsc46pQ9st1yE6UdBtan-W9GB6qOCuKe3Kdp-D-QA4UvFPFIOziISBhubZZDZAL0CXLrYmtLERCK-Qwq_XNQ_3pfbI4d7WXbQftsohje3Gid8fAUFIThp-AbRgT_-hOK7ikJUrHiYkfW5J_hYkATgrFODWD4fc86-stGJWX2053Kor70_9K_gIYd3ueIjEL1nDdUp0zQSBTRWfJVYoComu7nBnoxaggxvrYr49H9pJhdUHcew"
+      ]
+    }
+  },
+  "Options": {
+    "Policies": {
+      "PasswordPolicy": {
+        "MinimumLength": 8,
+        "RequireUppercase": true,
+        "RequireLowercase": true,
+        "RequireNumbers": true,
+        "RequireSymbols": true,
+        "TemporaryPasswordValidityDays": 7
+      }
+    },
+    "LambdaConfig": {},
+    "SchemaAttributes": [
+      {
+        "Name": "sub",
+        "AttributeDataType": "String",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": false,
+        "Required": true,
+        "StringAttributeConstraints": {
+          "MinLength": "1",
+          "MaxLength": "2048"
+        }
+      },
+      {
+        "Name": "name",
+        "AttributeDataType": "String",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false,
+        "StringAttributeConstraints": {
+          "MinLength": "0",
+          "MaxLength": "2048"
+        }
+      },
+      {
+        "Name": "given_name",
+        "AttributeDataType": "String",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false,
+        "StringAttributeConstraints": {
+          "MinLength": "0",
+          "MaxLength": "2048"
+        }
+      },
+      {
+        "Name": "family_name",
+        "AttributeDataType": "String",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false,
+        "StringAttributeConstraints": {
+          "MinLength": "0",
+          "MaxLength": "2048"
+        }
+      },
+      {
+        "Name": "middle_name",
+        "AttributeDataType": "String",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false,
+        "StringAttributeConstraints": {
+          "MinLength": "0",
+          "MaxLength": "2048"
+        }
+      },
+      {
+        "Name": "nickname",
+        "AttributeDataType": "String",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false,
+        "StringAttributeConstraints": {
+          "MinLength": "0",
+          "MaxLength": "2048"
+        }
+      },
+      {
+        "Name": "preferred_username",
+        "AttributeDataType": "String",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false,
+        "StringAttributeConstraints": {
+          "MinLength": "0",
+          "MaxLength": "2048"
+        }
+      },
+      {
+        "Name": "profile",
+        "AttributeDataType": "String",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false,
+        "StringAttributeConstraints": {
+          "MinLength": "0",
+          "MaxLength": "2048"
+        }
+      },
+      {
+        "Name": "picture",
+        "AttributeDataType": "String",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false,
+        "StringAttributeConstraints": {
+          "MinLength": "0",
+          "MaxLength": "2048"
+        }
+      },
+      {
+        "Name": "website",
+        "AttributeDataType": "String",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false,
+        "StringAttributeConstraints": {
+          "MinLength": "0",
+          "MaxLength": "2048"
+        }
+      },
+      {
+        "Name": "email",
+        "AttributeDataType": "String",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false,
+        "StringAttributeConstraints": {
+          "MinLength": "0",
+          "MaxLength": "2048"
+        }
+      },
+      {
+        "Name": "email_verified",
+        "AttributeDataType": "Boolean",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false
+      },
+      {
+        "Name": "gender",
+        "AttributeDataType": "String",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false,
+        "StringAttributeConstraints": {
+          "MinLength": "0",
+          "MaxLength": "2048"
+        }
+      },
+      {
+        "Name": "birthdate",
+        "AttributeDataType": "String",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false,
+        "StringAttributeConstraints": {
+          "MinLength": "10",
+          "MaxLength": "10"
+        }
+      },
+      {
+        "Name": "zoneinfo",
+        "AttributeDataType": "String",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false,
+        "StringAttributeConstraints": {
+          "MinLength": "0",
+          "MaxLength": "2048"
+        }
+      },
+      {
+        "Name": "locale",
+        "AttributeDataType": "String",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false,
+        "StringAttributeConstraints": {
+          "MinLength": "0",
+          "MaxLength": "2048"
+        }
+      },
+      {
+        "Name": "phone_number",
+        "AttributeDataType": "String",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false,
+        "StringAttributeConstraints": {
+          "MinLength": "0",
+          "MaxLength": "2048"
+        }
+      },
+      {
+        "Name": "phone_number_verified",
+        "AttributeDataType": "Boolean",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false
+      },
+      {
+        "Name": "address",
+        "AttributeDataType": "String",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false,
+        "StringAttributeConstraints": {
+          "MinLength": "0",
+          "MaxLength": "2048"
+        }
+      },
+      {
+        "Name": "updated_at",
+        "AttributeDataType": "Number",
+        "DeveloperOnlyAttribute": false,
+        "Mutable": true,
+        "Required": false,
+        "NumberAttributeConstraints": {
+          "MinValue": "0"
+        }
+      }
+    ],
+    "VerificationMessageTemplate": {
+      "DefaultEmailOption": "CONFIRM_WITH_CODE"
+    },
+    "MfaConfiguration": "OFF",
+    "EstimatedNumberOfUsers": 0,
+    "EmailConfiguration": {
+      "EmailSendingAccount": "COGNITO_DEFAULT"
+    },
+    "AdminCreateUserConfig": {
+      "AllowAdminCreateUserOnly": false,
+      "UnusedAccountValidityDays": 7
+    },
+    "UsernameAttributes": [
+      "email"
+    ],
+    "Arn": "arn:aws:cognito-idp:local:local:userpool/local_3Z6Efhtn",
+    "CreationDate": "2026-08-06T05:05:42.093Z",
+    "Id": "local_3Z6Efhtn",
+    "LastModifiedDate": "2026-08-06T05:05:42.093Z",
+    "Name": "confidence_sync_test_pool"
+  }
+}
