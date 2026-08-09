@@ -4,23 +4,18 @@ import QuickActions from "@/components/sections/QuickActions";
 import PendingRequestsSection from "@/components/sections/PendingRequestsSection";
 import TopicSection from "@/components/sections/TopicsSection";
 import { useAuth } from "@/auth";
-import { fetchTickets } from "@/api/tickets";
 import type { Ticket } from "@/types";
-
+import { fetchMyTickets } from "@/api/tickets";
 export const Route = createFileRoute("/_authenticated/employee/")({
   component: Component,
   loader: async () => {
-    const hr = await fetchTickets("hr");
-    const it = await fetchTickets("it");
-    return [...hr, ...it];
+    return await fetchMyTickets();
   },
 });
 
 function Component() {
   const { user } = useAuth();
-  const allTickets = Route.useLoaderData() as Ticket[];
-  // Filter to show only the current user's tickets
-  const myTickets = allTickets.filter((t) => t.poster_id === user?.id);
+  const myTickets = Route.useLoaderData() as Ticket[];
 
   return (
     <>

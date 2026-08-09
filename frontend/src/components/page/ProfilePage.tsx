@@ -1,20 +1,37 @@
-import { User, Mail, Phone, Building, Briefcase, CalendarHeart, CalendarDays } from "lucide-react";
+import {
+  User,
+  Mail,
+  Phone,
+  Building,
+  Briefcase,
+  CalendarHeart,
+  CalendarDays,
+} from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/auth";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 
 export function ProfilePage() {
   const { user } = useAuth();
 
   if (!user) return null;
 
+  console.log(user);
+
   return (
     <div className="container mx-auto p-6 max-w-4xl space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight mb-2">My Profile</h1>
         <p className="text-muted-foreground">
-          View your personal information, employment details, and leave balances.
+          View your personal information, employment details, and leave
+          balances.
         </p>
       </div>
 
@@ -30,7 +47,9 @@ export function ProfilePage() {
             </CardHeader>
             <CardContent>
               <div className="text-5xl font-bold">{user.leave_days}</div>
-              <p className="text-primary-foreground/80 mt-2 text-sm">Days remaining this year</p>
+              <p className="text-primary-foreground/80 mt-2 text-sm">
+                Days remaining this year
+              </p>
             </CardContent>
           </Card>
 
@@ -43,7 +62,9 @@ export function ProfilePage() {
                 <Building className="w-5 h-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">Department</p>
-                  <p className="text-sm text-muted-foreground uppercase">{user.department || "N/A"}</p>
+                  <p className="text-sm text-muted-foreground uppercase">
+                    {user.department || "N/A"}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -60,7 +81,10 @@ export function ProfilePage() {
                 <div>
                   <p className="text-sm font-medium">Joined</p>
                   <p className="text-sm text-muted-foreground">
-                    {format(new Date(user.created_at), "MMMM d, yyyy")}
+                    {format(
+                      new Date(user.created_at || new Date()),
+                      "MMMM d, yyyy",
+                    )}
                   </p>
                 </div>
               </div>
@@ -74,7 +98,8 @@ export function ProfilePage() {
             <CardHeader>
               <CardTitle className="text-lg">Personal Information</CardTitle>
               <CardDescription>
-                Your personal details as registered in the system. Contact HR to update.
+                Your personal details as registered in the system. Contact HR to
+                update.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">

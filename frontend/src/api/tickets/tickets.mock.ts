@@ -1,4 +1,10 @@
-import type { Ticket, HrRequest, ItTicket, TicketComment, TicketStatus } from "@/types";
+import type {
+  Ticket,
+  HrRequest,
+  ItTicket,
+  TicketComment,
+  TicketStatus,
+} from "@/types";
 
 const defaultHrRequests: HrRequest[] = [
   {
@@ -44,9 +50,17 @@ const defaultHrRequests: HrRequest[] = [
 ];
 
 let mockHrRequests: HrRequest[] = (() => {
-  try { return JSON.parse(sessionStorage.getItem("mockHrRequests") || "null") || defaultHrRequests; } catch { return defaultHrRequests; }
+  try {
+    return (
+      JSON.parse(sessionStorage.getItem("mockHrRequests") || "null") ||
+      defaultHrRequests
+    );
+  } catch {
+    return defaultHrRequests;
+  }
 })();
-const saveHrRequests = () => sessionStorage.setItem("mockHrRequests", JSON.stringify(mockHrRequests));
+const saveHrRequests = () =>
+  sessionStorage.setItem("mockHrRequests", JSON.stringify(mockHrRequests));
 
 const defaultItTickets: ItTicket[] = [
   {
@@ -92,26 +106,39 @@ const defaultItTickets: ItTicket[] = [
 ];
 
 let mockItTickets: ItTicket[] = (() => {
-  try { return JSON.parse(sessionStorage.getItem("mockItTickets") || "null") || defaultItTickets; } catch { return defaultItTickets; }
+  try {
+    return (
+      JSON.parse(sessionStorage.getItem("mockItTickets") || "null") ||
+      defaultItTickets
+    );
+  } catch {
+    return defaultItTickets;
+  }
 })();
-const saveItTickets = () => sessionStorage.setItem("mockItTickets", JSON.stringify(mockItTickets));
+const saveItTickets = () =>
+  sessionStorage.setItem("mockItTickets", JSON.stringify(mockItTickets));
 
-export async function fetchTickets(department: string): Promise<Ticket[]> {
+export async function fetchTickets(): Promise<Ticket[]> {
   await new Promise((resolve) => setTimeout(resolve, 500));
-
-  if (department === "hr") {
-    return mockHrRequests;
-  }
-  if (department === "it") {
-    return mockItTickets;
-  }
-  return [];
+  return [...mockHrRequests, ...mockItTickets];
 }
 
-export async function fetchTicket(id: string, department: string): Promise<Ticket | null> {
+export async function fetchMyTickets(): Promise<Ticket[]> {
   await new Promise((resolve) => setTimeout(resolve, 500));
-  
-  const source = department === "hr" ? mockHrRequests : department === "it" ? mockItTickets : [];
+
+  return [];
+}
+export async function fetchTicket(
+  id: string,
+): Promise<Ticket | null> {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  const department = id.includes("-hr-") ? "hr" : "it";
+  const source =
+    department === "hr"
+      ? mockHrRequests
+      : department === "it"
+        ? mockItTickets
+        : [];
   const ticket = source.find((t) => t.id === id);
   return ticket || null;
 }
@@ -134,9 +161,17 @@ const defaultComments: TicketComment[] = [
 ];
 
 let mockComments: TicketComment[] = (() => {
-  try { return JSON.parse(sessionStorage.getItem("mockComments") || "null") || defaultComments; } catch { return defaultComments; }
+  try {
+    return (
+      JSON.parse(sessionStorage.getItem("mockComments") || "null") ||
+      defaultComments
+    );
+  } catch {
+    return defaultComments;
+  }
 })();
-const saveComments = () => sessionStorage.setItem("mockComments", JSON.stringify(mockComments));
+const saveComments = () =>
+  sessionStorage.setItem("mockComments", JSON.stringify(mockComments));
 
 export async function createTicket(data: Partial<Ticket>): Promise<Ticket> {
   await new Promise((resolve) => setTimeout(resolve, 500));
@@ -166,10 +201,10 @@ export async function createTicket(data: Partial<Ticket>): Promise<Ticket> {
 
 export async function updateTicketStatus(
   id: string,
-  department: string,
   status: TicketStatus,
 ): Promise<Ticket | null> {
   await new Promise((resolve) => setTimeout(resolve, 500));
+  const department = id.includes("-hr-") ? "hr" : "it";
   if (department === "hr") {
     mockHrRequests = mockHrRequests.map((t) =>
       t.id === id ? { ...t, status, updated_at: new Date().toISOString() } : t,

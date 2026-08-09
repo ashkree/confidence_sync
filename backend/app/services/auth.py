@@ -1,7 +1,5 @@
-import asyncio
 import base64
 import json
-import pprint
 from functools import lru_cache
 
 import jwt
@@ -11,16 +9,63 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.database import get_db
+from app.exceptions.data import RecordNotFoundError
 from app.models import User
 from app.repository.cognito import CognitoRepo
 from app.repository.users import read_user_by_cognito_sub
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+repo = CognitoRepo()
 
 
-async def login_user(username: str, password: str) -> dict:
-    repo = CognitoRepo()
-    return await repo.login_user(username, password)
+async def authenticate_and_fetch_user(email: str, password: str, db: AsyncSession):
+
+    response = await repo.login_user(email, password)
+
+    try:
+        claims = verify_id_token(response["IdToken"])
+    except ValueError as e:
+        raise jwt.InvalidTokenError(f"Invalid or expired token: {e}")
+
+    cognito_sub = claims.get("sub")
+    if not cognito_sub:
+        raise jwt.InvalidTokenError("Token missing subject")
+
+    print(cognito_sub)
+
+    user = await read_user_by_cognito_sub(db, cognito_sub)
+
+    if user is None:
+        raise RecordNotFoundError("User not found in database")
+
+    return {
+        "access_token": response["AccessToken"],
+        "refresh_token": response.get("RefreshToken"),
+        "user": user,
+    }
+
+
+async def refresh_user_token(email: str, refresh_token: str, db: AsyncSession):
+    response = await repo.refresh_token(email, refresh_token)
+
+    try:
+        claims = verify_id_token(response["IdToken"])
+    except ValueError as e:
+        raise jwt.InvalidTokenError(f"Invalid or expired token: {e}")
+
+    cognito_sub = claims.get("sub")
+    if not cognito_sub:
+        raise jwt.InvalidTokenError("Token missing subject")
+
+    user = await read_user_by_cognito_sub(db, cognito_sub)
+    if user is None:
+        raise RecordNotFoundError("User not found in database")
+
+    return {
+        "access_token": response["AccessToken"],
+        "refresh_token": response.get("RefreshToken"),  # sometimes not returned on refresh
+        "user": user,
+    }
 
 
 @lru_cache
@@ -165,19 +210,3 @@ async def get_current_user(
         )
 
     return user
-
-
-async def main():
-    tokens = await login_user("dummy@example.com", "TestPassword123!")
-
-    print("--- Verified Access Token Claims ---")
-    access_claims = verify_access_token(tokens["AccessToken"])
-    pprint.pprint(access_claims)
-
-    print("--- Verified ID Token Claims ---")
-    id_claims = verify_id_token(tokens["IdToken"])
-    pprint.pprint(id_claims)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())

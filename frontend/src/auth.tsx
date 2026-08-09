@@ -11,9 +11,8 @@ const AuthContext = createContext<AuthState | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(() => {
-    return !!localStorage.getItem("auth-token");
-  });
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
 
   // checks if the user is authenticated
   const isAuthenticated = user !== null;
@@ -29,21 +28,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (user) setUser(user);
         else localStorage.removeItem("auth-token");
       })
-      .catch(() => localStorage.removeItem("auth-token"))
-      .finally(() => setIsLoading(false));
+      .catch(() => localStorage.removeItem("auth-token"));
   }, []);
 
   // Sends login request to backend
   const login = async (username: string, password: string) => {
-    const { token, user } = await apiLogin(username, password);
-    localStorage.setItem("auth-token", token);
+    const {
+      token,
+      refreshToken: newRefreshToken,
+      user,
+    } = await apiLogin(username, password);
     setUser(user);
+    setAccessToken(token);
+    setRefreshToken(newRefreshToken);
+    localStorage.setItem("auth-token", token);
+    if (newRefreshToken) {
+      localStorage.setItem("refresh-token", newRefreshToken);
+    }
   };
 
   // logout user and remove auth-token
   const logout = () => {
     localStorage.removeItem("auth-token");
+    localStorage.removeItem("refresh-token");
     setUser(null);
+    setAccessToken(null);
+    setRefreshToken(null);
   };
 
   // checks for role
@@ -56,20 +66,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return user?.department === department;
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        Loading...
-      </div>
-    );
-  }
-
   return (
     <AuthContext.Provider
       value={{
         isAuthenticated,
-        isLoading,
         user,
+        accessToken,
+        refreshToken,
         hasRole,
         hasDepartment,
         login,

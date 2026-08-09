@@ -28,10 +28,18 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     cognito_sub: Mapped[uuid.UUID] = mapped_column(unique=True, nullable=False)
     role: Mapped[UserRole] = mapped_column(
-        SAEnum(UserRole, name="user_role"), default=UserRole.EMPLOYEE, nullable=False
+        SAEnum(
+            UserRole, name="user_role", values_callable=lambda x: [e.value for e in x]
+        ),
+        default=UserRole.EMPLOYEE,
+        nullable=False,
     )
     department: Mapped[UserDepartment | None] = mapped_column(
-        SAEnum(UserDepartment, name="user_department"),
+        SAEnum(
+            UserDepartment,
+            name="user_department",
+            values_callable=lambda x: [e.value for e in x],
+        ),
         nullable=True,
     )
     phone_number: Mapped[str] = mapped_column(String(15), nullable=False)

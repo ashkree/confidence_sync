@@ -1,47 +1,51 @@
 import type { Ticket, TicketComment, TicketStatus } from "@/types";
 
-export async function fetchTickets(department: string): Promise<Ticket[]> {
-  const res = await fetch(`/api/tickets?department=${department}`);
-  if (!res.ok) throw new Error("Failed to fetch tickets");
+async function fetchWithAuth(url: string, options: RequestInit = {}) {
+  const token = localStorage.getItem("auth-token");
+  const headers = new Headers(options.headers || {});
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+  const res = await fetch(url, { ...options, headers });
+  if (!res.ok) throw new Error(`Failed to fetch ${url}`);
   return res.json();
 }
 
-export async function fetchTicket(id: string, department: string): Promise<Ticket> {
-  const res = await fetch(`/api/tickets/${id}?department=${department}`);
-  if (!res.ok) throw new Error("Failed to fetch ticket");
-  return res.json();
+export async function fetchMyTickets(): Promise<Ticket[]> {
+  return fetchWithAuth("/api/v1/tickets/me");
+}
+
+export async function fetchTickets(): Promise<Ticket[]> {
+  return fetchWithAuth("/api/v1/tickets");
+}
+
+export async function fetchTicket(id: string): Promise<Ticket> {
+  return fetchWithAuth(`/api/v1/tickets/${id}`);
 }
 
 export async function createTicket(data: Partial<Ticket>): Promise<Ticket> {
-  const res = await fetch("/api/tickets", {
+  return fetchWithAuth("/api/v1/tickets", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Failed to create ticket");
-  return res.json();
 }
 
 export async function updateTicketStatus(
   id: string,
-  department: string,
   status: TicketStatus,
 ): Promise<Ticket> {
-  const res = await fetch(`/api/tickets/${id}/status?department=${department}`, {
+  return fetchWithAuth(`/api/v1/tickets/${id}/status`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status }),
   });
-  if (!res.ok) throw new Error("Failed to update ticket status");
-  return res.json();
 }
 
 export async function fetchTicketComments(
   ticketId: string,
 ): Promise<TicketComment[]> {
-  const res = await fetch(`/api/tickets/${ticketId}/comments`);
-  if (!res.ok) throw new Error("Failed to fetch comments");
-  return res.json();
+  return fetchWithAuth(`/api/v1/tickets/${ticketId}/comments`);
 }
 
 export async function addTicketComment(
@@ -49,11 +53,9 @@ export async function addTicketComment(
   authorId: string,
   subject: string,
 ): Promise<TicketComment> {
-  const res = await fetch(`/api/tickets/${ticketId}/comments`, {
+  return fetchWithAuth(`/api/v1/tickets/${ticketId}/comments`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ author_id: authorId, subject }),
   });
-  if (!res.ok) throw new Error("Failed to add comment");
-  return res.json();
 }

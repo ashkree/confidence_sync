@@ -7,8 +7,8 @@ export const Route = createFileRoute("/_authenticated/ticket/$ticketId")({
     department: (search.department as string) || "it",
   }),
   loaderDeps: ({ search: { department } }) => ({ department }),
-  loader: async ({ params, deps }) => {
-    return fetchTicket(params.ticketId, deps.department);
+  loader: async ({ params }) => {
+    return fetchTicket(params.ticketId);
   },
   component: TicketDetailPage,
 });

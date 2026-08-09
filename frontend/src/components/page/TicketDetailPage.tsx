@@ -51,7 +51,7 @@ export function TicketDetailPage() {
   };
 
   const handleStatusUpdate = async () => {
-    await updateTicketStatus(ticket.id, ticket.type === "hr_request" ? "hr" : "it", currentStatus);
+    await updateTicketStatus(ticket.id, currentStatus);
     // Ideally we would refresh or update the local ticket status here
   };
 

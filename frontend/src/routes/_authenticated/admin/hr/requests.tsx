@@ -25,7 +25,7 @@ const ticket_columns = [
 
 export const Route = createFileRoute("/_authenticated/admin/hr/requests")({
   component: RouteComponent,
-  loader: () => fetchTickets("hr"),
+  loader: () => fetchTickets(),
 });
 
 function RouteComponent() {

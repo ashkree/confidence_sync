@@ -141,7 +141,7 @@ export async function login(username: string, _password: string) {
         Object.keys(MOCK_USERS).join("\n"),
     );
 
-  return { token: `mock-token-${username}`, user };
+  return { token: `mock-token-${username}`, refreshToken: null, user };
 }
 
 export async function validateToken(token: string) {

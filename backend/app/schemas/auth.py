@@ -8,6 +8,12 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class RefreshRequest(BaseModel):
+    email: str
+    refresh_token: str
+
+
 class LoginResponse(BaseModel):
     token: str
+    refresh_token: str | None = None
     user: UserBase

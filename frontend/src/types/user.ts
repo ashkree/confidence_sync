@@ -4,6 +4,10 @@ interface BaseUser {
   id: string;
   name: string;
   email: string;
+  phone_number?: string;
+  leave_days?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface UserProfile extends BaseUser {
