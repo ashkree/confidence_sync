@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/admin/it/tickets")({
 function RouteComponent() {
   const data = Route.useLoaderData();
 
-  const unassignedCount = data.filter((t) => !t.assignee_id).length;
+  const unassignedCount = data.filter((t) => !t.assignee_name).length;
   const openCount = data.filter((t) => t.status === "OPEN").length;
   const pendingCount = data.filter((t) => t.status === "PENDING").length;
 

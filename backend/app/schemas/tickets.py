@@ -55,8 +55,8 @@ class TicketListResponseBase(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
     id: uuid.UUID
-    poster_id: uuid.UUID
-    assignee_id: uuid.UUID | None
+    poster_name: str
+    assignee_name: str | None
     type: TicketType
     status: TicketStatus
     priority: TicketPriority
@@ -152,6 +152,6 @@ class TicketCommentCreate(BaseModel):
 class TicketCommentResponse(BaseModel):
     id: uuid.UUID
     ticket_id: uuid.UUID
-    author_id: uuid.UUID
+    author_name: str
     body: str
     created_at: datetime.datetime

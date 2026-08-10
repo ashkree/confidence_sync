@@ -8,7 +8,11 @@ export async function login(email: string, password: string) {
   });
   if (!res.ok) throw new Error("Authentication failed");
   const data = await res.json();
-  return { token: data.token, refreshToken: data.refresh_token, user: data.user };
+  return {
+    token: data.token,
+    refreshToken: data.refresh_token,
+    user: data.user,
+  };
 }
 
 export async function validateToken(token: string) {
@@ -22,13 +26,17 @@ export async function validateToken(token: string) {
   return res.json();
 }
 
-export async function refresh(email: string, refreshToken: string) {
+export async function refresh(refreshToken: string) {
   const res = await fetch("/api/v1/auth/refresh", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, refresh_token: refreshToken }),
+    body: JSON.stringify({ refresh_token: refreshToken }),
   });
   if (!res.ok) throw new Error("Refresh token failed");
   const data = await res.json();
-  return { token: data.token, refreshToken: data.refresh_token, user: data.user };
+  return {
+    token: data.token,
+    refreshToken: data.refresh_token,
+    user: data.user,
+  };
 }

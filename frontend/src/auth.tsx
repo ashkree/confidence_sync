@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import {
   login as apiLogin,
   validateToken as apiValidateToken,
+  refresh as apiRefresh,
 } from "@/api/auth";
 
 import type { AuthState, User } from "@/types";
@@ -13,25 +14,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // checks if the user is authenticated
   const isAuthenticated = user !== null;
 
-  // checks for token existance and validates if it exists
-  // early return otherwise
+  // checks for token existence and validates it, falling back to a
+  // refresh if the access token has expired. Blocks router mount
+  // via `isLoading` so route guards never see a stale null-user state.
   useEffect(() => {
     const token = localStorage.getItem("auth-token");
-    if (!token) return;
+    const storedRefreshToken = localStorage.getItem("refresh-token");
+
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
 
     apiValidateToken(token)
-      .then((user) => {
-        if (user) setUser(user);
-        else localStorage.removeItem("auth-token");
+      .then((validatedUser) => {
+        if (!validatedUser) throw new Error("Invalid token");
+        setUser(validatedUser);
+        setAccessToken(token);
+        if (storedRefreshToken) setRefreshToken(storedRefreshToken);
       })
-      .catch(() => localStorage.removeItem("auth-token"));
+      .catch(async () => {
+        if (!storedRefreshToken) {
+          localStorage.removeItem("auth-token");
+          return;
+        }
+
+        try {
+          const {
+            token: newToken,
+            refreshToken: newRefreshToken,
+            user: refreshedUser,
+          } = await apiRefresh(storedRefreshToken);
+
+          setUser(refreshedUser);
+          setAccessToken(newToken);
+          localStorage.setItem("auth-token", newToken);
+
+          if (newRefreshToken) {
+            setRefreshToken(newRefreshToken);
+            localStorage.setItem("refresh-token", newRefreshToken);
+          }
+        } catch {
+          localStorage.removeItem("auth-token");
+          localStorage.removeItem("refresh-token");
+        }
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
-  // Sends login request to backend
   const login = async (username: string, password: string) => {
     const {
       token,
@@ -47,7 +81,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // logout user and remove auth-token
   const logout = () => {
     localStorage.removeItem("auth-token");
     localStorage.removeItem("refresh-token");
@@ -56,12 +89,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setRefreshToken(null);
   };
 
-  // checks for role
   const hasRole = (role: string) => {
     return user?.role.includes(role) ?? false;
   };
 
-  // checks for department
   const hasDepartment = (department: string | null): boolean => {
     return user?.department === department;
   };
@@ -70,6 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider
       value={{
         isAuthenticated,
+        isLoading,
         user,
         accessToken,
         refreshToken,

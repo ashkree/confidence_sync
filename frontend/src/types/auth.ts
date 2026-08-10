@@ -2,6 +2,7 @@ import type { User } from "./user";
 
 export interface AuthState {
   isAuthenticated: boolean;
+  isLoading: boolean;
   user: User | null;
   accessToken: string | null;
   refreshToken: string | null;

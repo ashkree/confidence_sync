@@ -190,7 +190,7 @@ export function TicketDetailPage() {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">
-                      {comment.author_id}
+                      {comment.author_name}
                     </span>
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Clock className="w-3 h-3" />

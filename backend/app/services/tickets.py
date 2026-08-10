@@ -88,14 +88,16 @@ async def read_tickets_by_department(
     Returns a plain list of concrete HrRequest / ItTicket instances so that
     all subclass columns are eagerly available for Pydantic serialization.
     """
-
     if current_user.department == UserDepartment.IT:
-        result = await db.scalars(select(ItTicket))
+        result = await db.scalars(
+            _ticket_query().where(TicketWithSubtypes.type == TicketType.IT_TICKET)
+        )
         return list(result.all())
     if current_user.department == UserDepartment.HR:
-        result = await db.scalars(select(HrRequest))
+        result = await db.scalars(
+            _ticket_query().where(TicketWithSubtypes.type == TicketType.HR_REQUEST)
+        )
         return list(result.all())
-
     raise PermissionError(f"No ticket access for department: {current_user.department}")
 
 
@@ -163,6 +165,7 @@ async def read_ticket_comments(
 ) -> Sequence[TicketComment]:
     result = await db.scalars(
         select(TicketComment)
+        .options(selectinload(TicketComment.author))
         .where(TicketComment.ticket_id == ticket_id)
         .order_by(TicketComment.created_at)
     )
