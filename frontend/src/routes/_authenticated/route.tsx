@@ -80,11 +80,11 @@ function RouteComponent() {
   const { hasRole, hasDepartment } = useAuth();
 
   const getGroup = () => {
-    if (hasRole("employee")) {
+    if (hasRole("EMPLOYEE")) {
       return [employee_group];
     }
 
-    if (hasDepartment("it")) {
+    if (hasDepartment("IT")) {
       return [employee_group, it_group];
     } else {
       return [employee_group, hr_group];

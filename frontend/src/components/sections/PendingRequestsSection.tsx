@@ -36,7 +36,7 @@ export default function PendingRequestsSection({ tickets = [] }: { tickets?: Tic
               key={ticket.id}
               to="/ticket/$ticketId"
               params={{ ticketId: ticket.id }}
-              search={{ department: ticket.type === "hr_request" ? "hr" : "it" }}
+              search={{ department: ticket.type === "HR_REQUEST" ? "HR" : "IT" }}
               className="block"
             >
               <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors">

@@ -11,13 +11,13 @@ from app.models.base import Base
 
 
 class UserRole(str, enum.Enum):
-    EMPLOYEE = "employee"
-    ADMIN = "admin"
+    EMPLOYEE = "EMPLOYEE"
+    ADMIN = "ADMIN"
 
 
 class UserDepartment(str, enum.Enum):
-    HR = "hr"
-    IT = "it"
+    HR = "HR"
+    IT = "IT"
 
 
 class User(Base):

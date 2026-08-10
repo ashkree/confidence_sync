@@ -50,12 +50,11 @@ export async function fetchTicketComments(
 
 export async function addTicketComment(
   ticketId: string,
-  authorId: string,
-  subject: string,
+  body: string,
 ): Promise<TicketComment> {
   return fetchWithAuth(`/api/v1/tickets/${ticketId}/comments`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ author_id: authorId, subject }),
+    body: JSON.stringify({ ticket_id: ticketId, body }),
   });
 }

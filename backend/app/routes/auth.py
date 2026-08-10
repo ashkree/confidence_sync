@@ -65,9 +65,7 @@ async def post_refresh(
     db: AsyncSession = Depends(get_db),
 ):
     try:
-        data = await refresh_user_token(
-            refresh_request.email, refresh_request.refresh_token, db
-        )
+        data = await refresh_user_token(refresh_request.refresh_token, db)
     except InvalidCredentialsError:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
     except AuthServiceUnavailableError:

@@ -10,13 +10,13 @@ def to_user_base(user: User) -> UserBase:
         return Admin(
             name=user.name,
             email=user.email,
-            role=user.role.value,
-            department=user.department.value,
+            role=user.role,
+            department=user.department,
         )
     return Employee(
         name=user.name,
         email=user.email,
-        role=user.role.value,
+        role=user.role,
     )
 
 

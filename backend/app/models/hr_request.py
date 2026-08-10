@@ -11,13 +11,13 @@ from app.models.ticket import Ticket, TicketType
 
 
 class RequestType(str, enum.Enum):
-    LEAVE_REQUEST = "leave_request"
-    DOCUMENT_REQUEST = "document_request"
+    LEAVE_REQUEST = "LEAVE_REQUEST"
+    DOCUMENT_REQUEST = "DOCUMENT_REQUEST"
 
 
 class DocumentType(str, enum.Enum):
-    NOC = "noc"
-    SALARY_CERTIFICATE = "salary_certificate"
+    NOC = "NOC"
+    SALARY_CERTIFICATE = "SALARY_CERTIFICATE"
 
 
 class HrRequest(Ticket):

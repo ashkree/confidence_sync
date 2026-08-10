@@ -25,8 +25,8 @@ function RouteComponent() {
   const data = Route.useLoaderData();
 
   const unassignedCount = data.filter((t) => !t.assignee_id).length;
-  const openCount = data.filter((t) => t.status === "open").length;
-  const pendingCount = data.filter((t) => t.status === "pending").length;
+  const openCount = data.filter((t) => t.status === "OPEN").length;
+  const pendingCount = data.filter((t) => t.status === "PENDING").length;
 
   // We cast data to ItTicket[] to satisfy the generic TicketTable props
   // since the loader returns a general Ticket[]

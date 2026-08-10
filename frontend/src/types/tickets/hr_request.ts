@@ -1,10 +1,10 @@
 import type { Ticket } from "./ticket";
 
-export type HrRequestType = "leave_request" | "document_request";
-export type DocumentType = "noc" | "salary_certificate";
+export type HrRequestType = "LEAVE_REQUEST" | "DOCUMENT_REQUEST";
+export type DocumentType = "NOC" | "SALARY_CERTIFICATE";
 
 export interface HrRequest extends Ticket {
-  type: "hr_request";
+  type: "HR_REQUEST";
   request_type: HrRequestType;
   document_type: DocumentType | null;
   from_date: string | null;

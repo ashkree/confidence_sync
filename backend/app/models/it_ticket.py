@@ -10,8 +10,8 @@ from app.models.ticket import Ticket, TicketType
 
 
 class ITRequestType(str, enum.Enum):
-    HARDWARE_ISSUE = "hardware_issue"
-    SOFTWARE_ISSUE = "software_issue"
+    HARDWARE_ISSUE = "HARDWARE_ISSUE"
+    SOFTWARE_ISSUE = "SOFTWARE_ISSUE"
 
 
 class ItTicket(Ticket):

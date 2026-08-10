@@ -18,7 +18,11 @@ const ticket_columns = [
     header: "Document Type",
     cell: (info) => {
       const val = info.getValue();
-      return <span className="capitalize">{val ? val.replace("_", " ") : "N/A"}</span>;
+      return (
+        <span className="capitalize">
+          {val ? val.replace("_", " ") : "N/A"}
+        </span>
+      );
     },
   }),
 ];
@@ -32,8 +36,8 @@ function RouteComponent() {
   const data = Route.useLoaderData();
 
   const unassignedCount = data.filter((t) => !t.assignee_id).length;
-  const openCount = data.filter((t) => t.status === "open").length;
-  const pendingCount = data.filter((t) => t.status === "pending").length;
+  const openCount = data.filter((t) => t.status === "OPEN").length;
+  const pendingCount = data.filter((t) => t.status === "PENDING").length;
 
   const hrTickets = data as HrRequest[];
 

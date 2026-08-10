@@ -18,13 +18,13 @@ export interface UserProfile extends BaseUser {
 }
 
 export interface Employee extends BaseUser {
-  role: "employee";
+  role: "EMPLOYEE";
   department: null;
 }
 
 export interface Admin extends BaseUser {
-  role: "admin";
-  department: "hr" | "it";
+  role: "ADMIN";
+  department: "HR" | "IT";
 }
 
 export type User = Employee | Admin;

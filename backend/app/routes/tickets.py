@@ -4,7 +4,6 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.auth import get_current_user
 from app.database import get_db
 from app.models import User
 from app.schemas.tickets import (
@@ -16,6 +15,7 @@ from app.schemas.tickets import (
     TicketPriorityPatch,
     TicketStatusPatch,
 )
+from app.services.auth import get_current_user
 from app.services.tickets import (
     can_access,
     create_ticket,
@@ -34,7 +34,7 @@ ticket_router = APIRouter(prefix="/tickets")
 
 
 @ticket_router.post(
-    "/",
+    "",
     response_model=TicketDetailResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create a ticket",
@@ -57,7 +57,7 @@ async def create_ticket_route(
 
 
 @ticket_router.get(
-    "/",
+    "",
     response_model=list[TicketListReponse],
     summary="List departmental tickets",
     responses={
@@ -102,7 +102,10 @@ async def get_own_tickets(
     Returns:
         list[TicketListReponse]: A list of tickets submitted by the user.
     """
-    return await read_tickets_by_poster(db, current_user)
+
+    tickets = await read_tickets_by_poster(db, current_user)
+
+    return tickets
 
 
 @ticket_router.get(
@@ -270,7 +273,7 @@ async def post_ticket_comment(
         )
 
     # TODO: trigger async AI summarization -> ticket.information
-    return await create_ticket_comment(db, payload, current_user.id, id)
+    return await create_ticket_comment(db, payload, current_user.id)
 
 
 @ticket_router.get(

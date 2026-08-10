@@ -12,21 +12,21 @@ from app.models.user import User
 
 
 class TicketType(str, enum.Enum):
-    HR_REQUEST = "hr_request"
-    IT_TICKET = "it_ticket"
+    HR_REQUEST = "HR_REQUEST"
+    IT_TICKET = "IT_TICKET"
 
 
 class TicketStatus(str, enum.Enum):
-    OPEN = "open"
-    PENDING = "pending"
-    RESOLVED = "resolved"
-    CLOSED = "closed"
+    OPEN = "OPEN"
+    PENDING = "PENDING"
+    RESOLVED = "RESOLVED"
+    CLOSED = "CLOSED"
 
 
 class TicketPriority(str, enum.Enum):
-    HIGH = "high"
-    MEDIUM = "medium"
-    LOW = "low"
+    HIGH = "HIGH"
+    MEDIUM = "MEDIUM"
+    LOW = "LOW"
 
 
 class Ticket(Base):

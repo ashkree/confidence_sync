@@ -12,10 +12,10 @@ class TestTicketCreateDiscriminator:
 
     def test_parses_it_ticket_correctly(self):
         payload = {
-            "type": "it_ticket",
+            "type": "IT_TICKET",
             "subject": "My mouse is broken",
             "description": "Scroll wheel doesn't work",
-            "request_type": "hardware_issue",
+            "request_type": "HARDWARE_ISSUE",
             "device_type": "Mouse"
         }
         # TypeAdapter handles the discriminator validation
@@ -28,16 +28,16 @@ class TestTicketCreateDiscriminator:
 
     def test_parses_hr_request_correctly(self):
         payload = {
-            "type": "hr_request",
+            "type": "HR_REQUEST",
             "subject": "Leave Request",
             "description": "Taking PTO",
-            "request_type": "leave_request"
+            "request_type": "LEAVE_REQUEST"
         }
         adapter = TypeAdapter(TicketCreate)
         parsed = adapter.validate_python(payload)
         
         assert isinstance(parsed, HrRequestCreate)
-        assert parsed.request_type == "leave_request"
+        assert parsed.request_type == "LEAVE_REQUEST"
 
     def test_rejects_invalid_discriminator_type(self):
         payload = {
@@ -59,10 +59,10 @@ class TestSchemaToOrm:
     def test_it_ticket_to_orm(self):
         poster_id = uuid.uuid4()
         schema = ItTicketCreate(
-            type="it_ticket",
+            type="IT_TICKET",
             subject="IDE Crash",
             description="VSCode crashing on save",
-            request_type="software_issue",
+            request_type="SOFTWARE_ISSUE",
             software_name="VSCode"
         )
         
@@ -71,7 +71,7 @@ class TestSchemaToOrm:
         assert isinstance(db_model, ItTicket)
         assert db_model.poster_id == poster_id
         assert db_model.subject == "IDE Crash"
-        assert db_model.request_type == "software_issue"
+        assert db_model.request_type == "SOFTWARE_ISSUE"
         assert db_model.software_name == "VSCode"
 
     def test_hr_request_create_to_orm(self):
@@ -82,16 +82,16 @@ class TestSchemaToOrm:
         schema = HrRequestCreate(
             subject="Salary Certificate",
             description="Need cert for bank loan.",
-            request_type="document_request",
-            document_type="salary_certificate",
+            request_type="DOCUMENT_REQUEST",
+            document_type="SALARY_CERTIFICATE",
         )
 
         db_model = schema.to_orm(poster_id)
 
         assert isinstance(db_model, HrRequest)
         assert db_model.poster_id == poster_id
-        assert db_model.request_type == "document_request"
-        assert db_model.document_type == "salary_certificate"
+        assert db_model.request_type == "DOCUMENT_REQUEST"
+        assert db_model.document_type == "SALARY_CERTIFICATE"
 
     def test_ticket_comment_create_to_orm(self):
         ticket_id = uuid.uuid4()

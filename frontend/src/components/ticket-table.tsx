@@ -74,7 +74,7 @@ export function TicketTable<TData extends Ticket>({
         navigate({
           to: "/ticket/$ticketId",
           params: { ticketId: row.id },
-          search: { department: row.type === "hr_request" ? "hr" : "it" },
+          search: { department: row.type === "HR_REQUEST" ? "HR" : "IT" },
         });
       }}
     />

@@ -50,9 +50,9 @@ export function NavUser({
   };
 
   const mockEntries = MOCK_USERS ? Object.entries(MOCK_USERS) : [];
-  const employees = mockEntries.filter(([, u]) => u.role === "employee");
-  const hrAdmins = mockEntries.filter(([, u]) => u.role === "admin" && u.department === "hr");
-  const itAdmins = mockEntries.filter(([, u]) => u.role === "admin" && u.department === "it");
+  const employees = mockEntries.filter(([, u]) => u.role === "EMPLOYEE");
+  const hrAdmins = mockEntries.filter(([, u]) => u.role === "ADMIN" && u.department === "HR");
+  const itAdmins = mockEntries.filter(([, u]) => u.role === "ADMIN" && u.department === "IT");
 
   return (
     <>

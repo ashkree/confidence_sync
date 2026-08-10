@@ -12,7 +12,7 @@ export const MOCK_USERS: Record<string, User> = {
     leave_days: 14,
     created_at: "2025-01-15T09:00:00Z",
     updated_at: "2025-01-15T09:00:00Z",
-    role: "employee",
+    role: "EMPLOYEE",
     department: null,
   },
   "employee2@example.com": {
@@ -23,7 +23,7 @@ export const MOCK_USERS: Record<string, User> = {
     leave_days: 10,
     created_at: "2025-01-15T09:00:00Z",
     updated_at: "2025-01-15T09:00:00Z",
-    role: "employee",
+    role: "EMPLOYEE",
     department: null,
   },
   "employee3@example.com": {
@@ -34,7 +34,7 @@ export const MOCK_USERS: Record<string, User> = {
     leave_days: 7,
     created_at: "2025-01-15T09:00:00Z",
     updated_at: "2025-01-15T09:00:00Z",
-    role: "employee",
+    role: "EMPLOYEE",
     department: null,
   },
   "employee4@example.com": {
@@ -45,7 +45,7 @@ export const MOCK_USERS: Record<string, User> = {
     leave_days: 21,
     created_at: "2025-01-15T09:00:00Z",
     updated_at: "2025-01-15T09:00:00Z",
-    role: "employee",
+    role: "EMPLOYEE",
     department: null,
   },
   "employee5@example.com": {
@@ -56,7 +56,7 @@ export const MOCK_USERS: Record<string, User> = {
     leave_days: 5,
     created_at: "2025-01-15T09:00:00Z",
     updated_at: "2025-01-15T09:00:00Z",
-    role: "employee",
+    role: "EMPLOYEE",
     department: null,
   },
 
@@ -69,8 +69,8 @@ export const MOCK_USERS: Record<string, User> = {
     leave_days: 18,
     created_at: "2025-01-15T09:00:00Z",
     updated_at: "2025-01-15T09:00:00Z",
-    role: "admin",
-    department: "hr",
+    role: "ADMIN",
+    department: "HR",
   },
   "hr2@example.com": {
     id: "ahr2",
@@ -80,8 +80,8 @@ export const MOCK_USERS: Record<string, User> = {
     leave_days: 12,
     created_at: "2025-01-15T09:00:00Z",
     updated_at: "2025-01-15T09:00:00Z",
-    role: "admin",
-    department: "hr",
+    role: "ADMIN",
+    department: "HR",
   },
   "hr3@example.com": {
     id: "ahr3",
@@ -91,8 +91,8 @@ export const MOCK_USERS: Record<string, User> = {
     leave_days: 9,
     created_at: "2025-01-15T09:00:00Z",
     updated_at: "2025-01-15T09:00:00Z",
-    role: "admin",
-    department: "hr",
+    role: "ADMIN",
+    department: "HR",
   },
 
   // IT Admins
@@ -104,8 +104,8 @@ export const MOCK_USERS: Record<string, User> = {
     leave_days: 16,
     created_at: "2025-01-15T09:00:00Z",
     updated_at: "2025-01-15T09:00:00Z",
-    role: "admin",
-    department: "it",
+    role: "ADMIN",
+    department: "IT",
   },
   "it2@example.com": {
     id: "ait2",
@@ -115,8 +115,8 @@ export const MOCK_USERS: Record<string, User> = {
     leave_days: 11,
     created_at: "2025-01-15T09:00:00Z",
     updated_at: "2025-01-15T09:00:00Z",
-    role: "admin",
-    department: "it",
+    role: "ADMIN",
+    department: "IT",
   },
   "it3@example.com": {
     id: "ait3",
@@ -126,8 +126,8 @@ export const MOCK_USERS: Record<string, User> = {
     leave_days: 8,
     created_at: "2025-01-15T09:00:00Z",
     updated_at: "2025-01-15T09:00:00Z",
-    role: "admin",
-    department: "it",
+    role: "ADMIN",
+    department: "IT",
   },
 };
 

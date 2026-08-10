@@ -45,7 +45,7 @@ const routeApi = getRouteApi("/_authenticated/ticket/submit");
 const schema = z.object({
   subject: z.string().min(1, "Subject is required"),
   description: z.string().min(1, "Description is required"),
-  department: z.enum(["hr", "it"], { message: "Department is required" }),
+  department: z.enum(["HR", "IT"], { message: "Department is required" }),
   priority: z.string(),
   request_type: z.string(),
   document_type: z.string(),
@@ -66,7 +66,7 @@ export function TicketSubmissionPage() {
       subject: "",
       description: "",
       department: search.department || "",
-      priority: "medium",
+      priority: "MEDIUM",
       request_type: search.requestType || search.ticketType || "",
       document_type: "",
       from_date: undefined as Date | undefined,
@@ -82,15 +82,15 @@ export function TicketSubmissionPage() {
     onSubmit: async ({ value }) => {
       const newTicket = await createTicket({
         ...value,
-        type: value.department === "hr" ? "hr_request" : "it_ticket",
-        priority: value.priority as "low" | "medium" | "high" | "critical",
+        type: value.department === "HR" ? "HR_REQUEST" : "IT_TICKET",
+        priority: value.priority as "LOW" | "MEDIUM" | "HIGH",
         poster_id: user?.id,
         poster_name: user?.name,
       } as unknown as Partial<Ticket>);
       navigate({
         to: "/ticket/$ticketId",
         params: { ticketId: newTicket.id },
-        search: { department: newTicket.type === "hr_request" ? "hr" : "it" },
+        search: { department: newTicket.type === "HR_REQUEST" ? "HR" : "IT" },
       });
     },
   });
@@ -172,8 +172,8 @@ export function TicketSubmissionPage() {
                           <SelectValue placeholder="Select department" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="hr">Human Resources (HR)</SelectItem>
-                          <SelectItem value="it">Information Technology (IT)</SelectItem>
+                          <SelectItem value="HR">Human Resources (HR)</SelectItem>
+                          <SelectItem value="IT">Information Technology (IT)</SelectItem>
                         </SelectContent>
                       </Select>
                     </FieldContent>
@@ -191,7 +191,7 @@ export function TicketSubmissionPage() {
                 return (
                   <>
                     {/* HR Specific Fields */}
-                    {department === "hr" && (
+                    {department === "HR" && (
                       <div className="space-y-6 p-4 border rounded-md bg-muted/20">
                         <form.Field name="request_type">
                           {(field) => {
@@ -208,8 +208,8 @@ export function TicketSubmissionPage() {
                                       <SelectValue placeholder="Select request type" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="leave_request">Leave Request</SelectItem>
-                                      <SelectItem value="document_request">Document Request</SelectItem>
+                                      <SelectItem value="LEAVE_REQUEST">Leave Request</SelectItem>
+                                      <SelectItem value="DOCUMENT_REQUEST">Document Request</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </FieldContent>
@@ -219,7 +219,7 @@ export function TicketSubmissionPage() {
                           }}
                         </form.Field>
 
-                        {requestType === "leave_request" && (
+                        {requestType === "LEAVE_REQUEST" && (
                           <div className="grid grid-cols-2 gap-4">
                             <form.Field name="from_date">
                               {(field) => {
@@ -302,7 +302,7 @@ export function TicketSubmissionPage() {
                           </div>
                         )}
 
-                        {requestType === "document_request" && (
+                        {requestType === "DOCUMENT_REQUEST" && (
                           <form.Field name="document_type">
                             {(field) => {
                               const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
@@ -318,8 +318,8 @@ export function TicketSubmissionPage() {
                                         <SelectValue placeholder="Select document" />
                                       </SelectTrigger>
                                       <SelectContent>
-                                        <SelectItem value="salary_certificate">Salary Certificate</SelectItem>
-                                        <SelectItem value="noc">NOC (No Objection Certificate)</SelectItem>
+                                        <SelectItem value="SALARY_CERTIFICATE">Salary Certificate</SelectItem>
+                                        <SelectItem value="NOC">NOC (No Objection Certificate)</SelectItem>
                                       </SelectContent>
                                     </Select>
                                   </FieldContent>
@@ -333,7 +333,7 @@ export function TicketSubmissionPage() {
                     )}
 
                     {/* IT Specific Fields */}
-                    {department === "it" && (
+                    {department === "IT" && (
                       <div className="space-y-6 p-4 border rounded-md bg-muted/20">
                         <form.Field name="request_type">
                           {(field) => {
@@ -350,8 +350,8 @@ export function TicketSubmissionPage() {
                                       <SelectValue placeholder="Select ticket type" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="hardware_issue">Hardware Issue</SelectItem>
-                                      <SelectItem value="software_issue">Software Issue</SelectItem>
+                                      <SelectItem value="HARDWARE_ISSUE">Hardware Issue</SelectItem>
+                                      <SelectItem value="SOFTWARE_ISSUE">Software Issue</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </FieldContent>
@@ -361,7 +361,7 @@ export function TicketSubmissionPage() {
                           }}
                         </form.Field>
 
-                        {requestType === "hardware_issue" && (
+                        {requestType === "HARDWARE_ISSUE" && (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <form.Field name="device_type">
                               {(field) => {
@@ -407,7 +407,7 @@ export function TicketSubmissionPage() {
                           </div>
                         )}
 
-                        {requestType === "software_issue" && (
+                        {requestType === "SOFTWARE_ISSUE" && (
                           <form.Field name="software_name">
                             {(field) => {
                               const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;

@@ -31,22 +31,24 @@ async def authenticate_and_fetch_user(email: str, password: str, db: AsyncSessio
     if not cognito_sub:
         raise jwt.InvalidTokenError("Token missing subject")
 
-    print(cognito_sub)
-
     user = await read_user_by_cognito_sub(db, cognito_sub)
 
     if user is None:
         raise RecordNotFoundError("User not found in database")
 
     return {
-        "access_token": response["AccessToken"],
+        "access_token": response.get("AccessToken"),
         "refresh_token": response.get("RefreshToken"),
         "user": user,
     }
 
 
-async def refresh_user_token(email: str, refresh_token: str, db: AsyncSession):
-    response = await repo.refresh_token(email, refresh_token)
+async def refresh_user_token(refresh_token: str, db: AsyncSession):
+    payload_b64 = refresh_token.split(".")[1]
+    padded = payload_b64 + "=" * (-len(payload_b64) % 4)
+    payload = json.loads(base64.urlsafe_b64decode(padded))
+    username = payload["cognito:username"]
+    response = await repo.refresh_token(username, refresh_token)
 
     try:
         claims = verify_id_token(response["IdToken"])
@@ -62,8 +64,8 @@ async def refresh_user_token(email: str, refresh_token: str, db: AsyncSession):
         raise RecordNotFoundError("User not found in database")
 
     return {
-        "access_token": response["AccessToken"],
-        "refresh_token": response.get("RefreshToken"),  # sometimes not returned on refresh
+        "access_token": response.get("AccessToken"),
+        "refresh_token": response.get("RefreshToken"),
         "user": user,
     }
 
@@ -187,6 +189,7 @@ async def get_current_user(
     try:
         claims = verify_access_token(token)
     except ValueError as e:
+        print("Invalid or expired token")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid or expired token: {e}",
@@ -195,6 +198,7 @@ async def get_current_user(
 
     cognito_sub = claims.get("sub")
     if not cognito_sub:
+        print("Token missing sub")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token missing subject",
@@ -203,6 +207,7 @@ async def get_current_user(
 
     user = await read_user_by_cognito_sub(db, cognito_sub)
     if user is None:
+        print("User not found ")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",

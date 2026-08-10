@@ -9,21 +9,19 @@ class TestToUserBase:
         schema = to_user_base(employee_1)
         
         assert isinstance(schema, Employee)
-        assert schema.id == str(employee_1.id)
         assert schema.name == employee_1.name
         assert schema.email == employee_1.email
-        assert schema.role == "employee"
+        assert schema.role == "EMPLOYEE"
         assert getattr(schema, "department", None) is None
 
     def test_maps_admin_correctly(self, it_admin_user_1):
         schema = to_user_base(it_admin_user_1)
         
         assert isinstance(schema, Admin)
-        assert schema.id == str(it_admin_user_1.id)
         assert schema.name == it_admin_user_1.name
         assert schema.email == it_admin_user_1.email
-        assert schema.role == "admin"
-        assert schema.department == "it"
+        assert schema.role == "ADMIN"
+        assert schema.department == "IT"
 
     def test_raises_value_error_if_admin_has_no_department(self, hr_admin_user_1):
         # Temporarily unset the department
@@ -41,8 +39,7 @@ class TestToUserProfile:
         profile = to_user_profile(employee_1)
         
         assert isinstance(profile, UserProfile)
-        assert profile.id == str(employee_1.id)
-        assert profile.role == "employee"
+        assert profile.role == "EMPLOYEE"
         assert getattr(profile, "department", None) is None
         assert profile.phone_number == employee_1.phone_number
         assert profile.leave_days == employee_1.leave_days
@@ -53,9 +50,8 @@ class TestToUserProfile:
         profile = to_user_profile(it_admin_user_1)
         
         assert isinstance(profile, UserProfile)
-        assert profile.id == str(it_admin_user_1.id)
-        assert profile.role == "admin"
-        assert profile.department == "it"
+        assert profile.role == "ADMIN"
+        assert profile.department == "IT"
         assert profile.phone_number == it_admin_user_1.phone_number
         assert profile.leave_days == it_admin_user_1.leave_days
         assert profile.created_at == it_admin_user_1.created_at

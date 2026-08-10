@@ -28,7 +28,7 @@ class TestReadTickets:
         """Verify that reading tickets by poster returns the tickets created by the current user."""
 
         result = await read_tickets_by_poster(db_session, employee_1)
-        tickets = result.all()
+        tickets = result
 
         assert len(tickets) == 1
 
@@ -38,7 +38,7 @@ class TestReadTickets:
         """Verify that an IT admin reading tickets by department gets all IT tickets."""
 
         result = await read_tickets_by_department(db_session, it_admin_user_1)
-        tickets = result.all()
+        tickets = result
 
         assert len(tickets) == 2
         assert all(ticket.type == TicketType.IT_TICKET for ticket in tickets)
@@ -49,7 +49,7 @@ class TestReadTickets:
         """Verify that an HR admin reading tickets by department gets all HR requests."""
 
         result = await read_tickets_by_department(db_session, hr_admin_user_1)
-        tickets = result.all()
+        tickets = result
 
         assert len(tickets) == 2
         assert all(ticket.type == TicketType.HR_REQUEST for ticket in tickets)
@@ -61,7 +61,7 @@ class TestReadTickets:
 
         tickets = await read_tickets_by_poster(db_session, employee_1)
 
-        ticket = tickets.all()[0]
+        ticket = tickets[0]
 
         result = await read_ticket_by_id(db_session, ticket.id)
 
@@ -82,7 +82,7 @@ class TestReadTickets:
         """Verify that an employee who has never posted a ticket gets an empty result set."""
 
         result = await read_tickets_by_poster(db_session, employee_5)
-        tickets = result.all()
+        tickets = result
 
         assert len(tickets) == 0
 
@@ -108,8 +108,8 @@ class TestCreateTickets:
         description = "My desktops would not turn on after restarting"
 
         new_ticket_data = ItTicketCreate(
-            type="it_ticket",
-            request_type="hardware_issue",
+            type="IT_TICKET",
+            request_type="HARDWARE_ISSUE",
             device_type="desktop",
             subject=subject,
             description=description,
@@ -135,8 +135,8 @@ class TestCreateTickets:
         description = "My desktops would not turn on after restarting"
 
         new_ticket_data = ItTicketCreate(
-            type="it_ticket",
-            request_type="hardware_issue",
+            type="IT_TICKET",
+            request_type="HARDWARE_ISSUE",
             device_type="desktop",
             subject=subject,
             description=description,
@@ -158,8 +158,8 @@ class TestCreateTickets:
         description = "Taking annual leave for a family event."
 
         new_ticket_data = HrRequestCreate(
-            type="hr_request",
-            request_type="leave_request",
+            type="HR_REQUEST",
+            request_type="LEAVE_REQUEST",
             subject=subject,
             description=description,
         )
@@ -186,7 +186,7 @@ class TestUpdateTickets:
         self, db_session, hr_ticket_resolved
     ):
         """Verify that updating a ticket's status modifies the returned ticket object."""
-        target_status = "closed"
+        target_status = "CLOSED"
 
         result = await update_ticket_status(
             db_session, hr_ticket_resolved, target_status
@@ -196,7 +196,7 @@ class TestUpdateTickets:
 
     async def test_update_ticket_status_persists(self, db_session, hr_ticket_resolved):
         """Verify that updating a ticket's status persists the change to the database."""
-        target_status = "closed"
+        target_status = "CLOSED"
 
         ticket = await update_ticket_status(
             db_session, hr_ticket_resolved, target_status
@@ -211,7 +211,7 @@ class TestUpdateTickets:
         self, db_session, hr_ticket_resolved
     ):
         """Verify that updating a ticket's priority modifies the returned ticket object."""
-        target_priority = "high"
+        target_priority = "HIGH"
 
         result = await update_ticket_priority(
             db_session, hr_ticket_resolved, target_priority
@@ -223,7 +223,7 @@ class TestUpdateTickets:
         self, db_session, hr_ticket_resolved
     ):
         """Verify that updating a ticket's priority persists the change to the database."""
-        target_priority = "high"
+        target_priority = "HIGH"
 
         ticket = await update_ticket_priority(
             db_session, hr_ticket_resolved, target_priority

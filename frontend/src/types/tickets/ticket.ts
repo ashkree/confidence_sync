@@ -1,11 +1,9 @@
-export type TicketType = "hr_request" | "it_ticket";
-export type TicketStatus = "open" | "pending" | "resolved" | "closed";
-export type TicketPriority = "high" | "medium" | "low";
+export type TicketType = "HR_REQUEST" | "IT_TICKET";
+export type TicketStatus = "OPEN" | "PENDING" | "RESOLVED" | "CLOSED";
+export type TicketPriority = "HIGH" | "MEDIUM" | "LOW";
 
 export interface Ticket {
   id: string;
-  poster_id: string;
-  assignee_id: string | null;
   poster_name: string;
   assignee_name: string | null;
   type: TicketType;

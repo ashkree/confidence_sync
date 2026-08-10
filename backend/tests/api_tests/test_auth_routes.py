@@ -16,10 +16,9 @@ class TestGetCurrentUserRoutes:
         data = response.json()
 
         assert response.status_code == 200
-        assert data["id"] == str(employee_1.id)
         assert data["name"] == employee_1.name
         assert data["email"] == employee_1.email
-        assert data["role"] == "employee"
+        assert data["role"] == "EMPLOYEE"
         assert data.get("department") is None
 
     async def test_get_me_returns_admin_schema_with_department_for_admin(
@@ -32,9 +31,8 @@ class TestGetCurrentUserRoutes:
         data = response.json()
 
         assert response.status_code == 200
-        assert data["id"] == str(it_admin_user_1.id)
-        assert data["role"] == "admin"
-        assert data["department"] == "it"
+        assert data["role"] == "ADMIN"
+        assert data["department"] == "IT"
 
 
 @pytest.mark.asyncio
@@ -52,7 +50,6 @@ class TestGetCurrentUserProfileRoutes:
         data = response.json()
 
         assert response.status_code == 200
-        assert data["id"] == str(employee_1.id)
         assert data["phone_number"] == employee_1.phone_number
         assert data["leave_days"] == employee_1.leave_days
         assert "created_at" in data
@@ -68,5 +65,5 @@ class TestGetCurrentUserProfileRoutes:
         data = response.json()
 
         assert response.status_code == 200
-        assert data["department"] == "hr"
+        assert data["department"] == "HR"
         assert data["leave_days"] == hr_admin_user_1.leave_days

@@ -48,9 +48,13 @@ function getMockUsersByRole() {
   if (!MOCK_USERS) return { employees: [], hrAdmins: [], itAdmins: [] };
   const entries = Object.entries(MOCK_USERS);
   return {
-    employees: entries.filter(([, u]) => u.role === "employee"),
-    hrAdmins: entries.filter(([, u]) => u.role === "admin" && u.department === "hr"),
-    itAdmins: entries.filter(([, u]) => u.role === "admin" && u.department === "it"),
+    employees: entries.filter(([, u]) => u.role === "EMPLOYEE"),
+    hrAdmins: entries.filter(
+      ([, u]) => u.role === "ADMIN" && u.department === "HR",
+    ),
+    itAdmins: entries.filter(
+      ([, u]) => u.role === "ADMIN" && u.department === "IT",
+    ),
   };
 }
 

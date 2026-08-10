@@ -36,9 +36,9 @@ class TestCreateTicketRoutes:
         assert data["id"] is not None
         assert data["poster_id"] == str(employee_1.id)
         assert data["assignee_id"] is None
-        assert data["type"] == "it_ticket"
-        assert data["status"] == "open"
-        assert data["priority"] == "medium"
+        assert data["type"] == "IT_TICKET"
+        assert data["status"] == "OPEN"
+        assert data["priority"] == "MEDIUM"
         assert data["subject"] == payload.subject
         assert data["description"] == payload.description
         assert data["request_type"] == payload.request_type
@@ -64,9 +64,9 @@ class TestCreateTicketRoutes:
         assert data["id"] is not None
         assert data["poster_id"] == str(employee_1.id)
         assert data["assignee_id"] is None
-        assert data["type"] == "hr_request"
-        assert data["status"] == "open"
-        assert data["priority"] == "medium"
+        assert data["type"] == "HR_REQUEST"
+        assert data["status"] == "OPEN"
+        assert data["priority"] == "MEDIUM"
         assert data["subject"] == payload.subject
         assert data["description"] == payload.description
         assert data["request_type"] == payload.request_type
@@ -229,7 +229,7 @@ class TestPatchTicketStatusRoutes:
 
         client = as_user(it_admin_user_1)
         response = client.patch(
-            f"/tickets/{uuid.uuid4()}/status", json={"status": "pending"}
+            f"/tickets/{uuid.uuid4()}/status", json={"status": "PENDING"}
         )
 
         assert response.status_code == 404
@@ -241,7 +241,7 @@ class TestPatchTicketStatusRoutes:
 
         client = as_user(employee_3)
         response = client.patch(
-            f"/tickets/{it_ticket_pending.id}/status", json={"status": "closed"}
+            f"/tickets/{it_ticket_pending.id}/status", json={"status": "CLOSED"}
         )
 
         assert response.status_code == 403
@@ -253,7 +253,7 @@ class TestPatchTicketStatusRoutes:
 
         client = as_user(hr_admin_user_1)
         response = client.patch(
-            f"/tickets/{it_ticket_pending.id}/status", json={"status": "closed"}
+            f"/tickets/{it_ticket_pending.id}/status", json={"status": "CLOSED"}
         )
 
         assert response.status_code == 403
@@ -265,13 +265,13 @@ class TestPatchTicketStatusRoutes:
 
         client = as_user(it_admin_user_1)
         response = client.patch(
-            f"/tickets/{it_ticket_pending.id}/status", json={"status": "resolved"}
+            f"/tickets/{it_ticket_pending.id}/status", json={"status": "RESOLVED"}
         )
         data = response.json()
 
         assert response.status_code == 200
         assert data["id"] == str(it_ticket_pending.id)
-        assert data["status"] == "resolved"
+        assert data["status"] == "RESOLVED"
 
 
 @pytest.mark.asyncio
@@ -286,7 +286,7 @@ class TestPatchTicketPriorityRoutes:
 
         client = as_user(it_admin_user_1)
         response = client.patch(
-            f"/tickets/{uuid.uuid4()}/priority", json={"priority": "high"}
+            f"/tickets/{uuid.uuid4()}/priority", json={"priority": "HIGH"}
         )
 
         assert response.status_code == 404
@@ -298,7 +298,7 @@ class TestPatchTicketPriorityRoutes:
 
         client = as_user(employee_3)
         response = client.patch(
-            f"/tickets/{it_ticket_pending.id}/priority", json={"priority": "low"}
+            f"/tickets/{it_ticket_pending.id}/priority", json={"priority": "LOW"}
         )
 
         assert response.status_code == 403
@@ -310,7 +310,7 @@ class TestPatchTicketPriorityRoutes:
 
         client = as_user(hr_admin_user_1)
         response = client.patch(
-            f"/tickets/{it_ticket_pending.id}/priority", json={"priority": "low"}
+            f"/tickets/{it_ticket_pending.id}/priority", json={"priority": "LOW"}
         )
 
         assert response.status_code == 403
@@ -322,13 +322,13 @@ class TestPatchTicketPriorityRoutes:
 
         client = as_user(it_admin_user_1)
         response = client.patch(
-            f"/tickets/{it_ticket_pending.id}/priority", json={"priority": "low"}
+            f"/tickets/{it_ticket_pending.id}/priority", json={"priority": "LOW"}
         )
         data = response.json()
 
         assert response.status_code == 200
         assert data["id"] == str(it_ticket_pending.id)
-        assert data["priority"] == "low"
+        assert data["priority"] == "LOW"
 
 
 @pytest.mark.asyncio

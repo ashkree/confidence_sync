@@ -11,9 +11,9 @@ const defaultHrRequests: HrRequest[] = [
     id: "uuid-hr-1",
     poster_id: "e1",
     assignee_id: "ahr1",
-    type: "hr_request",
-    status: "open",
-    priority: "high",
+    type: "HR_REQUEST",
+    status: "OPEN",
+    priority: "HIGH",
     subject: "Leave request for next week",
     description: "I need to take a leave for a family emergency.",
     information: null,
@@ -22,7 +22,7 @@ const defaultHrRequests: HrRequest[] = [
     assignee_name: "HR Admin One",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    request_type: "leave_request",
+    request_type: "LEAVE_REQUEST",
     document_type: null,
     from_date: "2026-08-01",
     to_date: "2026-08-05",
@@ -31,9 +31,9 @@ const defaultHrRequests: HrRequest[] = [
     id: "uuid-hr-2",
     poster_id: "e2",
     assignee_id: null,
-    type: "hr_request",
-    status: "pending",
-    priority: "medium",
+    type: "HR_REQUEST",
+    status: "PENDING",
+    priority: "MEDIUM",
     subject: "Salary certificate for bank",
     description: "I need a salary certificate to apply for a loan.",
     information: null,
@@ -42,8 +42,8 @@ const defaultHrRequests: HrRequest[] = [
     assignee_name: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    request_type: "document_request",
-    document_type: "salary_certificate",
+    request_type: "DOCUMENT_REQUEST",
+    document_type: "SALARY_CERTIFICATE",
     from_date: null,
     to_date: null,
   },
@@ -67,9 +67,9 @@ const defaultItTickets: ItTicket[] = [
     id: "uuid-it-1",
     poster_id: "e1",
     assignee_id: "ait1",
-    type: "it_ticket",
-    status: "open",
-    priority: "high",
+    type: "IT_TICKET",
+    status: "OPEN",
+    priority: "HIGH",
     subject: "Laptop screen flickering",
     description: "My laptop screen keeps flickering since yesterday.",
     information: null,
@@ -78,7 +78,7 @@ const defaultItTickets: ItTicket[] = [
     assignee_name: "IT Admin One",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    request_type: "hardware_issue",
+    request_type: "HARDWARE_ISSUE",
     device_type: "Laptop",
     fault_code: null,
     software_name: null,
@@ -87,9 +87,9 @@ const defaultItTickets: ItTicket[] = [
     id: "uuid-it-2",
     poster_id: "e3",
     assignee_id: null,
-    type: "it_ticket",
-    status: "resolved",
-    priority: "low",
+    type: "IT_TICKET",
+    status: "RESOLVED",
+    priority: "LOW",
     subject: "Need Photoshop installed",
     description: "I need Photoshop for the new design project.",
     information: null,
@@ -98,7 +98,7 @@ const defaultItTickets: ItTicket[] = [
     assignee_name: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    request_type: "software_issue",
+    request_type: "SOFTWARE_ISSUE",
     device_type: "Laptop",
     fault_code: null,
     software_name: "Adobe Photoshop",
@@ -128,15 +128,13 @@ export async function fetchMyTickets(): Promise<Ticket[]> {
 
   return [];
 }
-export async function fetchTicket(
-  id: string,
-): Promise<Ticket | null> {
+export async function fetchTicket(id: string): Promise<Ticket | null> {
   await new Promise((resolve) => setTimeout(resolve, 500));
-  const department = id.includes("-hr-") ? "hr" : "it";
+  const department = id.includes("-hr-") ? "HR" : "IT";
   const source =
-    department === "hr"
+    department === "HR"
       ? mockHrRequests
-      : department === "it"
+      : department === "IT"
         ? mockItTickets
         : [];
   const ticket = source.find((t) => t.id === id);
@@ -177,9 +175,9 @@ export async function createTicket(data: Partial<Ticket>): Promise<Ticket> {
   await new Promise((resolve) => setTimeout(resolve, 500));
   const newTicket = {
     ...data,
-    id: `uuid-${data.type === "hr_request" ? "hr" : "it"}-${Date.now()}`,
-    status: "open" as const,
-    priority: "medium" as const,
+    id: `uuid-${data.type === "HR_REQUEST" ? "hr" : "it"}-${Date.now()}`,
+    status: "OPEN" as const,
+    priority: "MEDIUM" as const,
     assignee_id: null,
     poster_name: data.poster_name || "Current User",
     assignee_name: null,
@@ -189,7 +187,7 @@ export async function createTicket(data: Partial<Ticket>): Promise<Ticket> {
     updated_at: new Date().toISOString(),
   } as Ticket;
 
-  if (data.type === "hr_request") {
+  if (data.type === "HR_REQUEST") {
     mockHrRequests = [...mockHrRequests, newTicket as HrRequest];
     saveHrRequests();
   } else {
@@ -204,15 +202,15 @@ export async function updateTicketStatus(
   status: TicketStatus,
 ): Promise<Ticket | null> {
   await new Promise((resolve) => setTimeout(resolve, 500));
-  const department = id.includes("-hr-") ? "hr" : "it";
-  if (department === "hr") {
+  const department = id.includes("-hr-") ? "HR" : "IT";
+  if (department === "HR") {
     mockHrRequests = mockHrRequests.map((t) =>
       t.id === id ? { ...t, status, updated_at: new Date().toISOString() } : t,
     );
     saveHrRequests();
     return mockHrRequests.find((t) => t.id === id) || null;
   }
-  if (department === "it") {
+  if (department === "IT") {
     mockItTickets = mockItTickets.map((t) =>
       t.id === id ? { ...t, status, updated_at: new Date().toISOString() } : t,
     );
@@ -231,15 +229,14 @@ export async function fetchTicketComments(
 
 export async function addTicketComment(
   ticketId: string,
-  authorId: string,
-  subject: string,
+  body: string,
 ): Promise<TicketComment> {
   await new Promise((resolve) => setTimeout(resolve, 300));
   const comment: TicketComment = {
     id: `comment-${Date.now()}`,
     ticket_id: ticketId,
-    author_id: authorId,
-    subject,
+    author_id: "0000", // adjust to however the mock module accesses the logged-in user
+    body,
     created_at: new Date().toISOString(),
   };
   mockComments = [...mockComments, comment];
