@@ -9,6 +9,8 @@ export const {
   fetchTicket,
   createTicket,
   updateTicketStatus,
+  updateTicketPriority,
   fetchTicketComments,
   addTicketComment,
+  assignTicket,
 } = useMock ? mock : service;

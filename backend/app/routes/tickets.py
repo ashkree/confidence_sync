@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.models import User
 from app.schemas.tickets import (
+    TicketAssigneePatch,
     TicketCommentCreate,
     TicketCommentResponse,
     TicketCreate,
@@ -26,6 +27,7 @@ from app.services.tickets import (
     read_ticket_comments,
     read_tickets_by_department,
     read_tickets_by_poster,
+    update_ticket_assignee,
     update_ticket_priority,
     update_ticket_status,
 )
@@ -232,6 +234,49 @@ async def patch_ticket_priority(
         )
 
     return await update_ticket_priority(db, ticket, payload.priority)
+
+
+@ticket_router.patch(
+    "/{id}/assignee",
+    response_model=TicketDetailResponse,
+    summary="Assign a ticket",
+    responses={
+        404: {"description": "Ticket not found"},
+        403: {"description": "Not authorized to assign this ticket"},
+    },
+)
+async def patch_ticket_assignee(
+    id: uuid.UUID,
+    payload: TicketAssigneePatch,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Assign or unassign a ticket. Admin only.
+
+    Returns:
+        TicketDetailResponse: The updated ticket details.
+
+    Raises:
+        HTTPException 404: If the ticket does not exist.
+        HTTPException 403: If the user is not an admin or out of scope.
+    """
+    ticket = await read_ticket_by_id(db, id)
+
+    if ticket is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found"
+        )
+
+    if not (
+        is_admin(current_user.role)
+        and is_in_scope(current_user.department, ticket.type)
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to assign this ticket",
+        )
+
+    return await update_ticket_assignee(db, ticket, payload.assignee_id)
 
 
 @ticket_router.post(

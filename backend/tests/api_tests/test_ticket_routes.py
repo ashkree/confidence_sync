@@ -34,8 +34,8 @@ class TestCreateTicketRoutes:
 
         assert response.status_code == 201
         assert data["id"] is not None
-        assert data["poster_id"] == str(employee_1.id)
-        assert data["assignee_id"] is None
+        assert data["poster_name"] == employee_1.name
+        assert data["assignee_name"] is None
         assert data["type"] == "IT_TICKET"
         assert data["status"] == "OPEN"
         assert data["priority"] == "MEDIUM"
@@ -62,8 +62,8 @@ class TestCreateTicketRoutes:
 
         assert response.status_code == 201
         assert data["id"] is not None
-        assert data["poster_id"] == str(employee_1.id)
-        assert data["assignee_id"] is None
+        assert data["poster_name"] == employee_1.name
+        assert data["assignee_name"] is None
         assert data["type"] == "HR_REQUEST"
         assert data["status"] == "OPEN"
         assert data["priority"] == "MEDIUM"
@@ -129,7 +129,7 @@ class TestQueryTicketRoutes:
         data = response.json()
 
         assert response.status_code == 200
-        assert all(ticket["poster_id"] == str(employee_1.id) for ticket in data)
+        assert all(ticket["poster_name"] == employee_1.name for ticket in data)
 
     async def test_get_own_tickets_returns_empty_list_when_user_has_no_tickets(
         self, as_user, employee_5
@@ -198,7 +198,7 @@ class TestGetTicketDetailRoutes:
 
         assert response.status_code == 200
         assert data["id"] == str(hr_ticket_open.id)
-        assert data["poster_id"] == str(employee_1.id)
+        assert data["poster_name"] == employee_1.name
         assert data["subject"] == hr_ticket_open.subject
 
     async def test_get_ticket_returns_ticket_if_user_is_scoped_admin(
@@ -344,8 +344,10 @@ class TestTicketCommentsRoutes:
         """Returns 404 when posting a comment to a non-existent ticket."""
 
         client = as_user(employee_1)
+        nonexistent_id = uuid.uuid4()
         response = client.post(
-            f"/tickets/{uuid.uuid4()}/comments", json={"body": "Hello?"}
+            f"/tickets/{nonexistent_id}/comments",
+            json={"ticket_id": str(nonexistent_id), "body": "Hello?"},
         )
 
         assert response.status_code == 404
@@ -358,7 +360,7 @@ class TestTicketCommentsRoutes:
         client = as_user(employee_2)
         response = client.post(
             f"/tickets/{hr_ticket_open.id}/comments",
-            json={"body": "Can I help?"},
+            json={"ticket_id": str(hr_ticket_open.id), "body": "Can I help?"},
         )
 
         assert response.status_code == 403
@@ -371,14 +373,15 @@ class TestTicketCommentsRoutes:
         client = as_user(employee_1)
         body = "Any update on this?"
         response = client.post(
-            f"/tickets/{hr_ticket_open.id}/comments", json={"body": body}
+            f"/tickets/{hr_ticket_open.id}/comments",
+            json={"ticket_id": str(hr_ticket_open.id), "body": body},
         )
         data = response.json()
 
         assert response.status_code == 201
         assert data["id"] is not None
         assert data["ticket_id"] == str(hr_ticket_open.id)
-        assert data["author_id"] == str(employee_1.id)
+        assert data["author_name"] == employee_1.name
         assert data["body"] == body
 
     async def test_post_comment_returns_201_for_scoped_admin(
@@ -389,12 +392,13 @@ class TestTicketCommentsRoutes:
         client = as_user(hr_admin_user_1)
         body = "We are reviewing your request."
         response = client.post(
-            f"/tickets/{hr_ticket_open.id}/comments", json={"body": body}
+            f"/tickets/{hr_ticket_open.id}/comments",
+            json={"ticket_id": str(hr_ticket_open.id), "body": body},
         )
         data = response.json()
 
         assert response.status_code == 201
-        assert data["author_id"] == str(hr_admin_user_1.id)
+        assert data["author_name"] == hr_admin_user_1.name
         assert data["body"] == body
 
     # --- GET /tickets/{id}/comments ---
@@ -443,4 +447,4 @@ class TestTicketCommentsRoutes:
 
         assert response.status_code == 200
         assert len(data) == 2
-        assert data[0]["author_id"] == str(it_admin_user_1.id)
+        assert data[0]["author_name"] == it_admin_user_1.name

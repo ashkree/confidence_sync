@@ -21,7 +21,7 @@ def client(db_session):
     """
     app.dependency_overrides[get_db] = lambda: db_session
 
-    with TestClient(app) as c:
+    with TestClient(app, base_url="http://testserver/api/v1") as c:
         yield c
 
     app.dependency_overrides.clear()

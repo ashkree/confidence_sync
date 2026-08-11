@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import * as z from "zod";
 import { useForm } from "@tanstack/react-form";
+import { useState } from "react";
 
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/auth";
@@ -61,6 +62,7 @@ function getMockUsersByRole() {
 function LoginForm() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
@@ -71,8 +73,13 @@ function LoginForm() {
       onSubmit: loginSchema,
     },
     onSubmit: async ({ value }) => {
-      await login(value.email, value.password);
-      navigate({ to: "/employee" });
+      try {
+        setLoginError(null);
+        await login(value.email, value.password);
+        navigate({ to: "/employee" });
+      } catch {
+        setLoginError("Incorrect email or password. Please try again.");
+      }
     },
   });
 
@@ -192,6 +199,11 @@ function LoginForm() {
           }}
         </form.Field>
 
+        {loginError && (
+          <Field>
+            <p className="text-sm font-medium text-destructive">{loginError}</p>
+          </Field>
+        )}
         <Field>
           <Button type="submit">Login</Button>
         </Field>

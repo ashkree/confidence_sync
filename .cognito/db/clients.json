@@ -16,6 +16,39 @@
         "RefreshToken": "days"
       },
       "UserPoolId": "local_3Z6Efhtn"
+    },
+    "e65b3yg8le487rx5z2182nm1l": {
+      "ClientId": "e65b3yg8le487rx5z2182nm1l",
+      "ClientName": "confidence_sync_client",
+      "CreationDate": "2026-08-11T06:45:30.846Z",
+      "ExplicitAuthFlows": [
+        "ALLOW_USER_PASSWORD_AUTH",
+        "ALLOW_REFRESH_TOKEN_AUTH"
+      ],
+      "LastModifiedDate": "2026-08-11T06:45:30.846Z",
+      "TokenValidityUnits": {
+        "AccessToken": "hours",
+        "IdToken": "minutes",
+        "RefreshToken": "days"
+      },
+      "UserPoolId": "local_31NcgmC7"
+    },
+    "3kntalybmi532vqa7uy6wmort": {
+      "ClientId": "3kntalybmi532vqa7uy6wmort",
+      "ClientName": "confidence_sync_client",
+      "ClientSecret": "e2f0hc8d17lkd2xdx5v2lhj05",
+      "CreationDate": "2026-08-11T06:48:45.184Z",
+      "ExplicitAuthFlows": [
+        "ALLOW_USER_PASSWORD_AUTH",
+        "ALLOW_REFRESH_TOKEN_AUTH"
+      ],
+      "LastModifiedDate": "2026-08-11T06:48:45.184Z",
+      "TokenValidityUnits": {
+        "AccessToken": "hours",
+        "IdToken": "minutes",
+        "RefreshToken": "days"
+      },
+      "UserPoolId": "local_31NcgmC7"
     }
   }
 }

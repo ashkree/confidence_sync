@@ -146,6 +146,19 @@ async def update_ticket_priority(
     return ticket
 
 
+async def update_ticket_assignee(
+    db: AsyncSession,
+    ticket: Ticket,
+    new_assignee_id: uuid.UUID | None,
+) -> Ticket:
+
+    ticket.assignee_id = new_assignee_id
+
+    await db.commit()
+    await db.refresh(ticket, attribute_names=["assignee", "updated_at"])
+    return ticket
+
+
 async def create_ticket_comment(
     db: AsyncSession,
     comment_data: TicketCommentCreate,

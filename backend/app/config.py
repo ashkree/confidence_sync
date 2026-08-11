@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     cognito_app_client_secret: str
     cognito_endpoint_url: str
     app_env: str = "development"
-    use_congito_local: bool = True
+    use_cognito_local: bool = True
 
 
 # Loaded from .env file

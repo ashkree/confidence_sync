@@ -8,7 +8,7 @@ import {
   CalendarDays,
 } from "lucide-react";
 import { format } from "date-fns";
-import { useAuth } from "@/auth";
+import { Route } from "@/routes/_authenticated/profile/index";
 
 import {
   Card,
@@ -19,11 +19,7 @@ import {
 } from "@/components/ui/card";
 
 export function ProfilePage() {
-  const { user } = useAuth();
-
-  if (!user) return null;
-
-  console.log(user);
+  const profile = Route.useLoaderData();
 
   return (
     <div className="container mx-auto p-6 max-w-4xl space-y-8">
@@ -46,7 +42,7 @@ export function ProfilePage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-5xl font-bold">{user.leave_days}</div>
+              <div className="text-5xl font-bold">{profile.leave_days}</div>
               <p className="text-primary-foreground/80 mt-2 text-sm">
                 Days remaining this year
               </p>
@@ -63,7 +59,7 @@ export function ProfilePage() {
                 <div>
                   <p className="text-sm font-medium">Department</p>
                   <p className="text-sm text-muted-foreground uppercase">
-                    {user.department || "N/A"}
+                    {profile.department || "N/A"}
                   </p>
                 </div>
               </div>
@@ -72,7 +68,7 @@ export function ProfilePage() {
                 <div>
                   <p className="text-sm font-medium">Role</p>
                   <span className="mt-1 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-secondary text-secondary-foreground capitalize">
-                    {user.role.replace("_", " ")}
+                    {profile.role.replace("_", " ")}
                   </span>
                 </div>
               </div>
@@ -81,10 +77,7 @@ export function ProfilePage() {
                 <div>
                   <p className="text-sm font-medium">Joined</p>
                   <p className="text-sm text-muted-foreground">
-                    {format(
-                      new Date(user.created_at || new Date()),
-                      "MMMM d, yyyy",
-                    )}
+                    {format(new Date(profile.created_at), "MMMM d, yyyy")}
                   </p>
                 </div>
               </div>
@@ -109,7 +102,7 @@ export function ProfilePage() {
                     <User className="w-4 h-4 text-muted-foreground" />
                     Full Name
                   </p>
-                  <p className="text-base">{user.name}</p>
+                  <p className="text-base">{profile.name}</p>
                 </div>
 
                 <div className="space-y-1">
@@ -117,7 +110,7 @@ export function ProfilePage() {
                     <Mail className="w-4 h-4 text-muted-foreground" />
                     Email Address
                   </p>
-                  <p className="text-base">{user.email}</p>
+                  <p className="text-base">{profile.email}</p>
                 </div>
 
                 <div className="space-y-1">
@@ -125,7 +118,7 @@ export function ProfilePage() {
                     <Phone className="w-4 h-4 text-muted-foreground" />
                     Phone Number
                   </p>
-                  <p className="text-base">{user.phone_number}</p>
+                  <p className="text-base">{profile.phone_number}</p>
                 </div>
               </div>
             </CardContent>

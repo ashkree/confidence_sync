@@ -96,10 +96,10 @@ class TestSchemaToOrm:
     def test_ticket_comment_create_to_orm(self):
         ticket_id = uuid.uuid4()
         author_id = uuid.uuid4()
-        
-        schema = TicketCommentCreate(body="Looking into this now.")
-        db_model = schema.to_orm(ticket_id=ticket_id, author_id=author_id)
-        
+
+        schema = TicketCommentCreate(ticket_id=ticket_id, body="Looking into this now.")
+        db_model = schema.to_orm(author_id)
+
         assert isinstance(db_model, TicketComment)
         assert db_model.ticket_id == ticket_id
         assert db_model.author_id == author_id

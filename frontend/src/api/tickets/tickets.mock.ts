@@ -3,8 +3,10 @@ import type {
   HrRequest,
   ItTicket,
   TicketComment,
+  TicketPriority,
   TicketStatus,
 } from "@/types";
+import { MOCK_USERS } from "@/api/auth";
 
 const defaultHrRequests: HrRequest[] = [
   {
@@ -220,6 +222,29 @@ export async function updateTicketStatus(
   return null;
 }
 
+export async function updateTicketPriority(
+  id: string,
+  priority: TicketPriority,
+): Promise<Ticket | null> {
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  const department = id.includes("-hr-") ? "HR" : "IT";
+  if (department === "HR") {
+    mockHrRequests = mockHrRequests.map((t) =>
+      t.id === id ? { ...t, priority, updated_at: new Date().toISOString() } : t,
+    );
+    saveHrRequests();
+    return mockHrRequests.find((t) => t.id === id) || null;
+  }
+  if (department === "IT") {
+    mockItTickets = mockItTickets.map((t) =>
+      t.id === id ? { ...t, priority, updated_at: new Date().toISOString() } : t,
+    );
+    saveItTickets();
+    return mockItTickets.find((t) => t.id === id) || null;
+  }
+  return null;
+}
+
 export async function fetchTicketComments(
   ticketId: string,
 ): Promise<TicketComment[]> {
@@ -235,11 +260,51 @@ export async function addTicketComment(
   const comment: TicketComment = {
     id: `comment-${Date.now()}`,
     ticket_id: ticketId,
-    author_id: "0000", // adjust to however the mock module accesses the logged-in user
+    author_name: "Current User",
     body,
     created_at: new Date().toISOString(),
   };
   mockComments = [...mockComments, comment];
   saveComments();
   return comment;
+}
+
+export async function assignTicket(
+  id: string,
+  assigneeId: string | null,
+): Promise<Ticket | null> {
+  await new Promise((resolve) => setTimeout(resolve, 300));
+
+  const isHr = id.includes("-hr-");
+  const isIt = id.includes("-it-");
+
+  const findAssigneeName = (aid: string | null): string | null => {
+    if (!aid) return null;
+    const entry = Object.values(
+      MOCK_USERS as Record<string, { id: string; name: string }>,
+    ).find((u) => u.id === aid);
+    return entry?.name ?? null;
+  };
+
+  if (isHr) {
+    mockHrRequests = mockHrRequests.map((t) =>
+      t.id === id
+        ? { ...t, assignee_id: assigneeId, assignee_name: findAssigneeName(assigneeId), updated_at: new Date().toISOString() }
+        : t,
+    );
+    saveHrRequests();
+    return mockHrRequests.find((t) => t.id === id) ?? null;
+  }
+
+  if (isIt) {
+    mockItTickets = mockItTickets.map((t) =>
+      t.id === id
+        ? { ...t, assignee_id: assigneeId, assignee_name: findAssigneeName(assigneeId), updated_at: new Date().toISOString() }
+        : t,
+    );
+    saveItTickets();
+    return mockItTickets.find((t) => t.id === id) ?? null;
+  }
+
+  return null;
 }

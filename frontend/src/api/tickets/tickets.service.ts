@@ -1,4 +1,4 @@
-import type { Ticket, TicketComment, TicketStatus } from "@/types";
+import type { Ticket, TicketComment, TicketPriority, TicketStatus } from "@/types";
 
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
   const token = localStorage.getItem("auth-token");
@@ -42,6 +42,17 @@ export async function updateTicketStatus(
   });
 }
 
+export async function updateTicketPriority(
+  id: string,
+  priority: TicketPriority,
+): Promise<Ticket> {
+  return fetchWithAuth(`/api/v1/tickets/${id}/priority`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ priority }),
+  });
+}
+
 export async function fetchTicketComments(
   ticketId: string,
 ): Promise<TicketComment[]> {
@@ -56,5 +67,16 @@ export async function addTicketComment(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ticket_id: ticketId, body }),
+  });
+}
+
+export async function assignTicket(
+  id: string,
+  assigneeId: string | null,
+): Promise<Ticket> {
+  return fetchWithAuth(`/api/v1/tickets/${id}/assignee`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ assignee_id: assigneeId }),
   });
 }

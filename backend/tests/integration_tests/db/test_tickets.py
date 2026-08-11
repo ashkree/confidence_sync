@@ -246,11 +246,11 @@ class TestTicketComments:
         """Verify the returned comment object has the expected
         body, ticket_id, and author_id."""
 
-        comment_data = TicketCommentCreate(body="This is a test comment")
-
-        result = await create_ticket_comment(
-            db_session, comment_data, employee_3.id, it_ticket_pending.id
+        comment_data = TicketCommentCreate(
+            ticket_id=it_ticket_pending.id, body="This is a test comment"
         )
+
+        result = await create_ticket_comment(db_session, comment_data, employee_3.id)
 
         assert result.id is not None
         assert result.body == "This is a test comment"
@@ -264,11 +264,11 @@ class TestTicketComments:
         """Verify that a newly created comment can be read back
         from the database."""
 
-        comment_data = TicketCommentCreate(body="Persisted comment")
-
-        comment = await create_ticket_comment(
-            db_session, comment_data, employee_3.id, it_ticket_pending.id
+        comment_data = TicketCommentCreate(
+            ticket_id=it_ticket_pending.id, body="Persisted comment"
         )
+
+        comment = await create_ticket_comment(db_session, comment_data, employee_3.id)
 
         results = await read_ticket_comments(db_session, it_ticket_pending.id)
 

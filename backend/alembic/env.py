@@ -18,7 +18,7 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
-# inject DATABASE_URL from environment before anything tries to use it
+# inject DB_URL from environment before anything tries to use it
 db_url = os.environ.get("DB_URL")
 if not db_url:
     raise RuntimeError("DB_URL environment variable is not set")

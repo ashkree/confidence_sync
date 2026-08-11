@@ -6,6 +6,8 @@ import {
   fetchTicketComments,
   addTicketComment,
   updateTicketStatus,
+  updateTicketPriority,
+  assignTicket,
 } from "@/api/tickets";
 import { getPriorityColor, getStatusColor } from "@/lib/ticket-colors";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,10 +22,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Clock, User } from "lucide-react";
+import { ArrowLeft, Clock, User, UserCheck, UserMinus } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import type { TicketStatus, TicketComment } from "@/types";
+import type { TicketPriority, TicketStatus, TicketComment } from "@/types";
 
 const routeApi = getRouteApi("/_authenticated/ticket/$ticketId");
 
@@ -35,9 +37,26 @@ export function TicketDetailPage() {
 
   const [comments, setComments] = useState<TicketComment[]>([]);
   const [newComment, setNewComment] = useState("");
+
+  // Track status, priority, and updatedAt reactively so header badges stay in sync
   const [currentStatus, setCurrentStatus] = useState<TicketStatus>(
     (ticket?.status as TicketStatus) || "OPEN",
   );
+  const [currentPriority, setCurrentPriority] = useState<TicketPriority>(
+    (ticket?.priority as TicketPriority) || "MEDIUM",
+  );
+  const [updatedAt, setUpdatedAt] = useState(ticket?.updated_at);
+
+  // Track assignee reactively — driven fully from the API response after each action
+  const [assigneeId, setAssigneeId] = useState<string | null>(
+    ticket?.assignee_id ?? null,
+  );
+  const [assigneeName, setAssigneeName] = useState<string | null>(
+    ticket?.assignee_name ?? null,
+  );
+
+  // A user is considered assigned to themselves when the ticket's assignee_id matches their own id
+  const isAssignedToMe = !!user && !!assigneeId && assigneeId === user.id;
 
   useEffect(() => {
     if (ticket) {
@@ -46,16 +65,12 @@ export function TicketDetailPage() {
   }, [ticket]);
 
   if (!ticket) {
-    // Show a not-found state
     return <div className="container mx-auto p-6">...</div>;
   }
 
   const handleAddComment = async () => {
     if (!newComment.trim() || !user) return;
-
-    // Using a simplistic addTicketComment call for the stub
     const addedComment = await addTicketComment(ticket.id, newComment);
-
     if (addedComment) {
       setComments((prev) => [...prev, addedComment]);
       setNewComment("");
@@ -63,8 +78,29 @@ export function TicketDetailPage() {
   };
 
   const handleStatusUpdate = async () => {
-    await updateTicketStatus(ticket.id, currentStatus);
-    // Ideally we would refresh or update the local ticket status here
+    const updated = await updateTicketStatus(ticket.id, currentStatus);
+    if (updated) {
+      setCurrentStatus(updated.status as TicketStatus);
+      setUpdatedAt(updated.updated_at);
+    }
+  };
+
+  const handlePriorityUpdate = async () => {
+    const updated = await updateTicketPriority(ticket.id, currentPriority);
+    if (updated) {
+      setCurrentPriority(updated.priority as TicketPriority);
+      setUpdatedAt(updated.updated_at);
+    }
+  };
+
+  const handleAssign = async () => {
+    // Toggle: assign to self if unassigned/assigned to someone else, unassign if already mine
+    const newAssigneeId = isAssignedToMe ? null : (user?.id ?? null);
+    const updated = await assignTicket(ticket.id, newAssigneeId);
+    if (updated) {
+      setAssigneeId(updated.assignee_id);
+      setAssigneeName(updated.assignee_name);
+    }
   };
 
   return (
@@ -88,23 +124,24 @@ export function TicketDetailPage() {
               </p>
             </div>
             <div className="flex gap-2">
+              {/* Badges read from local state so they update immediately after admin actions */}
               <Badge
                 variant="outline"
                 className={cn(
                   "capitalize font-semibold",
-                  getStatusColor(ticket.status),
+                  getStatusColor(currentStatus),
                 )}
               >
-                {ticket.status}
+                {currentStatus}
               </Badge>
               <Badge
                 variant="outline"
                 className={cn(
                   "capitalize font-semibold",
-                  getPriorityColor(ticket.priority),
+                  getPriorityColor(currentPriority),
                 )}
               >
-                {ticket.priority}
+                {currentPriority}
               </Badge>
             </div>
           </div>
@@ -124,8 +161,9 @@ export function TicketDetailPage() {
             </div>
             <div>
               <span className="font-medium">Assignee</span>
+              {/* Read-only in the metadata grid — admin controls live in the card below */}
               <p className="text-muted-foreground">
-                {ticket.assignee_name || "Unassigned"}
+                {assigneeName || "Unassigned"}
               </p>
             </div>
             <div>
@@ -137,26 +175,28 @@ export function TicketDetailPage() {
             <div>
               <span className="font-medium">Updated</span>
               <p className="text-muted-foreground">
-                {format(new Date(ticket.updated_at), "PPP")}
+                {format(new Date(updatedAt ?? ticket.updated_at), "PPP")}
               </p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Admin Status Change - only visible to admins */}
+      {/* Admin Controls — status, priority, and assignee in one consolidated card */}
       {isAdmin && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Update Status</CardTitle>
+            <CardTitle className="text-lg">Admin Controls</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            {/* Status row */}
             <div className="flex items-center gap-4">
+              <span className="text-sm font-medium w-20 shrink-0">Status</span>
               <Select
                 value={currentStatus}
                 onValueChange={(val) => setCurrentStatus(val as TicketStatus)}
               >
-                <SelectTrigger className="w-[200px]">
+                <SelectTrigger className="w-[180px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -166,7 +206,57 @@ export function TicketDetailPage() {
                   <SelectItem value="CLOSED">Closed</SelectItem>
                 </SelectContent>
               </Select>
-              <Button onClick={handleStatusUpdate}>Update Status</Button>
+              <Button onClick={handleStatusUpdate}>Update</Button>
+            </div>
+
+            <Separator />
+
+            {/* Priority row */}
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium w-20 shrink-0">
+                Priority
+              </span>
+              <Select
+                value={currentPriority}
+                onValueChange={(val) =>
+                  setCurrentPriority(val as TicketPriority)
+                }
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="HIGH">High</SelectItem>
+                  <SelectItem value="MEDIUM">Medium</SelectItem>
+                  <SelectItem value="LOW">Low</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button onClick={handlePriorityUpdate}>Update</Button>
+            </div>
+
+            <Separator />
+
+            {/* Assignee row */}
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium w-20 shrink-0">
+                Assignee
+              </span>
+              <p className="text-sm text-muted-foreground flex-1">
+                {assigneeName || "Unassigned"}
+              </p>
+              <Button variant="outline" onClick={handleAssign}>
+                {isAssignedToMe ? (
+                  <>
+                    <UserMinus className="w-4 h-4 mr-2" />
+                    Unassign
+                  </>
+                ) : (
+                  <>
+                    <UserCheck className="w-4 h-4 mr-2" />
+                    Assign to me
+                  </>
+                )}
+              </Button>
             </div>
           </CardContent>
         </Card>

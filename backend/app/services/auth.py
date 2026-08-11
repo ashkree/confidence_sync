@@ -72,7 +72,7 @@ async def refresh_user_token(refresh_token: str, db: AsyncSession):
 
 @lru_cache
 def get_cognito_base_url() -> str:
-    if settings.use_congito_local and settings.app_env == "development":
+    if settings.use_cognito_local and settings.app_env == "development":
         return f"http://0.0.0.0:9229/{settings.cognito_user_pool_id}"
     return f"https://cognito-idp.{settings.aws_region}.amazonaws.com/{settings.cognito_user_pool_id}"
 

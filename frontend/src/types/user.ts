@@ -11,6 +11,8 @@ interface BaseUser {
 }
 
 export interface UserProfile extends BaseUser {
+  role: "EMPLOYEE" | "ADMIN";
+  department: "HR" | "IT" | null;
   phone_number: string;
   leave_days: number;
   created_at: string;

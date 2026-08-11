@@ -55,6 +55,8 @@ class TicketListResponseBase(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
     id: uuid.UUID
+    poster_id: uuid.UUID
+    assignee_id: uuid.UUID | None
     poster_name: str
     assignee_name: str | None
     type: TicketType
@@ -94,6 +96,8 @@ class TicketDetailResponseBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
+    poster_id: uuid.UUID
+    assignee_id: uuid.UUID | None
     poster_name: str
     assignee_name: str | None
     type: TicketType
@@ -139,6 +143,10 @@ class TicketStatusPatch(BaseModel):
 
 class TicketPriorityPatch(BaseModel):
     priority: TicketPriority
+
+
+class TicketAssigneePatch(BaseModel):
+    assignee_id: uuid.UUID | None
 
 
 class TicketCommentCreate(BaseModel):
