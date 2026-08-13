@@ -1,6 +1,9 @@
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database import get_db
 from app.routes.auth import auth_router
 from app.routes.tickets import ticket_router
 
@@ -39,6 +42,22 @@ app.add_middleware(
 )
 
 
-@app.get("/health")
+health_router = APIRouter(prefix="/health")
+
+
+@health_router.get("")
 def read_root():
     return {"response": "ok"}
+
+
+@app.get("/db")
+async def read_db(db: AsyncSession = Depends(get_db)):
+    try:
+        await db.execute(text("SELECT 1"))
+        await db.commit()
+        return {"response": "ok"}
+    except Exception as e:
+        return {"response": str(e)}
+
+
+app.include_router(health_router)

@@ -19,17 +19,15 @@ services:
       retries: 10
     restart: unless-stopped
 
-  # --- cognito-local: local stand-in for real Cognito ---
-  # Bind-mounting .cognito (not a named volume) so the seeded pool/users/client
-  # you already have on disk are used directly and stay editable/inspectable.
+  # --- Cognito local ---
   cognito-local:
     image: jagregory/cognito-local:latest
     ports:
       - "9229:9229"
     volumes:
-      - ./.cognito:/app/.cognito
+      - cognito_data:/app/.cognito   # persists users/pools across restarts, path depends on your setup
     restart: unless-stopped
-
+  
   # --- FastAPI backend ---
   backend:
     build:
@@ -37,63 +35,47 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - .env
+      - ./backend/.env
+      - ./.env   # loaded second, overrides DB_URL
     environment:
       # Internal service-to-service hostnames (Docker DNS), not localhost.
       DB_URL: ${DB_URL:-postgresql+psycopg://app:app@postgres:5432/confidence_sync}
       COGNITO_ENDPOINT_URL: ${COGNITO_ENDPOINT_URL:-http://cognito-local:9229}
     volumes:
-      # Bind-mount source for live reload...
       - ./backend:/app
-      # ...but keep the venv built into the image in its own volume, so the
-      # bind mount above doesn't shadow/wipe out the installed dependencies.
       - backend_venv:/app/.venv
     depends_on:
       postgres:
         condition: service_healthy
       cognito-local:
         condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
     restart: unless-stopped
 
-  # --- Frontend: dev profile (hot reload via vite) ---
-  # Run with: docker compose --profile dev up --build
-  frontend-dev:
-    build:
-      context: ./frontend
-      target: dev
-    profiles: ["dev"]
-    ports:
+  frontend:
+    build: 
+      context: ./frontend 
+    env_file:
+      - ./frontend/.env
+      - ./.env   # loaded second, overrides DB_URL
+    ports: 
       - "5173:5173"
-    environment:
-      # Browser-facing URLs, so these must be host-reachable (localhost),
-      # not the internal Docker service names.
-      VITE_USE_MOCK: ${VITE_USE_MOCK:-false}
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
-      VITE_COGNITO_ENDPOINT: ${VITE_COGNITO_ENDPOINT:-http://localhost:9229}
     volumes:
       - ./frontend:/app
-      - /app/node_modules
+      - frontend_node_modules:/app/node_modules
     depends_on:
-      - backend
-      - cognito-local
+      backend: 
+        condition: service_healthy
+    restart: unless-stopped
 
-  # --- Frontend: prod-sim profile (static build served by nginx, like S3) ---
-  # Run with: docker compose --profile prod up --build
-  frontend-prod:
-    build:
-      context: ./frontend
-      target: prod
-      args:
-        VITE_USE_MOCK: ${VITE_USE_MOCK:-false}
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
-        VITE_COGNITO_ENDPOINT: ${VITE_COGNITO_ENDPOINT:-http://localhost:9229}
-    profiles: ["prod"]
-    ports:
-      - "8080:80"
-    depends_on:
-      - backend
-      - cognito-local
 
 volumes:
   postgres_data:
   backend_venv:
+  cognito_data:
+  frontend_node_modules:

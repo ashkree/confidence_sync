@@ -30,6 +30,7 @@ export const Route = createFileRoute("/login")({
     redirect: (search.redirect as string) || "/employee",
   }),
   beforeLoad: ({ context, search }) => {
+    console.log(import.meta.env.VITE_API_URL);
     // Redirect if already authenticated
     if (context.auth.isAuthenticated) {
       throw redirect({ to: search.redirect });

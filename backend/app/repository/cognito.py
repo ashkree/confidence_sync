@@ -2,7 +2,6 @@ import base64
 import hashlib
 import hmac
 
-import boto3
 from botocore.exceptions import ClientError
 
 from app.config import settings
@@ -11,13 +10,13 @@ from app.exceptions.auth import (
     AuthServiceUnavailableError,
     InvalidCredentialsError,
 )
+from app.repository.aws import AWSRepo
 
 
-class CognitoRepo:
+class CognitoRepo(AWSRepo):
     def __init__(self):
-        self.client = boto3.client(
+        super().__init__(
             "cognito-idp",
-            region_name=settings.aws_region,
             endpoint_url=settings.cognito_endpoint_url,
         )
 

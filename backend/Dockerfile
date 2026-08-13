@@ -33,4 +33,4 @@ EXPOSE 8000
 
 # --reload is fine for local/dev compose; production (EC2) should build its own
 # image without --reload, or override the command there.
-CMD ["sh", "-c", "until uv run alembic upgrade head; do echo 'Migration failed, retrying in 2s...'; sleep 2; done && uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"]
+CMD ["sh", "-c", "uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"]
