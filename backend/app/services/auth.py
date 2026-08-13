@@ -19,23 +19,17 @@ repo = CognitoRepo()
 
 
 async def authenticate_and_fetch_user(email: str, password: str, db: AsyncSession):
-
     response = await repo.login_user(email, password)
-
     try:
         claims = verify_id_token(response["IdToken"])
     except ValueError as e:
         raise jwt.InvalidTokenError(f"Invalid or expired token: {e}")
-
     cognito_sub = claims.get("sub")
     if not cognito_sub:
         raise jwt.InvalidTokenError("Token missing subject")
-
     user = await read_user_by_cognito_sub(db, cognito_sub)
-
     if user is None:
         raise RecordNotFoundError("User not found in database")
-
     return {
         "access_token": response.get("AccessToken"),
         "refresh_token": response.get("RefreshToken"),
@@ -49,20 +43,16 @@ async def refresh_user_token(refresh_token: str, db: AsyncSession):
     payload = json.loads(base64.urlsafe_b64decode(padded))
     username = payload["cognito:username"]
     response = await repo.refresh_token(username, refresh_token)
-
     try:
         claims = verify_id_token(response["IdToken"])
     except ValueError as e:
         raise jwt.InvalidTokenError(f"Invalid or expired token: {e}")
-
     cognito_sub = claims.get("sub")
     if not cognito_sub:
         raise jwt.InvalidTokenError("Token missing subject")
-
     user = await read_user_by_cognito_sub(db, cognito_sub)
     if user is None:
         raise RecordNotFoundError("User not found in database")
-
     return {
         "access_token": response.get("AccessToken"),
         "refresh_token": response.get("RefreshToken"),
@@ -71,18 +61,23 @@ async def refresh_user_token(refresh_token: str, db: AsyncSession):
 
 
 @lru_cache
-def get_cognito_base_url() -> str:
+def get_cognito_jwks_base_url() -> str:
+    """Used only for fetching signing keys — must be reachable from inside the container."""
+    if settings.use_cognito_local and settings.app_env == "development":
+        return f"{settings.cognito_endpoint_url}/{settings.cognito_user_pool_id}"
+    return f"https://cognito-idp.{settings.aws_region}.amazonaws.com/{settings.cognito_user_pool_id}"
+
+
+@lru_cache
+def get_issuer() -> str:
+    """Used only for validating the iss claim — must match what cognito-local actually issues."""
     if settings.use_cognito_local and settings.app_env == "development":
         return f"http://0.0.0.0:9229/{settings.cognito_user_pool_id}"
     return f"https://cognito-idp.{settings.aws_region}.amazonaws.com/{settings.cognito_user_pool_id}"
 
 
-def get_issuer() -> str:
-    return get_cognito_base_url()
-
-
 def get_jwks_url() -> str:
-    return get_cognito_base_url() + "/.well-known/jwks.json"
+    return get_cognito_jwks_base_url() + "/.well-known/jwks.json"
 
 
 def verify_access_token(token: str) -> dict:
@@ -119,7 +114,6 @@ def verify_access_token(token: str) -> dict:
         raise ValueError(
             f"Expected access token, got token_use={claims.get('token_use')!r}"
         )
-
     if claims.get("client_id") != settings.cognito_app_client_id:
         raise ValueError("Access token was not issued for this app client")
 
@@ -131,6 +125,7 @@ def verify_id_token(token: str) -> dict:
     Verify a Cognito ID token's signature, issuer, audience, expiry, and claims.
     Raises ValueError on any verification failure.
     """
+
     try:
         jwks_client = jwt.PyJWKClient(get_jwks_url())
         signing_key = jwks_client.get_signing_key_from_jwt(token)
