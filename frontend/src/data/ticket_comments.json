@@ -1,0 +1,16 @@
+[
+  {
+    "id": "c0000000-0000-4000-8000-000000000001",
+    "ticket_id": "a1b2c3d4-1111-4000-8000-000000000001",
+    "author_name": "HR Admin One",
+    "body": "We are reviewing your leave request.",
+    "created_at": "2026-08-01T11:00:00Z"
+  },
+  {
+    "id": "c0000000-0000-4000-8000-000000000002",
+    "ticket_id": "a1b2c3d4-3333-4000-8000-000000000003",
+    "author_name": "IT Admin One",
+    "body": "We have ordered a replacement screen for your laptop.",
+    "created_at": "2026-08-04T09:30:00Z"
+  }
+]

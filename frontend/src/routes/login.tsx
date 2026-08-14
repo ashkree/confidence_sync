@@ -24,6 +24,8 @@ import { useState } from "react";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/auth";
 import { MOCK_USERS } from "@/api/auth";
+import { SHOW_DEV_TOOLS } from "@/lib/env";
+import { useAppEnv } from "@/contexts/app-env";
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search) => ({
@@ -44,8 +46,6 @@ const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-const useMock = import.meta.env.VITE_USE_MOCK === "true";
-
 function getMockUsersByRole() {
   if (!MOCK_USERS) return { employees: [], hrAdmins: [], itAdmins: [] };
   const entries = Object.entries(MOCK_USERS);
@@ -64,6 +64,7 @@ function LoginForm() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [loginError, setLoginError] = useState<string | null>(null);
+  const { appEnv } = useAppEnv();
 
   const form = useForm({
     defaultValues: {
@@ -86,7 +87,8 @@ function LoginForm() {
 
   const handleQuickLogin = async (email: string | null) => {
     if (!email) return;
-    await login(email, "mock");
+    const prefix = email.split('@')[0];
+    await login(email, `${prefix}123!`);
     navigate({ to: "/employee" });
   };
 
@@ -108,7 +110,7 @@ function LoginForm() {
           </p>
         </div>
 
-        {useMock && MOCK_USERS && (
+        {SHOW_DEV_TOOLS && appEnv !== "prod" && MOCK_USERS && (
           <Field>
             <FieldLabel>Quick Login (Mock)</FieldLabel>
             <Select onValueChange={handleQuickLogin}>

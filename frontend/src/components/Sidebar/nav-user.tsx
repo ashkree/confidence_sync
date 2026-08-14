@@ -26,8 +26,8 @@ import { Separator } from "@/components/ui/separator";
 import type { User } from "@/types";
 import { ChevronsUpDownIcon, LogOutIcon, UsersRound } from "lucide-react";
 import { MOCK_USERS } from "@/api/auth";
-
-const useMock = import.meta.env.VITE_USE_MOCK === "true";
+import { SHOW_DEV_TOOLS } from "@/lib/env";
+import { useAppEnv } from "@/contexts/app-env";
 
 export function NavUser({
   user,
@@ -40,10 +40,12 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const { appEnv } = useAppEnv();
 
   const handleSwitch = async (email: string) => {
     if (onSwitchUser) {
-      await onSwitchUser(email, "mock");
+      const prefix = email.split('@')[0];
+      await onSwitchUser(email, `${prefix}123!`);
       setSheetOpen(false);
       window.location.reload();
     }
@@ -86,7 +88,7 @@ export function NavUser({
                   </div>
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
-              {useMock && (
+              {SHOW_DEV_TOOLS && appEnv !== "prod" && (
                 <DropdownMenuItem onClick={() => setSheetOpen(true)}>
                   <UsersRound />
                   Switch User
@@ -105,7 +107,7 @@ export function NavUser({
         </SidebarMenuItem>
       </SidebarMenu>
 
-      {useMock && (
+      {SHOW_DEV_TOOLS && appEnv !== "prod" && (
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetContent side="right">
             <SheetHeader>

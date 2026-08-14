@@ -6,172 +6,74 @@ import type {
   TicketPriority,
   TicketStatus,
 } from "@/types";
-import { MOCK_USERS } from "@/api/auth";
+import {
+  getAllTickets,
+  getAllComments,
+  getUserNameById,
+} from "@/data";
 
-const defaultHrRequests: HrRequest[] = [
-  {
-    id: "uuid-hr-1",
-    poster_id: "e1",
-    assignee_id: "ahr1",
-    type: "HR_REQUEST",
-    status: "OPEN",
-    priority: "HIGH",
-    subject: "Leave request for next week",
-    description: "I need to take a leave for a family emergency.",
-    information: null,
-    ai_summary: null,
-    poster_name: "Employee One",
-    assignee_name: "HR Admin One",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    request_type: "LEAVE_REQUEST",
-    document_type: null,
-    from_date: "2026-08-01",
-    to_date: "2026-08-05",
-  },
-  {
-    id: "uuid-hr-2",
-    poster_id: "e2",
-    assignee_id: null,
-    type: "HR_REQUEST",
-    status: "PENDING",
-    priority: "MEDIUM",
-    subject: "Salary certificate for bank",
-    description: "I need a salary certificate to apply for a loan.",
-    information: null,
-    ai_summary: null,
-    poster_name: "Employee Two",
-    assignee_name: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    request_type: "DOCUMENT_REQUEST",
-    document_type: "SALARY_CERTIFICATE",
-    from_date: null,
-    to_date: null,
-  },
-];
+let _mockTickets: Ticket[] | null = null;
+let _mockComments: TicketComment[] | null = null;
 
-let mockHrRequests: HrRequest[] = (() => {
-  try {
-    return (
-      JSON.parse(sessionStorage.getItem("mockHrRequests") || "null") ||
-      defaultHrRequests
-    );
-  } catch {
-    return defaultHrRequests;
+function getMockTickets(): Ticket[] {
+  if (!_mockTickets) {
+    try {
+      const stored = sessionStorage.getItem("mockTickets_v2");
+      if (stored) {
+        _mockTickets = JSON.parse(stored);
+      } else {
+        _mockTickets = getAllTickets();
+      }
+    } catch {
+      _mockTickets = getAllTickets();
+    }
   }
-})();
-const saveHrRequests = () =>
-  sessionStorage.setItem("mockHrRequests", JSON.stringify(mockHrRequests));
+  return _mockTickets!;
+}
 
-const defaultItTickets: ItTicket[] = [
-  {
-    id: "uuid-it-1",
-    poster_id: "e1",
-    assignee_id: "ait1",
-    type: "IT_TICKET",
-    status: "OPEN",
-    priority: "HIGH",
-    subject: "Laptop screen flickering",
-    description: "My laptop screen keeps flickering since yesterday.",
-    information: null,
-    ai_summary: null,
-    poster_name: "Employee One",
-    assignee_name: "IT Admin One",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    request_type: "HARDWARE_ISSUE",
-    device_type: "Laptop",
-    fault_code: null,
-    software_name: null,
-  },
-  {
-    id: "uuid-it-2",
-    poster_id: "e3",
-    assignee_id: null,
-    type: "IT_TICKET",
-    status: "RESOLVED",
-    priority: "LOW",
-    subject: "Need Photoshop installed",
-    description: "I need Photoshop for the new design project.",
-    information: null,
-    ai_summary: null,
-    poster_name: "Employee Three",
-    assignee_name: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    request_type: "SOFTWARE_ISSUE",
-    device_type: "Laptop",
-    fault_code: null,
-    software_name: "Adobe Photoshop",
-  },
-];
-
-let mockItTickets: ItTicket[] = (() => {
-  try {
-    return (
-      JSON.parse(sessionStorage.getItem("mockItTickets") || "null") ||
-      defaultItTickets
-    );
-  } catch {
-    return defaultItTickets;
+function saveMockTickets() {
+  if (_mockTickets) {
+    sessionStorage.setItem("mockTickets_v2", JSON.stringify(_mockTickets));
   }
-})();
-const saveItTickets = () =>
-  sessionStorage.setItem("mockItTickets", JSON.stringify(mockItTickets));
+}
+
+function getMockComments(): TicketComment[] {
+  if (!_mockComments) {
+    try {
+      const stored = sessionStorage.getItem("mockComments_v2");
+      if (stored) {
+        _mockComments = JSON.parse(stored);
+      } else {
+        _mockComments = getAllComments();
+      }
+    } catch {
+      _mockComments = getAllComments();
+    }
+  }
+  return _mockComments!;
+}
+
+function saveMockComments() {
+  if (_mockComments) {
+    sessionStorage.setItem("mockComments_v2", JSON.stringify(_mockComments));
+  }
+}
 
 export async function fetchTickets(): Promise<Ticket[]> {
   await new Promise((resolve) => setTimeout(resolve, 500));
-  return [...mockHrRequests, ...mockItTickets];
+  return getMockTickets();
 }
 
 export async function fetchMyTickets(): Promise<Ticket[]> {
   await new Promise((resolve) => setTimeout(resolve, 500));
-
   return [];
 }
+
 export async function fetchTicket(id: string): Promise<Ticket | null> {
   await new Promise((resolve) => setTimeout(resolve, 500));
-  const department = id.includes("-hr-") ? "HR" : "IT";
-  const source =
-    department === "HR"
-      ? mockHrRequests
-      : department === "IT"
-        ? mockItTickets
-        : [];
-  const ticket = source.find((t) => t.id === id);
+  const ticket = getMockTickets().find((t) => t.id === id);
   return ticket || null;
 }
-
-const defaultComments: TicketComment[] = [
-  {
-    id: "comment-1",
-    ticket_id: "uuid-hr-1",
-    author_id: "ahr1",
-    subject: "We are reviewing your leave request.",
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "comment-2",
-    ticket_id: "uuid-it-1",
-    author_id: "ait1",
-    subject: "We have ordered a replacement screen for your laptop.",
-    created_at: new Date().toISOString(),
-  },
-];
-
-let mockComments: TicketComment[] = (() => {
-  try {
-    return (
-      JSON.parse(sessionStorage.getItem("mockComments") || "null") ||
-      defaultComments
-    );
-  } catch {
-    return defaultComments;
-  }
-})();
-const saveComments = () =>
-  sessionStorage.setItem("mockComments", JSON.stringify(mockComments));
 
 export async function createTicket(data: Partial<Ticket>): Promise<Ticket> {
   await new Promise((resolve) => setTimeout(resolve, 500));
@@ -189,13 +91,8 @@ export async function createTicket(data: Partial<Ticket>): Promise<Ticket> {
     updated_at: new Date().toISOString(),
   } as Ticket;
 
-  if (data.type === "HR_REQUEST") {
-    mockHrRequests = [...mockHrRequests, newTicket as HrRequest];
-    saveHrRequests();
-  } else {
-    mockItTickets = [...mockItTickets, newTicket as ItTicket];
-    saveItTickets();
-  }
+  _mockTickets = [...getMockTickets(), newTicket];
+  saveMockTickets();
   return newTicket;
 }
 
@@ -204,22 +101,16 @@ export async function updateTicketStatus(
   status: TicketStatus,
 ): Promise<Ticket | null> {
   await new Promise((resolve) => setTimeout(resolve, 500));
-  const department = id.includes("-hr-") ? "HR" : "IT";
-  if (department === "HR") {
-    mockHrRequests = mockHrRequests.map((t) =>
-      t.id === id ? { ...t, status, updated_at: new Date().toISOString() } : t,
-    );
-    saveHrRequests();
-    return mockHrRequests.find((t) => t.id === id) || null;
-  }
-  if (department === "IT") {
-    mockItTickets = mockItTickets.map((t) =>
-      t.id === id ? { ...t, status, updated_at: new Date().toISOString() } : t,
-    );
-    saveItTickets();
-    return mockItTickets.find((t) => t.id === id) || null;
-  }
-  return null;
+  let found = false;
+  _mockTickets = getMockTickets().map((t) => {
+    if (t.id === id) {
+      found = true;
+      return { ...t, status, updated_at: new Date().toISOString() };
+    }
+    return t;
+  });
+  if (found) saveMockTickets();
+  return getMockTickets().find((t) => t.id === id) || null;
 }
 
 export async function updateTicketPriority(
@@ -227,29 +118,23 @@ export async function updateTicketPriority(
   priority: TicketPriority,
 ): Promise<Ticket | null> {
   await new Promise((resolve) => setTimeout(resolve, 300));
-  const department = id.includes("-hr-") ? "HR" : "IT";
-  if (department === "HR") {
-    mockHrRequests = mockHrRequests.map((t) =>
-      t.id === id ? { ...t, priority, updated_at: new Date().toISOString() } : t,
-    );
-    saveHrRequests();
-    return mockHrRequests.find((t) => t.id === id) || null;
-  }
-  if (department === "IT") {
-    mockItTickets = mockItTickets.map((t) =>
-      t.id === id ? { ...t, priority, updated_at: new Date().toISOString() } : t,
-    );
-    saveItTickets();
-    return mockItTickets.find((t) => t.id === id) || null;
-  }
-  return null;
+  let found = false;
+  _mockTickets = getMockTickets().map((t) => {
+    if (t.id === id) {
+      found = true;
+      return { ...t, priority, updated_at: new Date().toISOString() };
+    }
+    return t;
+  });
+  if (found) saveMockTickets();
+  return getMockTickets().find((t) => t.id === id) || null;
 }
 
 export async function fetchTicketComments(
   ticketId: string,
 ): Promise<TicketComment[]> {
   await new Promise((resolve) => setTimeout(resolve, 300));
-  return mockComments.filter((c) => c.ticket_id === ticketId);
+  return getMockComments().filter((c) => c.ticket_id === ticketId);
 }
 
 export async function addTicketComment(
@@ -264,8 +149,8 @@ export async function addTicketComment(
     body,
     created_at: new Date().toISOString(),
   };
-  mockComments = [...mockComments, comment];
-  saveComments();
+  _mockComments = [...getMockComments(), comment];
+  saveMockComments();
   return comment;
 }
 
@@ -275,36 +160,20 @@ export async function assignTicket(
 ): Promise<Ticket | null> {
   await new Promise((resolve) => setTimeout(resolve, 300));
 
-  const isHr = id.includes("-hr-");
-  const isIt = id.includes("-it-");
-
-  const findAssigneeName = (aid: string | null): string | null => {
-    if (!aid) return null;
-    const entry = Object.values(
-      MOCK_USERS as Record<string, { id: string; name: string }>,
-    ).find((u) => u.id === aid);
-    return entry?.name ?? null;
-  };
-
-  if (isHr) {
-    mockHrRequests = mockHrRequests.map((t) =>
-      t.id === id
-        ? { ...t, assignee_id: assigneeId, assignee_name: findAssigneeName(assigneeId), updated_at: new Date().toISOString() }
-        : t,
-    );
-    saveHrRequests();
-    return mockHrRequests.find((t) => t.id === id) ?? null;
-  }
-
-  if (isIt) {
-    mockItTickets = mockItTickets.map((t) =>
-      t.id === id
-        ? { ...t, assignee_id: assigneeId, assignee_name: findAssigneeName(assigneeId), updated_at: new Date().toISOString() }
-        : t,
-    );
-    saveItTickets();
-    return mockItTickets.find((t) => t.id === id) ?? null;
-  }
-
-  return null;
+  let found = false;
+  _mockTickets = getMockTickets().map((t) => {
+    if (t.id === id) {
+      found = true;
+      return { 
+        ...t, 
+        assignee_id: assigneeId, 
+        assignee_name: assigneeId ? getUserNameById(assigneeId) : null,
+        updated_at: new Date().toISOString() 
+      };
+    }
+    return t;
+  });
+  
+  if (found) saveMockTickets();
+  return getMockTickets().find((t) => t.id === id) || null;
 }

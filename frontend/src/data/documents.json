@@ -1,0 +1,10 @@
+[
+  { "id": "d0000000-0001-4000-8000-000000000001", "title": "Employee Code of Conduct", "category": "HR_POLICY", "url": "#", "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z" },
+  { "id": "d0000000-0002-4000-8000-000000000002", "title": "Leave Policy 2026", "category": "HR_POLICY", "url": "#", "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z" },
+  { "id": "d0000000-0003-4000-8000-000000000003", "title": "Remote Work Guidelines", "category": "HR_POLICY", "url": "#", "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z" },
+  { "id": "d0000000-0004-4000-8000-000000000004", "title": "Performance Review Process", "category": "HR_POLICY", "url": "#", "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z" },
+  { "id": "d0000000-0005-4000-8000-000000000005", "title": "VPN Setup Guide", "category": "IT_MANUAL", "url": "#", "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z" },
+  { "id": "d0000000-0006-4000-8000-000000000006", "title": "Password Security Policy", "category": "IT_MANUAL", "url": "#", "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z" },
+  { "id": "d0000000-0007-4000-8000-000000000007", "title": "Equipment Requisition Form", "category": "IT_MANUAL", "url": "#", "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z" },
+  { "id": "d0000000-0008-4000-8000-000000000008", "title": "Troubleshooting Outlook", "category": "IT_MANUAL", "url": "#", "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z" }
+]

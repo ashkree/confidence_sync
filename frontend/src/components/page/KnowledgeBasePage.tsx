@@ -1,22 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { FileText, Link as LinkIcon } from "lucide-react";
 import HeroSection from "@/components/sections/HeroSection";
-
-const hrPolicies = [
-  { id: "1", title: "Employee Code of Conduct", url: "#" },
-  { id: "2", title: "Leave Policy 2026", url: "#" },
-  { id: "3", title: "Remote Work Guidelines", url: "#" },
-  { id: "4", title: "Performance Review Process", url: "#" },
-];
-
-const itManuals = [
-  { id: "1", title: "VPN Setup Guide", url: "#" },
-  { id: "2", title: "Password Security Policy", url: "#" },
-  { id: "3", title: "Equipment Requisition Form", url: "#" },
-  { id: "4", title: "Troubleshooting Outlook", url: "#" },
-];
+import { useLoaderData } from "@tanstack/react-router";
 
 export function KnowledgeBasePage() {
+  const { hrPolicies, itManuals } = useLoaderData({
+    from: "/_authenticated/kb/",
+  });
   return (
     <>
       <HeroSection 
