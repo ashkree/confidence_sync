@@ -1,12 +1,10 @@
 import { createColumnHelper, type ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "./ui/data-table";
+import { DataTable } from "@/components/ui/data-table";
 import type { Ticket } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { getPriorityColor, getStatusColor } from "@/lib/ticket-colors";
 import { useNavigate } from "@tanstack/react-router";
-
-
 
 function getBaseColumns<TData extends Ticket>(): ColumnDef<TData, any>[] {
   const helper = createColumnHelper<TData>();

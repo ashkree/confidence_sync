@@ -4,6 +4,7 @@ import { TicketTable } from "@/components/ticket-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createColumnHelper } from "@tanstack/react-table";
 import type { HrRequest } from "@/types";
+import HeroSection from "@/components/sections/HeroSection";
 
 const helper = createColumnHelper<HrRequest>();
 
@@ -42,10 +43,9 @@ function RouteComponent() {
   const hrTickets = data as HrRequest[];
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight">
-        HR Requests Dashboard
-      </h1>
+    <>
+      <HeroSection title="HR Requests" />
+      <div className="p-6 space-y-6">
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
@@ -79,6 +79,7 @@ function RouteComponent() {
       </div>
 
       <TicketTable<HrRequest> columns={ticket_columns} data={hrTickets} />
-    </div>
+      </div>
+    </>
   );
 }

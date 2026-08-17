@@ -6,11 +6,7 @@ import type {
   TicketPriority,
   TicketStatus,
 } from "@/types";
-import {
-  getAllTickets,
-  getAllComments,
-  getUserNameById,
-} from "@/data";
+import { getAllTickets, getAllComments, getUserNameById } from "@/data";
 
 let _mockTickets: Ticket[] | null = null;
 let _mockComments: TicketComment[] | null = null;
@@ -164,16 +160,16 @@ export async function assignTicket(
   _mockTickets = getMockTickets().map((t) => {
     if (t.id === id) {
       found = true;
-      return { 
-        ...t, 
-        assignee_id: assigneeId, 
+      return {
+        ...t,
+        assignee_id: assigneeId,
         assignee_name: assigneeId ? getUserNameById(assigneeId) : null,
-        updated_at: new Date().toISOString() 
+        updated_at: new Date().toISOString(),
       };
     }
     return t;
   });
-  
+
   if (found) saveMockTickets();
   return getMockTickets().find((t) => t.id === id) || null;
 }

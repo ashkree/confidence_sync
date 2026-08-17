@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { Route } from "@/routes/_authenticated/profile/index";
+import HeroSection from "@/components/sections/HeroSection";
 
 import {
   Card,
@@ -22,14 +23,12 @@ export function ProfilePage() {
   const profile = Route.useLoaderData();
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight mb-2">My Profile</h1>
-        <p className="text-muted-foreground">
-          View your personal information, employment details, and leave
-          balances.
-        </p>
-      </div>
+    <>
+      <HeroSection
+        title="My Profile"
+        subtitle="View your personal information, employment details, and leave balances."
+      />
+      <div className="container mx-auto p-6 max-w-4xl space-y-8">
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left Column: Leave Balance & Employment Info */}
@@ -125,6 +124,7 @@ export function ProfilePage() {
           </Card>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

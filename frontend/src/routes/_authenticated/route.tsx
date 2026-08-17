@@ -63,6 +63,11 @@ const it_group = {
       url: "/admin/it/tickets",
       icon: Tickets,
     },
+    {
+      title: "Manuals",
+      url: "/admin/it/manuals",
+      icon: BookOpenIcon,
+    },
   ],
 };
 

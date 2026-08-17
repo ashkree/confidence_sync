@@ -49,24 +49,24 @@
 }
 
 :root {
-    /* --- 3-Tier Color System (Cream Base) --- */
-    --core: oklch(0.95 0.02 85);
-    --mantle: oklch(0.98 0.01 85);
-    --crust: oklch(0.995 0.005 85);
+    /* --- 3-Tier Color System (Graphite Base) --- */
+    --core: oklch(0.965 0.003 255);
+    --mantle: oklch(1 0 0);
+    --crust: oklch(0.985 0.002 255);
 
-    /* --- Chrome System (Sidebar - Slate/Navy) --- */
-    --chrome-core: oklch(0.20 0.03 260);
-    --chrome-mantle: oklch(0.25 0.03 260);
-    --chrome-crust: oklch(0.30 0.03 260);
-    --chrome-text: oklch(0.98 0.01 85);
+    /* --- Chrome System (Sidebar - Dark Navy) --- */
+    --chrome-core: oklch(0.22 0.02 260);
+    --chrome-mantle: oklch(0.27 0.025 260);
+    --chrome-crust: oklch(0.32 0.025 260);
+    --chrome-text: oklch(0.95 0.005 255);
 
     /* --- Typography --- */
-    --text-main: oklch(0.20 0.04 260);
-    --text-muted: oklch(0.45 0.03 260);
+    --text-main: oklch(0.24 0.02 260);
+    --text-muted: oklch(0.55 0.025 260);
 
-    /* --- Accents --- */
-    --accent-deep-blue: oklch(0.35 0.1 260);
-    --accent-deep-blue-fg: oklch(0.98 0.01 85);
+    /* --- Accents (Cobalt) --- */
+    --accent-cobalt: oklch(0.45 0.14 260);
+    --accent-cobalt-fg: oklch(1 0 0);
 
     /* --- Shadcn Semantic Mapping --- */
     --background: var(--core);
@@ -78,64 +78,64 @@
     --popover: var(--crust);
     --popover-foreground: var(--text-main);
     
-    --primary: var(--accent-deep-blue);
-    --primary-foreground: var(--accent-deep-blue-fg);
+    --primary: var(--accent-cobalt);
+    --primary-foreground: var(--accent-cobalt-fg);
     
     --secondary: var(--mantle);
     --secondary-foreground: var(--text-main);
     
-    --muted: oklch(0.92 0.02 85);
+    --muted: oklch(0.94 0.004 255);
     --muted-foreground: var(--text-muted);
     
-    --accent: oklch(0.92 0.02 85);
+    --accent: oklch(0.94 0.004 255);
     --accent-foreground: var(--text-main);
     
     --destructive: oklch(0.577 0.245 27.325);
-    --destructive-foreground: oklch(0.98 0.01 85);
+    --destructive-foreground: oklch(1 0 0);
     
-    --border: oklch(0.88 0.02 85);
-    --input: oklch(0.88 0.02 85);
-    --ring: var(--accent-deep-blue);
+    --border: oklch(0.89 0.006 255);
+    --input: oklch(0.89 0.006 255);
+    --ring: var(--accent-cobalt);
     
-    --radius: 0.45rem;
+    --radius: 0.3rem;
 
-    /* --- Charts --- */
-    --chart-1: oklch(0.845 0.143 164.978);
-    --chart-2: oklch(0.696 0.17 162.48);
-    --chart-3: oklch(0.596 0.145 163.225);
-    --chart-4: oklch(0.508 0.118 165.612);
-    --chart-5: oklch(0.432 0.095 166.913);
+    /* --- Charts (Cobalt family, light → dark) --- */
+    --chart-1: oklch(0.65 0.15 260);
+    --chart-2: oklch(0.55 0.13 261);
+    --chart-3: oklch(0.46 0.11 262);
+    --chart-4: oklch(0.38 0.10 263);
+    --chart-5: oklch(0.30 0.09 264);
 
     /* --- Sidebar Mapping (Chrome System) --- */
     --sidebar: var(--chrome-core);
     --sidebar-foreground: var(--chrome-text);
-    --sidebar-primary: var(--accent-deep-blue);
-    --sidebar-primary-foreground: var(--accent-deep-blue-fg);
+    --sidebar-primary: var(--accent-cobalt);
+    --sidebar-primary-foreground: var(--accent-cobalt-fg);
     --sidebar-accent: var(--chrome-mantle);
     --sidebar-accent-foreground: var(--chrome-text);
     --sidebar-border: var(--chrome-mantle);
-    --sidebar-ring: var(--accent-deep-blue);
+    --sidebar-ring: var(--accent-cobalt);
 }
 
 .dark {
-    /* --- 3-Tier Color System (Dark Mode - Deep Navy Base) --- */
-    --core: oklch(0.15 0.03 260);
-    --mantle: oklch(0.20 0.03 260);
-    --crust: oklch(0.25 0.03 260);
+    /* --- 3-Tier Color System (Dark Mode - Deep Graphite Base) --- */
+    --core: oklch(0.19 0.012 260);
+    --mantle: oklch(0.23 0.014 260);
+    --crust: oklch(0.27 0.016 260);
 
-    /* --- Chrome System (Sidebar - Darker) --- */
-    --chrome-core: oklch(0.12 0.03 260);
-    --chrome-mantle: oklch(0.17 0.03 260);
-    --chrome-crust: oklch(0.22 0.03 260);
-    --chrome-text: oklch(0.90 0.02 85);
+    /* --- Chrome System (Sidebar - Deeper Dark) --- */
+    --chrome-core: oklch(0.15 0.012 260);
+    --chrome-mantle: oklch(0.19 0.014 260);
+    --chrome-crust: oklch(0.23 0.016 260);
+    --chrome-text: oklch(0.92 0.004 255);
 
     /* --- Typography --- */
-    --text-main: oklch(0.95 0.02 85);
-    --text-muted: oklch(0.70 0.02 85);
+    --text-main: oklch(0.92 0.004 255);
+    --text-muted: oklch(0.68 0.02 260);
 
-    /* --- Accents --- */
-    --accent-deep-blue: oklch(0.55 0.1 260);
-    --accent-deep-blue-fg: oklch(0.15 0.03 260);
+    /* --- Accents (Cobalt — brighter for dark-surface contrast) --- */
+    --accent-cobalt: oklch(0.62 0.15 260);
+    --accent-cobalt-fg: oklch(0.15 0.012 260);
 
     /* --- Shadcn Semantic Mapping --- */
     --background: var(--core);
@@ -147,41 +147,41 @@
     --popover: var(--crust);
     --popover-foreground: var(--text-main);
     
-    --primary: var(--accent-deep-blue);
-    --primary-foreground: var(--accent-deep-blue-fg);
+    --primary: var(--accent-cobalt);
+    --primary-foreground: var(--accent-cobalt-fg);
     
     --secondary: var(--mantle);
     --secondary-foreground: var(--text-main);
     
-    --muted: oklch(0.22 0.03 260);
+    --muted: oklch(0.25 0.014 260);
     --muted-foreground: var(--text-muted);
     
-    --accent: oklch(0.22 0.03 260);
+    --accent: oklch(0.25 0.014 260);
     --accent-foreground: var(--text-main);
     
     --destructive: oklch(0.704 0.191 22.216);
-    --destructive-foreground: oklch(0.15 0.03 260);
+    --destructive-foreground: oklch(0.15 0.012 260);
     
-    --border: oklch(0.30 0.03 260);
-    --input: oklch(0.30 0.03 260);
-    --ring: var(--accent-deep-blue);
+    --border: oklch(0.3 0.016 260);
+    --input: oklch(0.3 0.016 260);
+    --ring: var(--accent-cobalt);
     
-    /* --- Charts --- */
-    --chart-1: oklch(0.845 0.143 164.978);
-    --chart-2: oklch(0.696 0.17 162.48);
-    --chart-3: oklch(0.596 0.145 163.225);
-    --chart-4: oklch(0.508 0.118 165.612);
-    --chart-5: oklch(0.432 0.095 166.913);
+    /* --- Charts (Cobalt family, dark mode — slightly lighter) --- */
+    --chart-1: oklch(0.70 0.15 260);
+    --chart-2: oklch(0.60 0.13 261);
+    --chart-3: oklch(0.50 0.11 262);
+    --chart-4: oklch(0.44 0.10 263);
+    --chart-5: oklch(0.38 0.10 264);
 
     /* --- Sidebar Mapping (Chrome System) --- */
     --sidebar: var(--chrome-core);
     --sidebar-foreground: var(--chrome-text);
-    --sidebar-primary: var(--accent-deep-blue);
-    --sidebar-primary-foreground: var(--accent-deep-blue-fg);
+    --sidebar-primary: var(--accent-cobalt);
+    --sidebar-primary-foreground: var(--accent-cobalt-fg);
     --sidebar-accent: var(--chrome-mantle);
     --sidebar-accent-foreground: var(--chrome-text);
     --sidebar-border: var(--chrome-mantle);
-    --sidebar-ring: var(--accent-deep-blue);
+    --sidebar-ring: var(--accent-cobalt);
 }
 
 @layer base {

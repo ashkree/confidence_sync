@@ -8,3 +8,10 @@ export async function fetchDocuments(category?: string): Promise<Document[]> {
   }
   return getAllDocuments();
 }
+
+export async function fetchMyDocuments(): Promise<Document[]> {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  return getAllDocuments();
+}
+
+

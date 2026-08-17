@@ -4,4 +4,4 @@ import { USE_MOCK_DATA } from "@/lib/env";
 
 const useMock = USE_MOCK_DATA;
 
-export const { fetchDocuments } = useMock ? mock : service;
+export const { fetchDocuments, fetchMyDocuments } = useMock ? mock : service;

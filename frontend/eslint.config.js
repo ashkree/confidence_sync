@@ -35,7 +35,12 @@ export default defineConfig([
   },
 
   {
-    files: ["**/columns/**", "**/data-table*", "**/ticket-table*"],
+    files: [
+      "**/columns/**",
+      "**/data-table*",
+      "**/ticket-table*",
+      "**/page/DocumentsPage*",
+    ],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
     },
