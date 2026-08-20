@@ -1,7 +1,5 @@
 import type {
   Ticket,
-  HrRequest,
-  ItTicket,
   TicketComment,
   TicketPriority,
   TicketStatus,

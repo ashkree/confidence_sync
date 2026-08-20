@@ -81,7 +81,7 @@ async def read_document(
     target_id: uuid.UUID,
     disposition: Literal["inline", "attachment"] = "attachment",
 ) -> StreamingResponse:
-    document = await db.scalar(select(Document).where(Document.object_key == target_id))
+    document = await db.scalar(select(Document).where(Document.id == target_id))
     if document is None:
         raise RecordNotFoundError
 

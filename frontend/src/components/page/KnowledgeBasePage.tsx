@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { FileText, Link as LinkIcon } from "lucide-react";
 import HeroSection from "@/components/sections/HeroSection";
 import { useLoaderData } from "@tanstack/react-router";
+import { viewDocument } from "@/api/documents";
 
 export function KnowledgeBasePage() {
   const { hrPolicies, itManuals } = useLoaderData({
@@ -26,16 +27,16 @@ export function KnowledgeBasePage() {
             {hrPolicies.map((doc) => (
               <Card key={doc.id} className="hover:shadow-md transition-shadow group">
                 <CardContent className="p-4">
-                  <a
-                    href={doc.url}
-                    className="flex items-center justify-between outline-none"
-                    onClick={(e) => e.preventDefault()}
+                  <button
+                    type="button"
+                    className="flex items-center justify-between w-full outline-none cursor-pointer text-left"
+                    onClick={() => viewDocument(doc.id)}
                   >
                     <span className="font-medium group-hover:text-primary transition-colors">
-                      {doc.title}
+                      {doc.file_name}
                     </span>
                     <LinkIcon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                  </a>
+                  </button>
                 </CardContent>
               </Card>
             ))}
@@ -52,16 +53,16 @@ export function KnowledgeBasePage() {
             {itManuals.map((doc) => (
               <Card key={doc.id} className="hover:shadow-md transition-shadow group">
                 <CardContent className="p-4">
-                  <a
-                    href={doc.url}
-                    className="flex items-center justify-between outline-none"
-                    onClick={(e) => e.preventDefault()}
+                  <button
+                    type="button"
+                    className="flex items-center justify-between w-full outline-none cursor-pointer text-left"
+                    onClick={() => viewDocument(doc.id)}
                   >
                     <span className="font-medium group-hover:text-primary transition-colors">
-                      {doc.title}
+                      {doc.file_name}
                     </span>
                     <LinkIcon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                  </a>
+                  </button>
                 </CardContent>
               </Card>
             ))}

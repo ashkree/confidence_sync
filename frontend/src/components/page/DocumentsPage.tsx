@@ -20,7 +20,11 @@ import * as z from "zod";
 import { useForm } from "@tanstack/react-form";
 import { Field, FieldError, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
-import { createDocument } from "@/api/documents";
+import {
+  createDocument,
+  downloadDocument,
+  viewDocument,
+} from "@/api/documents";
 
 interface DocumentTableProps<TData extends Document> {
   columns?: ColumnDef<TData, any>[];
@@ -42,15 +46,11 @@ function RowActions({ row }: { row: Row<Document> }) {
         }
       />
       <DropdownMenuContent align="end">
-        <DropdownMenuItem
-          onClick={() =>
-            window.open(
-              `${import.meta.env.VITE_API_URL}/documents/${doc.id}/view`,
-              "_blank",
-            )
-          }
-        >
+        <DropdownMenuItem onClick={() => viewDocument(doc.id)}>
           View
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => downloadDocument(doc.id)}>
+          Download
         </DropdownMenuItem>
         <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
       </DropdownMenuContent>
@@ -62,15 +62,18 @@ function getBaseColumns<TData extends Document>(): ColumnDef<TData, any>[] {
   const helper = createColumnHelper<TData>();
 
   return [
-    helper.accessor("file_name" as any, {
+    helper.accessor((row) => row.file_name, {
+      id: "file_name",
       header: "File Name",
       cell: (info) => info.getValue(),
     }),
-    helper.accessor("created_at" as any, {
+    helper.accessor((row) => row.created_at, {
+      id: "created_at",
       header: "Created",
       cell: (info) => info.getValue(),
     }),
-    helper.accessor("updated_at" as any, {
+    helper.accessor((row) => row.updated_at, {
+      id: "updated_at",
       header: "Updated",
       cell: (info) => info.getValue(),
     }),
