@@ -1,10 +1,10 @@
 import uuid
-from datetime import datetime
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.user import UserDepartment, UserRole
+from app.schemas.date_types import FormattedDateTime
 
 
 class UserCommon(BaseModel):
@@ -41,5 +41,5 @@ class UserProfile(UserCommon):
     department: UserDepartment | None
     phone_number: str
     leave_days: int
-    created_at: datetime
-    updated_at: datetime
+    created_at: FormattedDateTime
+    updated_at: FormattedDateTime

@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Clock, User, UserCheck, UserMinus } from "lucide-react";
-import { format } from "date-fns";
+import { formatDate } from "@/lib/date";
 import { cn } from "@/lib/utils";
 import type { TicketPriority, TicketStatus, TicketComment } from "@/types";
 
@@ -120,7 +120,7 @@ export function TicketDetailPage() {
             <div className="space-y-1">
               <CardTitle className="text-2xl">{ticket.subject}</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Created {format(new Date(ticket.created_at), "PPP")}
+                Created {formatDate(ticket.created_at)}
               </p>
             </div>
             <div className="flex gap-2">
@@ -175,7 +175,7 @@ export function TicketDetailPage() {
             <div>
               <span className="font-medium">Updated</span>
               <p className="text-muted-foreground">
-                {format(new Date(updatedAt ?? ticket.updated_at), "PPP")}
+                {formatDate(updatedAt ?? ticket.updated_at)}
               </p>
             </div>
           </div>
@@ -284,7 +284,7 @@ export function TicketDetailPage() {
                     </span>
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      {format(new Date(comment.created_at), "PPp")}
+                      {formatDate(comment.created_at)}
                     </span>
                   </div>
                   <p className="text-sm">{comment.body}</p>

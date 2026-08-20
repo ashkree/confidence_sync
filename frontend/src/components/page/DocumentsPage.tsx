@@ -25,6 +25,7 @@ import {
   downloadDocument,
   viewDocument,
 } from "@/api/documents";
+import { formatDate } from "@/lib/date";
 
 interface DocumentTableProps<TData extends Document> {
   columns?: ColumnDef<TData, any>[];
@@ -67,12 +68,12 @@ function getBaseColumns<TData extends Document>(): ColumnDef<TData, any>[] {
       header: "File Name",
       cell: (info) => info.getValue(),
     }),
-    helper.accessor((row) => row.created_at, {
+    helper.accessor((row) => formatDate(row.created_at), {
       id: "created_at",
       header: "Created",
       cell: (info) => info.getValue(),
     }),
-    helper.accessor((row) => row.updated_at, {
+    helper.accessor((row) => formatDate(row.updated_at), {
       id: "updated_at",
       header: "Updated",
       cell: (info) => info.getValue(),

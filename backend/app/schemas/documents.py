@@ -1,7 +1,8 @@
-import datetime
 import uuid
 
 from pydantic import BaseModel, ConfigDict
+
+from app.schemas.date_types import FormattedDateTime
 
 
 class DocumentResponse(BaseModel):
@@ -9,5 +10,5 @@ class DocumentResponse(BaseModel):
 
     id: uuid.UUID
     file_name: str
-    created_at: datetime.datetime
-    updated_at: datetime.datetime
+    created_at: FormattedDateTime
+    updated_at: FormattedDateTime

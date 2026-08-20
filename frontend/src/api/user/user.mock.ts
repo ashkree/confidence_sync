@@ -1,6 +1,7 @@
 // api/user/user.mock.ts
 import type { UserProfile } from "@/types";
 import { MOCK_USERS } from "@/api/auth";
+import { formatDate } from "@/lib/date";
 
 const ACCESS_PREFIX = "mock-token-";
 
@@ -13,6 +14,7 @@ export async function fetchProfile(): Promise<UserProfile> {
 
   if (!user) throw new Error("Mock user not found");
 
+  const today = formatDate(new Date());
   return {
     id: user.id,
     name: user.name,
@@ -21,7 +23,7 @@ export async function fetchProfile(): Promise<UserProfile> {
     department: user.department,
     phone_number: (user as UserProfile).phone_number ?? "+0 (000) 000-0000",
     leave_days: (user as UserProfile).leave_days ?? 0,
-    created_at: (user as UserProfile).created_at ?? new Date().toISOString(),
-    updated_at: (user as UserProfile).updated_at ?? new Date().toISOString(),
+    created_at: (user as UserProfile).created_at ?? today,
+    updated_at: (user as UserProfile).updated_at ?? today,
   };
 }

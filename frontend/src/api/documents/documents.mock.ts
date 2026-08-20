@@ -1,5 +1,6 @@
 import { getAllDocuments } from "@/data";
 import type { Document } from "@/types";
+import { formatDate } from "@/lib/date";
 
 let _mockDocuments: Document[] | null = null;
 
@@ -44,12 +45,13 @@ export async function createDocument(
 ): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 500));
 
+  const today = formatDate(new Date());
   const newDocument: Document = {
     id: `uuid-doc-${Date.now()}`,
     file_name: fileName.toLowerCase().replace(/\s+/g, "-"),
     category: "HR_POLICY", // mock stand-in — no department context available here
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    created_at: today,
+    updated_at: today,
   };
 
   _mockDocuments = [...getMockDocuments(), newDocument];

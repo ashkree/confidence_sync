@@ -5,6 +5,7 @@ import type {
   TicketStatus,
 } from "@/types";
 import { getAllTickets, getAllComments, getUserNameById } from "@/data";
+import { formatDate } from "@/lib/date";
 
 let _mockTickets: Ticket[] | null = null;
 let _mockComments: TicketComment[] | null = null;
@@ -81,8 +82,8 @@ export async function createTicket(data: Partial<Ticket>): Promise<Ticket> {
     assignee_name: null,
     information: null,
     ai_summary: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    created_at: formatDate(new Date()),
+    updated_at: formatDate(new Date()),
   } as Ticket;
 
   _mockTickets = [...getMockTickets(), newTicket];
@@ -99,7 +100,7 @@ export async function updateTicketStatus(
   _mockTickets = getMockTickets().map((t) => {
     if (t.id === id) {
       found = true;
-      return { ...t, status, updated_at: new Date().toISOString() };
+      return { ...t, status, updated_at: formatDate(new Date()) };
     }
     return t;
   });
@@ -116,7 +117,7 @@ export async function updateTicketPriority(
   _mockTickets = getMockTickets().map((t) => {
     if (t.id === id) {
       found = true;
-      return { ...t, priority, updated_at: new Date().toISOString() };
+      return { ...t, priority, updated_at: formatDate(new Date()) };
     }
     return t;
   });
@@ -141,7 +142,7 @@ export async function addTicketComment(
     ticket_id: ticketId,
     author_name: "Current User",
     body,
-    created_at: new Date().toISOString(),
+    created_at: formatDate(new Date()),
   };
   _mockComments = [...getMockComments(), comment];
   saveMockComments();
@@ -162,7 +163,7 @@ export async function assignTicket(
         ...t,
         assignee_id: assigneeId,
         assignee_name: assigneeId ? getUserNameById(assigneeId) : null,
-        updated_at: new Date().toISOString(),
+        updated_at: formatDate(new Date()),
       };
     }
     return t;

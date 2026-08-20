@@ -82,6 +82,8 @@ export function TicketSubmissionPage() {
     onSubmit: async ({ value }) => {
       const newTicket = await createTicket({
         ...value,
+        from_date: value.from_date ? format(value.from_date, "dd/MM/yyyy") : undefined,
+        to_date: value.to_date ? format(value.to_date, "dd/MM/yyyy") : undefined,
         type: value.department === "HR" ? "HR_REQUEST" : "IT_TICKET",
         priority: value.priority as "LOW" | "MEDIUM" | "HIGH",
         poster_id: user?.id,
@@ -240,7 +242,7 @@ export function TicketSubmissionPage() {
                                           >
                                             <CalendarIcon className="mr-2 h-4 w-4" />
                                             {field.state.value ? (
-                                              format(field.state.value, "PPP")
+                                              format(field.state.value, "dd/MM/yyyy")
                                             ) : (
                                               <span>Pick a date</span>
                                             )}
@@ -279,7 +281,7 @@ export function TicketSubmissionPage() {
                                           >
                                             <CalendarIcon className="mr-2 h-4 w-4" />
                                             {field.state.value ? (
-                                              format(field.state.value, "PPP")
+                                              format(field.state.value, "dd/MM/yyyy")
                                             ) : (
                                               <span>Pick a date</span>
                                             )}

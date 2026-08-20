@@ -7,7 +7,7 @@ import {
   CalendarHeart,
   CalendarDays,
 } from "lucide-react";
-import { format } from "date-fns";
+import { formatDate } from "@/lib/date";
 import { Route } from "@/routes/_authenticated/profile/index";
 import HeroSection from "@/components/sections/HeroSection";
 
@@ -76,7 +76,7 @@ export function ProfilePage() {
                 <div>
                   <p className="text-sm font-medium">Joined</p>
                   <p className="text-sm text-muted-foreground">
-                    {format(new Date(profile.created_at), "MMMM d, yyyy")}
+                    {formatDate(profile.created_at)}
                   </p>
                 </div>
               </div>

@@ -1,4 +1,3 @@
-import datetime
 import uuid
 from typing import Annotated, Literal
 
@@ -8,6 +7,7 @@ from app.models import HrRequest, ItTicket, TicketComment
 from app.models.hr_request import DocumentType, RequestType
 from app.models.it_ticket import ITRequestType
 from app.models.ticket import TicketPriority, TicketStatus, TicketType
+from app.schemas.date_types import FormattedDate, FormattedDateTime
 
 # TICKET CREATION SCHEMAS
 
@@ -107,8 +107,8 @@ class TicketDetailResponseBase(BaseModel):
     description: str
     information: str | None = None
     ai_summary: str | None = None
-    created_at: datetime.datetime
-    updated_at: datetime.datetime
+    created_at: FormattedDateTime
+    updated_at: FormattedDateTime
 
 
 class ItTicketDetailResponse(TicketDetailResponseBase):
@@ -127,8 +127,8 @@ class HrRequestDetailResponse(TicketDetailResponseBase):
     type: Literal[TicketType.HR_REQUEST] = TicketType.HR_REQUEST
     request_type: RequestType
     document_type: DocumentType | None = None
-    from_date: datetime.date | None = None
-    to_date: datetime.date | None = None
+    from_date: FormattedDate | None = None
+    to_date: FormattedDate | None = None
 
 
 TicketDetailResponse = Annotated[
@@ -162,4 +162,4 @@ class TicketCommentResponse(BaseModel):
     ticket_id: uuid.UUID
     author_name: str
     body: str
-    created_at: datetime.datetime
+    created_at: FormattedDateTime
