@@ -14,4 +14,9 @@ export async function fetchMyDocuments(): Promise<Document[]> {
   return getAllDocuments();
 }
 
-
+export async function createDocument(
+  file: File,
+  fileName: string,
+): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+}

@@ -1,36 +1,39 @@
 # app/routes/documents.py
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, Form, UploadFile
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database import get_db
 from app.models import User
+from app.models.documents import DocumentCategory
 from app.schemas.documents import DocumentResponse
-from app.services.auth import get_current_user
-from app.services.documents import get_document_categories_for_user
+from app.services.auth import require_admin
+from app.services.documents import create_document, read_documents
 
 document_router = APIRouter(prefix="/documents")
 
 
-@document_router.get(
-    "/me",
-    response_model=list[DocumentResponse],
-    summary="List documents for the current user",
-)
-async def get_my_documents(
-    current_user: User = Depends(get_current_user),
-) -> list[DocumentResponse]:
-    """Return documents the current user is allowed to see, based on their role and department.
+@document_router.post("/create", status_code=201)
+async def create_document_route(
+    file: UploadFile = File(...),
+    file_name: str = Form(...),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    await create_document(db, current_user, file, file_name)
 
-    - Employees receive both HR policies and IT manuals.
-    - IT admins receive IT manuals only.
-    - HR admins receive HR policies only.
 
-    Returns:
-        list[DocumentResponse]: Documents scoped to the current user.
-    """
-    categories = get_document_categories_for_user(current_user)
+@document_router.get("", response_model=list[DocumentResponse])
+async def list_documents(
+    category: DocumentCategory | None = None, db: AsyncSession = Depends(get_db)
+):
 
-    # TODO: fetch documents from S3, filtering by `categories`.
-    # Each S3 object should be stored under a prefix matching its category,
-    # e.g. s3://<bucket>/HR_POLICY/<key> and s3://<bucket>/IT_MANUAL/<key>.
-    # For now this returns an empty list until the S3 integration is wired up.
-    _ = categories
-    return []
+    print(category)
+
+    if category is not None:
+        documents = await read_documents(db)
+
+    else:
+        documents = await read_documents(db, category)
+
+    print(documents)
+    return documents

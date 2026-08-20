@@ -17,3 +17,7 @@ class AccountNotConfirmedError(AuthError):
 
 class AuthServiceUnavailableError(AuthError):
     """Unexpected Cognito/AWS error, not a credentials problem."""
+
+
+class DepartmentNotConfiguredError(Exception):
+    """User's department has no associated document bucket"""

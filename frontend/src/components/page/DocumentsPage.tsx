@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Document } from "@/types";
 import { DataTable } from "@/components/ui/data-table";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -19,6 +20,7 @@ import * as z from "zod";
 import { useForm } from "@tanstack/react-form";
 import { Field, FieldError, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
+import { createDocument } from "@/api/documents";
 
 interface DocumentTableProps<TData extends Document> {
   columns?: ColumnDef<TData, any>[];
@@ -40,7 +42,14 @@ function RowActions({ row }: { row: Row<Document> }) {
         }
       />
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => window.open(doc.url, "_blank")}>
+        <DropdownMenuItem
+          onClick={() =>
+            window.open(
+              `${import.meta.env.VITE_API_URL}/documents/${doc.id}/view`,
+              "_blank",
+            )
+          }
+        >
           View
         </DropdownMenuItem>
         <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
@@ -53,8 +62,8 @@ function getBaseColumns<TData extends Document>(): ColumnDef<TData, any>[] {
   const helper = createColumnHelper<TData>();
 
   return [
-    helper.accessor("title" as any, {
-      header: "Title",
+    helper.accessor("file_name" as any, {
+      header: "File Name",
       cell: (info) => info.getValue(),
     }),
     helper.accessor("created_at" as any, {
@@ -68,7 +77,6 @@ function getBaseColumns<TData extends Document>(): ColumnDef<TData, any>[] {
     helper.display({
       id: "actions",
       header: "Actions",
-
       cell: (props) => <RowActions row={props.row} />,
     }),
   ];
@@ -79,12 +87,14 @@ export function DocumentsPage<TData extends Document>({
   data,
   title = "Documents",
 }: DocumentTableProps<TData>) {
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   return (
     <>
       <HeroSection title={title} />
       <div className="p-6 space-y-6">
         <div className="flex justify-end">
-          <Dialog>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger
               render={
                 <Button>
@@ -110,7 +120,7 @@ export function DocumentsPage<TData extends Document>({
 // Document Upload Form
 
 const formSchema = z.object({
-  fileName: z.string().min(1, "File name is required"),
+  fileName: z.string().min(1, "File name is required").max(50),
   attachment: z
     .instanceof(File, { message: "A file is required" })
     .refine(
@@ -125,11 +135,21 @@ const formSchema = z.object({
 });
 
 function DocumentUploadForm() {
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const form = useForm({
     defaultValues: { fileName: "", attachment: undefined as File | undefined },
     validators: { onSubmit: formSchema },
     onSubmit: async ({ value }) => {
-      console.log(value);
+      if (!value.attachment) return;
+      try {
+        setSubmitError(null);
+        await createDocument(value.attachment, value.fileName);
+        // Reload the page so the document list refreshes automatically
+        window.location.reload();
+      } catch {
+        setSubmitError("Failed to upload document. Please try again.");
+      }
     },
   });
 
@@ -188,6 +208,14 @@ function DocumentUploadForm() {
             );
           }}
         />
+
+        {submitError && (
+          <Field>
+            <p className="text-sm font-medium text-destructive">
+              {submitError}
+            </p>
+          </Field>
+        )}
 
         <form.Subscribe selector={(state) => state.canSubmit}>
           {(canSubmit) => (

@@ -8,8 +8,9 @@ from sqlalchemy.orm import selectinload, with_polymorphic
 from app.models import HrRequest, ItTicket, Ticket, User
 from app.models.ticket import TicketPriority, TicketStatus, TicketType
 from app.models.ticket_comment import TicketComment
-from app.models.user import UserDepartment, UserRole
+from app.models.user import UserDepartment
 from app.schemas.tickets import TicketCommentCreate, TicketCreate
+from app.services.users import is_admin
 
 # Ticket query that eagerly joins in HrRequest and ItTicket columns,
 # so subclass-specific attributes are available without an extra
@@ -30,10 +31,6 @@ def can_access(user: User, ticket: Ticket) -> bool:
 
 def is_owner(ticket_poster_id: uuid.UUID, user_id: uuid.UUID):
     return ticket_poster_id == user_id
-
-
-def is_admin(user_role: UserRole) -> bool:
-    return user_role == UserRole.ADMIN
 
 
 def is_in_scope(

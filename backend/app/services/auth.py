@@ -11,6 +11,7 @@ from app.config import settings
 from app.database import get_db
 from app.exceptions.data import RecordNotFoundError
 from app.models import User
+from app.models.user import UserRole
 from app.repository.cognito import CognitoRepo
 from app.repository.users import read_user_by_cognito_sub
 
@@ -207,6 +208,17 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
             headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return user
+
+
+async def require_admin(user: User = Depends(get_current_user)):
+
+    if user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"detail": "Admin access required"},
         )
 
     return user

@@ -3,6 +3,10 @@ from app.models.user import UserRole
 from app.schemas.users import Admin, Employee, UserBase, UserProfile
 
 
+def is_admin(user_role: UserRole) -> bool:
+    return user_role == UserRole.ADMIN
+
+
 def to_user_base(user: User) -> UserBase:
     if user.role == UserRole.ADMIN:
         if user.department is None:
