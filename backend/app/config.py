@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     # s3 settings
     s3_endpoint_url: str
 
+    # bedrock settings:
+    bedrock_endpoint_url: str
+
     # development settings
     app_env: str = "development"
     use_cognito_local: bool = True
