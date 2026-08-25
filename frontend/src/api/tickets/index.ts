@@ -14,4 +14,5 @@ export const {
   fetchTicketComments,
   addTicketComment,
   assignTicket,
+  summarizeTicket,
 } = useMock ? mock : service;

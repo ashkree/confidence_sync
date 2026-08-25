@@ -80,3 +80,9 @@ export async function assignTicket(
     body: JSON.stringify({ assignee_id: assigneeId }),
   });
 }
+
+export async function summarizeTicket(id: string): Promise<Ticket> {
+  return fetchWithAuth(`/api/v1/tickets/${id}/summarize`, {
+    method: "PATCH",
+  });
+}

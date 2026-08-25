@@ -10,13 +10,36 @@ class BedrockRepo(AWSRepo):
             endpoint_url=settings.bedrock_endpoint_url,
         )
 
+    def chat(self, messages: list[dict], system_prompt: str | None = None) -> str:
+        kwargs = {
+            "modelId": "anthropic.claude-3-haiku-20240307-v1:0",
+            "messages": messages,
+        }
+        if system_prompt:
+            kwargs["system"] = [{"text": system_prompt}]
+
+        try:
+            response = self.client.converse(**kwargs)
+        except Exception:
+            import traceback
+
+            traceback.print_exc()
+            raise  # re-raise so the caller/logs see the actual failure
+
+        text = response["output"]["message"]["content"][0]["text"]
+        if text.startswith("Error generating response:"):
+            raise RuntimeError(f"Bedrock mock generation failed: {text}")
+
+        return text
+
+
+bedrockRepo = BedrockRepo()
 
 if __name__ == "__main__":
     bedrockRepo = BedrockRepo()
 
     try:
-        response = bedrockRepo.client.converse(
-            modelId="anthropic.claude-3-haiku-20240307-v1:0",
+        response = bedrockRepo.chat(
             messages=[
                 {
                     "role": "user",

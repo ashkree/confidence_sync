@@ -8,6 +8,7 @@ import {
   updateTicketStatus,
   updateTicketPriority,
   assignTicket,
+  summarizeTicket,
 } from "@/api/tickets";
 import { getPriorityColor, getStatusColor } from "@/lib/ticket-colors";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Clock, User, UserCheck, UserMinus } from "lucide-react";
+import { ArrowLeft, Clock, FileText, Sparkles, User, UserCheck, UserMinus } from "lucide-react";
 import { formatDate } from "@/lib/date";
 import { cn } from "@/lib/utils";
 import type { TicketPriority, TicketStatus, TicketComment } from "@/types";
@@ -58,6 +59,18 @@ export function TicketDetailPage() {
   // A user is considered assigned to themselves when the ticket's assignee_id matches their own id
   const isAssignedToMe = !!user && !!assigneeId && assigneeId === user.id;
 
+  // Track AI summary state
+  const [aiSummary, setAiSummary] = useState<string | null>(
+    ticket?.ai_summary ?? null,
+  );
+  const [isSummarizing, setIsSummarizing] = useState(false);
+
+  // Loading states for actions
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isUpdatingPriority, setIsUpdatingPriority] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
+
   useEffect(() => {
     if (ticket) {
       fetchTicketComments(ticket.id).then(setComments);
@@ -70,36 +83,69 @@ export function TicketDetailPage() {
 
   const handleAddComment = async () => {
     if (!newComment.trim() || !user) return;
-    const addedComment = await addTicketComment(ticket.id, newComment);
-    if (addedComment) {
-      setComments((prev) => [...prev, addedComment]);
-      setNewComment("");
+    setIsSubmittingComment(true);
+    try {
+      const addedComment = await addTicketComment(ticket.id, newComment);
+      if (addedComment) {
+        setComments((prev) => [...prev, addedComment]);
+        setNewComment("");
+      }
+    } finally {
+      setIsSubmittingComment(false);
     }
   };
 
   const handleStatusUpdate = async () => {
-    const updated = await updateTicketStatus(ticket.id, currentStatus);
-    if (updated) {
-      setCurrentStatus(updated.status as TicketStatus);
-      setUpdatedAt(updated.updated_at);
+    setIsUpdatingStatus(true);
+    try {
+      const updated = await updateTicketStatus(ticket.id, currentStatus);
+      if (updated) {
+        setCurrentStatus(updated.status as TicketStatus);
+        setUpdatedAt(updated.updated_at);
+      }
+    } finally {
+      setIsUpdatingStatus(false);
     }
   };
 
   const handlePriorityUpdate = async () => {
-    const updated = await updateTicketPriority(ticket.id, currentPriority);
-    if (updated) {
-      setCurrentPriority(updated.priority as TicketPriority);
-      setUpdatedAt(updated.updated_at);
+    setIsUpdatingPriority(true);
+    try {
+      const updated = await updateTicketPriority(ticket.id, currentPriority);
+      if (updated) {
+        setCurrentPriority(updated.priority as TicketPriority);
+        setUpdatedAt(updated.updated_at);
+      }
+    } finally {
+      setIsUpdatingPriority(false);
     }
   };
 
   const handleAssign = async () => {
-    // Toggle: assign to self if unassigned/assigned to someone else, unassign if already mine
-    const newAssigneeId = isAssignedToMe ? null : (user?.id ?? null);
-    const updated = await assignTicket(ticket.id, newAssigneeId);
-    if (updated) {
-      setAssigneeId(updated.assignee_id);
-      setAssigneeName(updated.assignee_name);
+    setIsAssigning(true);
+    try {
+      // Toggle: assign to self if unassigned/assigned to someone else, unassign if already mine
+      const newAssigneeId = isAssignedToMe ? null : (user?.id ?? null);
+      const updated = await assignTicket(ticket.id, newAssigneeId);
+      if (updated) {
+        setAssigneeId(updated.assignee_id);
+        setAssigneeName(updated.assignee_name);
+      }
+    } finally {
+      setIsAssigning(false);
+    }
+  };
+
+  const handleSummarize = async () => {
+    setIsSummarizing(true);
+    try {
+      const updated = await summarizeTicket(ticket.id);
+      if (updated?.ai_summary) {
+        setAiSummary(updated.ai_summary);
+        setUpdatedAt(updated.updated_at);
+      }
+    } finally {
+      setIsSummarizing(false);
     }
   };
 
@@ -182,6 +228,36 @@ export function TicketDetailPage() {
         </CardContent>
       </Card>
 
+      {/* Summary Card */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">Summary</CardTitle>
+            {isAdmin && !aiSummary && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSummarize}
+                disabled={isSummarizing}
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                {isSummarizing ? "Generating..." : "Generate Summary"}
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {aiSummary ? (
+            <p className="text-sm text-muted-foreground">{aiSummary}</p>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-6 text-muted-foreground">
+              <FileText className="w-10 h-10 mb-2 opacity-40" />
+              <p className="text-sm">No AI summary generated yet.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Admin Controls — status, priority, and assignee in one consolidated card */}
       {isAdmin && (
         <Card>
@@ -206,7 +282,9 @@ export function TicketDetailPage() {
                   <SelectItem value="CLOSED">Closed</SelectItem>
                 </SelectContent>
               </Select>
-              <Button onClick={handleStatusUpdate}>Update</Button>
+              <Button onClick={handleStatusUpdate} disabled={isUpdatingStatus}>
+                {isUpdatingStatus ? "Updating..." : "Update"}
+              </Button>
             </div>
 
             <Separator />
@@ -231,7 +309,9 @@ export function TicketDetailPage() {
                   <SelectItem value="LOW">Low</SelectItem>
                 </SelectContent>
               </Select>
-              <Button onClick={handlePriorityUpdate}>Update</Button>
+              <Button onClick={handlePriorityUpdate} disabled={isUpdatingPriority}>
+                {isUpdatingPriority ? "Updating..." : "Update"}
+              </Button>
             </div>
 
             <Separator />
@@ -244,8 +324,14 @@ export function TicketDetailPage() {
               <p className="text-sm text-muted-foreground flex-1">
                 {assigneeName || "Unassigned"}
               </p>
-              <Button variant="outline" onClick={handleAssign}>
-                {isAssignedToMe ? (
+              <Button
+                variant="outline"
+                onClick={handleAssign}
+                disabled={isAssigning}
+              >
+                {isAssigning ? (
+                  "Updating..."
+                ) : isAssignedToMe ? (
                   <>
                     <UserMinus className="w-4 h-4 mr-2" />
                     Unassign
@@ -299,8 +385,11 @@ export function TicketDetailPage() {
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
             />
-            <Button onClick={handleAddComment} disabled={!newComment.trim()}>
-              Add Comment
+            <Button
+              onClick={handleAddComment}
+              disabled={!newComment.trim() || isSubmittingComment}
+            >
+              {isSubmittingComment ? "Submitting..." : "Add Comment"}
             </Button>
           </div>
         </CardContent>

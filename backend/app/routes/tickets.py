@@ -16,7 +16,8 @@ from app.schemas.tickets import (
     TicketPriorityPatch,
     TicketStatusPatch,
 )
-from app.services.auth import get_current_user
+from app.services.ai import generate_ticket_summary
+from app.services.auth import get_current_user, require_admin
 from app.services.tickets import (
     can_access,
     create_ticket,
@@ -54,7 +55,7 @@ async def create_ticket_route(
 
     ticket = await create_ticket(db, current_user, payload)
 
-    # TODO: Needs to trigger async ai summarization
+    await generate_ticket_summary(db, ticket)
     return ticket
 
 
@@ -317,8 +318,9 @@ async def post_ticket_comment(
             detail="Not authorized to view this ticket",
         )
 
-    # TODO: trigger async AI summarization -> ticket.information
-    return await create_ticket_comment(db, payload, current_user.id)
+    comment = await create_ticket_comment(db, payload, current_user.id)
+    await generate_ticket_summary(db, ticket)
+    return comment
 
 
 @ticket_router.get(
@@ -344,7 +346,6 @@ async def get_ticket_comments(
         HTTPException 404: If the ticket does not exist.
         HTTPException 403: If the user is not authorized to view the ticket.
     """
-    # TODO(tomorrow): current_user, db session, scope check
     ticket = await read_ticket_by_id(db, id)
 
     if ticket is None:
@@ -359,3 +360,47 @@ async def get_ticket_comments(
         )
         # TODO: trigger async AI summarization -> ticket.information
     return await read_ticket_comments(db, id)
+
+
+@ticket_router.patch(
+    "/{id}/summarize",
+    response_model=TicketDetailResponse,
+    summary="Generate AI summary",
+    responses={
+        404: {"description": "Ticket not found"},
+        403: {"description": "Not authorized to summarize this ticket"},
+        409: {"description": "Summary already exists"},
+    },
+)
+async def summarize_ticket_route(
+    id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    """Generate an AI summary for a ticket. Admin only.
+
+    Returns:
+        TicketDetailResponse: The updated ticket with ai_summary populated.
+
+    Raises:
+        HTTPException 404: If the ticket does not exist.
+        HTTPException 403: If the user is not an admin.
+        HTTPException 409: If the ticket already has a summary.
+    """
+
+    ticket = await read_ticket_by_id(db, id)
+
+    if ticket is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found"
+        )
+
+    if ticket.ai_summary:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Summary already exists for this ticket",
+        )
+
+    updated_ticket = await generate_ticket_summary(db, ticket)
+    return updated_ticket
+

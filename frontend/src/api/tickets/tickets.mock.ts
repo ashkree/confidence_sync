@@ -172,3 +172,22 @@ export async function assignTicket(
   if (found) saveMockTickets();
   return getMockTickets().find((t) => t.id === id) || null;
 }
+
+export async function summarizeTicket(id: string): Promise<Ticket | null> {
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+  let found = false;
+  _mockTickets = getMockTickets().map((t) => {
+    if (t.id === id) {
+      found = true;
+      return {
+        ...t,
+        ai_summary:
+          "This is a mock AI-generated summary of the ticket for development testing.",
+        updated_at: formatDate(new Date()),
+      };
+    }
+    return t;
+  });
+  if (found) saveMockTickets();
+  return getMockTickets().find((t) => t.id === id) || null;
+}
