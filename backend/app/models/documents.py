@@ -4,9 +4,10 @@ from datetime import datetime
 
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy import String, Uuid, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models import Base
+from app.models.document_chunks import DocumentChunk
 
 
 class DocumentCategory(str, enum.Enum):
@@ -29,3 +30,5 @@ class Document(Base):
     updated_at: Mapped[datetime] = mapped_column(
         server_default=func.now(), onupdate=func.now()
     )
+
+    chunks: Mapped[list[DocumentChunk]] = relationship(cascade="all, delete-orphan")

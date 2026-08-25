@@ -79,6 +79,11 @@ const hr_group = {
       url: "/admin/hr/requests",
       icon: Tickets,
     },
+    {
+      title: "Policies",
+      url: "/admin/hr/policies",
+      icon: BookOpenIcon,
+    },
   ],
 };
 function RouteComponent() {

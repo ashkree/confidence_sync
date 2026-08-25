@@ -3,6 +3,7 @@ import { getRouteApi } from "@tanstack/react-router";
 import { useAuth } from "@/auth";
 import { usePermissions } from "@/hooks/usePermission";
 import {
+  fetchTicket,
   fetchTicketComments,
   addTicketComment,
   updateTicketStatus,
@@ -89,6 +90,15 @@ export function TicketDetailPage() {
       if (addedComment) {
         setComments((prev) => [...prev, addedComment]);
         setNewComment("");
+
+        // The backend regenerates the AI summary on every comment, but the
+        // comment endpoint only returns the comment — re-fetch the ticket
+        // to pick up the refreshed summary.
+        const refreshed = await fetchTicket(ticket.id);
+        if (refreshed) {
+          setAiSummary(refreshed.ai_summary ?? null);
+          setUpdatedAt(refreshed.updated_at);
+        }
       }
     } finally {
       setIsSubmittingComment(false);
@@ -257,6 +267,20 @@ export function TicketDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Information Card — only rendered when the field has content */}
+      {ticket.information && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+              {ticket.information}
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Admin Controls — status, priority, and assignee in one consolidated card */}
       {isAdmin && (

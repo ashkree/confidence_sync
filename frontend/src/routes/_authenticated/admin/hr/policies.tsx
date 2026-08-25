@@ -1,17 +1,16 @@
-import { createFileRoute } from '@tanstack/react-router'
-import HeroSection from '@/components/sections/HeroSection'
+import { fetchDocuments } from "@/api/documents";
+import { DocumentsPage } from "@/components/page/DocumentsPage";
+import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/_authenticated/admin/hr/policies')({
+export const Route = createFileRoute("/_authenticated/admin/hr/policies")({
   component: RouteComponent,
-})
+  loader: async () => {
+    return await fetchDocuments("HR_POLICY");
+  },
+});
 
 function RouteComponent() {
-  return (
-    <>
-      <HeroSection title="HR Policies" />
-      <div className="p-6">
-        <p className="text-muted-foreground text-sm">No policies available yet.</p>
-      </div>
-    </>
-  )
+  const data = Route.useLoaderData();
+
+  return <DocumentsPage columns={[]} data={data} title="HR Policies" />;
 }

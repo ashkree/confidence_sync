@@ -1,4 +1,5 @@
 from app.models.base import Base
+from app.models.document_chunks import DocumentChunk
 from app.models.documents import Document
 from app.models.hr_request import HrRequest
 from app.models.it_ticket import ItTicket
@@ -14,4 +15,5 @@ __all__ = [
     "ItTicket",
     "TicketComment",
     "Document",
+    "DocumentChunk",
 ]

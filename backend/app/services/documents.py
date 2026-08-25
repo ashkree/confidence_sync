@@ -1,20 +1,23 @@
 # app/services/documents.py
-
-
 import uuid
+from io import BytesIO
 from typing import Literal
 from urllib.parse import quote
 
 from fastapi import UploadFile
 from fastapi.responses import StreamingResponse
+from langchain_core.documents import Document as LcDocument
+from pymupdf import open as open_pdf
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.exceptions.auth import DepartmentNotConfiguredError
 from app.exceptions.data import RecordNotFoundError
 from app.models import User
+from app.models.document_chunks import DocumentChunk
 from app.models.documents import Document, DocumentCategory
 from app.models.user import UserDepartment
+from app.repository.bedrock import bedrockRepo
 from app.repository.s3 import S3Repo
 
 s3Repo = S3Repo()
@@ -23,6 +26,21 @@ DEPARTMENT_BUCKETS = {
     UserDepartment.IT: "it_manuals",
     UserDepartment.HR: "hr_policies",
 }
+
+
+def extract_pdf_documents(pdf, filename: str) -> list[LcDocument]:
+    docs = []
+    for page_num, page in enumerate(pdf):
+        text = page.get_text()
+        if text.strip():
+            docs.append(
+                LcDocument(
+                    page_content=text,
+                    metadata={"source": filename, "page": page_num + 1},
+                )
+            )
+    pdf.close()
+    return docs
 
 
 async def create_document(
@@ -39,15 +57,19 @@ async def create_document(
     object_key = uuid.uuid4()
     filename = file_name.lower().replace(" ", "-")
 
-    try:
-        s3Repo.upload_file(
-            file.file,
-            bucket_name,
-            str(object_key),
-            extra_args={"Metadata": {"original-filename": filename}},
-        )
-    except s3Repo.client.exceptions.ClientError:
-        raise
+    # extract file contents
+    bytes = await file.read()
+    pdf = open_pdf(stream=bytes, filetype="pdf")
+    docs = extract_pdf_documents(pdf, filename)
+    chunks, vectors = bedrockRepo.embed_pdf(docs)
+
+    # upload to s3
+    s3Repo.upload_file(
+        BytesIO(bytes),
+        bucket_name,
+        str(object_key),
+        extra_args={"Metadata": {"original-filename": filename}},
+    )
 
     new_document = Document(
         object_key=object_key,
@@ -58,9 +80,21 @@ async def create_document(
         else DocumentCategory.HR_POLICY,
     )
     db.add(new_document)
-    await db.commit()
+    await db.flush()
 
-    # TODO: Trigger a lambda function to generate vectors
+    # create document chunks
+    db.add_all(
+        DocumentChunk(
+            document_id=new_document.id,
+            content=chunk.page_content,
+            page_number=chunk.metadata.get("page"),
+            chunk_index=idx,
+            embedding=vector,
+        )
+        for idx, (chunk, vector) in enumerate(zip(chunks, vectors))
+    )
+
+    await db.commit()
 
 
 async def read_documents(db: AsyncSession, category: DocumentCategory | None = None):

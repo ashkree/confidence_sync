@@ -1,0 +1,5 @@
+id,name,email,department,phone_number,leave_days,created_at,updated_at,role,cognito_sub
+16e0cba6-7525-493e-90f6-94c42f04344d,Employee 0,employee_0@example.com,,+19995550001,15,2026-08-11 11:07:13,2026-08-11 11:07:13,EMPLOYEE,fa94ae45-b16d-4d4b-987b-e5f9a21d0caa
+62b6ea27-986a-4d1b-b2f7-fefde2c8148b,Employee 1,employee_1@example.com,,+19995550002,22,2026-08-11 11:07:14,2026-08-11 11:07:14,EMPLOYEE,290d0446-06a8-46cb-8c89-dff7460db733
+160c56e3-188e-4864-a5ff-735dc4153e93,IT Admin,it_admin@example.com,IT,+19995550003,18,2026-08-11 11:07:15,2026-08-11 11:07:15,ADMIN,66d04c0b-6e62-4623-b69c-c80ba345bafb
+15f9737e-215e-4dc7-9408-7705acbfc545,HR Admin,hr_admin@example.com,HR,+19995550004,25,2026-08-11 11:07:16,2026-08-11 11:07:16,ADMIN,ca0aa7a6-14ea-485e-9ddb-7030770f31d0

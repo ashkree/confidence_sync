@@ -30,10 +30,10 @@ async def list_documents(
 ):
 
     if category is not None:
-        documents = await read_documents(db)
+        documents = await read_documents(db, category)
 
     else:
-        documents = await read_documents(db, category)
+        documents = await read_documents(db)
 
     return documents
 

@@ -19,6 +19,7 @@ import { Route as AuthenticatedAdminHrRouteRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminItRouteRouteImport } from './routes/_authenticated/admin/it/route'
 import { Route as AuthenticatedEmployeeIndexRouteImport } from './routes/_authenticated/employee/index'
 import { Route as AuthenticatedKbIndexRouteImport } from './routes/_authenticated/kb/index'
+import { Route as AuthenticatedKbCategoryRouteImport } from './routes/_authenticated/kb/$category'
 import { Route as AuthenticatedProfileIndexRouteImport } from './routes/_authenticated/profile/index'
 import { Route as AuthenticatedTicketTicketIdRouteImport } from './routes/_authenticated/ticket/$ticketId'
 import { Route as AuthenticatedTicketSubmitRouteImport } from './routes/_authenticated/ticket/submit'
@@ -79,6 +80,11 @@ const AuthenticatedKbIndexRoute = AuthenticatedKbIndexRouteImport.update({
   path: '/kb/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedKbCategoryRoute = AuthenticatedKbCategoryRouteImport.update({
+  id: '/kb/$category',
+  path: '/kb/$category',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProfileIndexRoute =
   AuthenticatedProfileIndexRouteImport.update({
     id: '/profile/',
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/admin/hr': typeof AuthenticatedAdminHrRouteRouteWithChildren
   '/admin/it': typeof AuthenticatedAdminItRouteRouteWithChildren
+  '/kb/$category': typeof AuthenticatedKbCategoryRoute
   '/ticket/$ticketId': typeof AuthenticatedTicketTicketIdRoute
   '/ticket/submit': typeof AuthenticatedTicketSubmitRoute
   '/employee/': typeof AuthenticatedEmployeeIndexRoute
@@ -148,6 +155,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/admin/hr': typeof AuthenticatedAdminHrRouteRouteWithChildren
   '/admin/it': typeof AuthenticatedAdminItRouteRouteWithChildren
+  '/kb/$category': typeof AuthenticatedKbCategoryRoute
   '/ticket/$ticketId': typeof AuthenticatedTicketTicketIdRoute
   '/ticket/submit': typeof AuthenticatedTicketSubmitRoute
   '/employee': typeof AuthenticatedEmployeeIndexRoute
@@ -168,6 +176,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/admin/hr': typeof AuthenticatedAdminHrRouteRouteWithChildren
   '/_authenticated/admin/it': typeof AuthenticatedAdminItRouteRouteWithChildren
+  '/_authenticated/kb/$category': typeof AuthenticatedKbCategoryRoute
   '/_authenticated/ticket/$ticketId': typeof AuthenticatedTicketTicketIdRoute
   '/_authenticated/ticket/submit': typeof AuthenticatedTicketSubmitRoute
   '/_authenticated/employee/': typeof AuthenticatedEmployeeIndexRoute
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/hr'
     | '/admin/it'
+    | '/kb/$category'
     | '/ticket/$ticketId'
     | '/ticket/submit'
     | '/employee/'
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/hr'
     | '/admin/it'
+    | '/kb/$category'
     | '/ticket/$ticketId'
     | '/ticket/submit'
     | '/employee'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/admin/hr'
     | '/_authenticated/admin/it'
+    | '/_authenticated/kb/$category'
     | '/_authenticated/ticket/$ticketId'
     | '/_authenticated/ticket/submit'
     | '/_authenticated/employee/'
@@ -314,6 +326,13 @@ declare module '@tanstack/react-router' {
       path: '/kb'
       fullPath: '/kb/'
       preLoaderRoute: typeof AuthenticatedKbIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/kb/$category': {
+      id: '/_authenticated/kb/$category'
+      path: '/kb/$category'
+      fullPath: '/kb/$category'
+      preLoaderRoute: typeof AuthenticatedKbCategoryRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/profile/': {
@@ -418,6 +437,7 @@ const AuthenticatedAdminRouteRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
+  AuthenticatedKbCategoryRoute: typeof AuthenticatedKbCategoryRoute
   AuthenticatedTicketTicketIdRoute: typeof AuthenticatedTicketTicketIdRoute
   AuthenticatedTicketSubmitRoute: typeof AuthenticatedTicketSubmitRoute
   AuthenticatedEmployeeIndexRoute: typeof AuthenticatedEmployeeIndexRoute
@@ -427,6 +447,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
+  AuthenticatedKbCategoryRoute: AuthenticatedKbCategoryRoute,
   AuthenticatedTicketTicketIdRoute: AuthenticatedTicketTicketIdRoute,
   AuthenticatedTicketSubmitRoute: AuthenticatedTicketSubmitRoute,
   AuthenticatedEmployeeIndexRoute: AuthenticatedEmployeeIndexRoute,

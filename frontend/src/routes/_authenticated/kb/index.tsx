@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { KnowledgeBasePage } from "@/components/page/KnowledgeBasePage";
+import { KnowledgeBaseHubPage } from "@/components/page/KnowledgeBaseHubPage";
 import { fetchDocuments } from "@/api/documents";
 
 export const Route = createFileRoute("/_authenticated/kb/")({
@@ -8,7 +8,11 @@ export const Route = createFileRoute("/_authenticated/kb/")({
       fetchDocuments("HR_POLICY"),
       fetchDocuments("IT_MANUAL"),
     ]);
-    return { hrPolicies, itManuals };
+    return {
+      hrCount: hrPolicies?.length ?? 0,
+      itCount: itManuals?.length ?? 0,
+    };
   },
-  component: KnowledgeBasePage,
+  component: KnowledgeBaseHubPage,
 });
+
