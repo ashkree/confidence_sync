@@ -85,7 +85,7 @@ async def read_document(
     disposition: Literal["inline", "attachment"] = "attachment",
 ) -> StreamingResponse:
 
-    document = document_repo.read_by_id(target_id)
+    document = await document_repo.read_by_id(target_id)
 
     try:
         body = await get_s3_client().download_file(

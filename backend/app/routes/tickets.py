@@ -7,6 +7,7 @@ from app.authorization.guards import require_admin, require_authenticated
 from app.authorization.tickets import can_access, is_in_scope
 from app.exceptions.tickets import TicketAccessDeniedError
 from app.models import User
+from app.repository.document import DocumentRepo, get_document_repo
 from app.repository.ticket import TicketRepo, get_ticket_repo
 from app.schemas.tickets import (
     TicketAssigneePatch,
@@ -22,6 +23,7 @@ from app.services.tickets import (
     create_ticket,
     create_ticket_comment,
     read_tickets_by_department,
+    summarize_ticket,
     update_ticket_assignee,
     update_ticket_priority,
     update_ticket_status,
@@ -38,7 +40,8 @@ ticket_router = APIRouter(prefix="/tickets")
 )
 async def create_ticket_route(
     payload: TicketCreate,
-    repo: TicketRepo = Depends(get_ticket_repo),
+    ticket_repo: TicketRepo = Depends(get_ticket_repo),
+    document_repo: DocumentRepo = Depends(get_document_repo),
     current_user: User = Depends(require_authenticated),
 ):
     """Create a new HR request or IT ticket.
@@ -47,7 +50,7 @@ async def create_ticket_route(
         TicketDetailResponse: The newly created ticket.
     """
 
-    return await create_ticket(repo, current_user, payload)
+    return await create_ticket(ticket_repo, document_repo, current_user, payload)
 
 
 @ticket_router.get(
@@ -212,7 +215,7 @@ async def post_ticket_comment(
     if not can_access(current_user, ticket):
         raise TicketAccessDeniedError(id)
 
-    return await create_ticket_comment(ticket_repo, payload, id, current_user.id)
+    return await create_ticket_comment(ticket_repo, payload, ticket, current_user.id)
 
 
 @ticket_router.get(
@@ -259,5 +262,4 @@ async def summarize_ticket_route(
     if not is_in_scope(current_user.department, ticket.type):
         raise TicketAccessDeniedError(id)
 
-    # updated_ticket = await generate_ticket_summary(db, ticket)
-    return ticket
+    return await summarize_ticket(ticket_repo, ticket)

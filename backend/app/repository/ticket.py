@@ -1,6 +1,5 @@
 # app/repository/tickets.py
 import uuid
-from typing import Sequence
 
 from fastapi import Depends
 from sqlalchemy import select
@@ -62,14 +61,18 @@ class TicketRepo:
         await self.db.refresh(comment)
         return comment
 
-    async def read_comments(self, ticket_id: uuid.UUID) -> Sequence[TicketComment]:
+    async def refresh_comment(self, comment: TicketComment) -> TicketComment:
+        await self.db.refresh(comment, attribute_names=["author"])
+        return comment
+
+    async def read_comments(self, ticket_id: uuid.UUID) -> list[TicketComment]:
         result = await self.db.scalars(
             select(TicketComment)
             .options(selectinload(TicketComment.author))
             .where(TicketComment.ticket_id == ticket_id)
             .order_by(TicketComment.created_at)
         )
-        return result.all()
+        return list(result.all())
 
 
 async def get_ticket_repo(db: AsyncSession = Depends(get_db)) -> TicketRepo:
