@@ -11,16 +11,14 @@ from pymupdf import open as open_pdf
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.exceptions.auth import DepartmentNotConfiguredError
-from app.exceptions.data import RecordNotFoundError
+from app.exceptions.documents import DepartmentNotConfiguredError, DocumentNotFoundError
+from app.exceptions.external import S3ObjectNotFoundError
 from app.models import User
 from app.models.document_chunks import DocumentChunk
 from app.models.documents import Document, DocumentCategory
 from app.models.user import UserDepartment
-from app.repository.bedrock import bedrockRepo
-from app.repository.s3 import S3Repo
-
-s3Repo = S3Repo()
+from app.repository.bedrock import get_bedrock_client
+from app.repository.s3 import get_s3_client
 
 DEPARTMENT_BUCKETS = {
     UserDepartment.IT: "it_manuals",
@@ -47,6 +45,7 @@ async def create_document(
     db: AsyncSession, current_user: User, file: UploadFile, file_name: str
 ) -> None:
     department = current_user.department
+
     if department is None:
         raise DepartmentNotConfiguredError(department)
 
@@ -57,15 +56,13 @@ async def create_document(
     object_key = uuid.uuid4()
     filename = file_name.lower().replace(" ", "-")
 
-    # extract file contents
-    bytes = await file.read()
-    pdf = open_pdf(stream=bytes, filetype="pdf")
+    file_bytes = await file.read()
+    pdf = open_pdf(stream=file_bytes, filetype="pdf")
     docs = extract_pdf_documents(pdf, filename)
-    chunks, vectors = bedrockRepo.embed_pdf(docs)
+    chunks, vectors = await get_bedrock_client().embed_pdf(docs)
 
-    # upload to s3
-    s3Repo.upload_file(
-        BytesIO(bytes),
+    await get_s3_client().upload_file(
+        BytesIO(file_bytes),
         bucket_name,
         str(object_key),
         extra_args={"Metadata": {"original-filename": filename}},
@@ -82,7 +79,6 @@ async def create_document(
     db.add(new_document)
     await db.flush()
 
-    # create document chunks
     db.add_all(
         DocumentChunk(
             document_id=new_document.id,
@@ -97,6 +93,32 @@ async def create_document(
     await db.commit()
 
 
+async def read_document(
+    db: AsyncSession,
+    target_id: uuid.UUID,
+    disposition: Literal["inline", "attachment"] = "attachment",
+) -> StreamingResponse:
+    document = await db.scalar(select(Document).where(Document.id == target_id))
+    if document is None:
+        raise DocumentNotFoundError(target_id)
+
+    try:
+        body = await get_s3_client().download_file(
+            document.s3_bucket, str(document.object_key)
+        )
+    except S3ObjectNotFoundError:
+        # the DB row exists but the S3 object is gone — surface it as a
+        # document-not-found to the client, not an S3 implementation detail
+        raise DocumentNotFoundError(target_id)
+
+    filename = quote(document.file_name)
+    return StreamingResponse(
+        body.iter_chunks(),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'{disposition}; filename="{filename}"'},
+    )
+
+
 async def read_documents(db: AsyncSession, category: DocumentCategory | None = None):
 
     if category is None:
@@ -108,28 +130,6 @@ async def read_documents(db: AsyncSession, category: DocumentCategory | None = N
         )
 
     return list(response.all())
-
-
-async def read_document(
-    db: AsyncSession,
-    target_id: uuid.UUID,
-    disposition: Literal["inline", "attachment"] = "attachment",
-) -> StreamingResponse:
-    document = await db.scalar(select(Document).where(Document.id == target_id))
-    if document is None:
-        raise RecordNotFoundError
-
-    try:
-        body = s3Repo.download_file(document.s3_bucket, str(document.object_key))
-    except s3Repo.client.exceptions.NoSuchKey:
-        raise RecordNotFoundError
-
-    filename = quote(document.file_name)
-    return StreamingResponse(
-        body.iter_chunks(),
-        media_type="application/pdf",
-        headers={"Content-Disposition": f'{disposition}; filename="{filename}"'},
-    )
 
 
 async def update_document(bucket_name: str):

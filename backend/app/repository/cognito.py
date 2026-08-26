@@ -1,15 +1,16 @@
 import base64
 import hashlib
 import hmac
+from functools import lru_cache
 
 from botocore.exceptions import ClientError
 
 from app.config import settings
 from app.exceptions.auth import (
     AccountNotConfirmedError,
-    AuthServiceUnavailableError,
     InvalidCredentialsError,
 )
+from app.exceptions.external import CognitoUnavailableError
 from app.repository.aws import AWSRepo
 
 
@@ -48,7 +49,7 @@ class CognitoRepo(AWSRepo):
         except self.client.exceptions.UserNotConfirmedException:
             raise AccountNotConfirmedError()
         except ClientError as e:
-            raise AuthServiceUnavailableError() from e
+            raise CognitoUnavailableError() from e
 
         return response["AuthenticationResult"]
 
@@ -71,6 +72,11 @@ class CognitoRepo(AWSRepo):
         except self.client.exceptions.UserNotFoundException:
             raise InvalidCredentialsError()
         except ClientError as e:
-            raise AuthServiceUnavailableError() from e
+            raise CognitoUnavailableError() from e
 
         return response["AuthenticationResult"]
+
+
+@lru_cache
+def get_cognito_client() -> CognitoRepo:
+    return CognitoRepo()

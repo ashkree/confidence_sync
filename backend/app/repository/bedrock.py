@@ -1,8 +1,14 @@
+import asyncio
+from functools import lru_cache
+
+from botocore.discovery import BotoCoreError
+from botocore.utils import ClientError
 from langchain_aws import BedrockEmbeddings, ChatBedrockConverse
 from langchain_core.documents import Document as LcDocument
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from app.config import settings
+from app.exceptions.external import BedrockUnavailableError
 from app.repository.aws import AWSRepo
 
 _ROLE_MAP = {"user": "human", "assistant": "ai"}
@@ -24,16 +30,65 @@ class BedrockRepo(AWSRepo):
 
         self.embed = BedrockEmbeddings(client=self.client)
 
-    def chat(self, messages: list[dict], system_prompt: str | None = None) -> str:
+    # Async wrapper functions
+    async def chat(self, messages: list[dict], system_prompt: str | None = None) -> str:
+        return await asyncio.to_thread(self._chat, messages, system_prompt)
+
+    async def embed_text(self, text: str) -> list[float]:
+        return await asyncio.to_thread(self._embed_text, text)
+
+    async def embed_pdf(self, docs: list[LcDocument]):
+        return await asyncio.to_thread(self._embed_pdf, docs)
+
+    # Sync callers
+    def _chat(self, messages: list[dict], system_prompt: str | None = None) -> str:
+
         formatted = self._format_messages(messages, system_prompt)
+
         try:
             response = self.converse.invoke(formatted)
-        except Exception:
-            import traceback
+        except (ClientError, BotoCoreError) as e:
+            raise BedrockUnavailableError(f"Bedrock chat request failed: {e}") from e
 
-            traceback.print_exc()
-            raise
         return self._extract_text(response.content)
+
+    def _embed_text(self, text: str) -> list[float]:
+
+        try:
+            return self.embed.embed_query(text)
+        except (ClientError, BotoCoreError) as e:
+            raise BedrockUnavailableError(
+                f"Bedrock embedding request failed: {e}"
+            ) from e
+
+    def _embed_pdf(self, docs: list[LcDocument]):
+
+        chunks = splitter.split_documents(docs)
+        texts = [chunk.page_content for chunk in chunks]
+
+        try:
+            vectors = self.embed.embed_documents(
+                texts
+            )  # batch call instead of looping embed_query
+        except (ClientError, BotoCoreError) as e:
+            raise BedrockUnavailableError(
+                f"Bedrock embedding request failed: {e}"
+            ) from e
+
+        return chunks, vectors
+
+    # Static methods
+    @staticmethod
+    def _format_messages(
+        messages: list[dict], system_prompt: str | None = None
+    ) -> list[tuple]:
+        formatted = []
+        if system_prompt:
+            formatted.append(("system", system_prompt))
+        formatted.extend(
+            (_ROLE_MAP.get(m["role"], m["role"]), m["content"]) for m in messages
+        )
+        return formatted
 
     @staticmethod
     def _extract_text(content: str | list[str | dict]) -> str:
@@ -55,57 +110,7 @@ class BedrockRepo(AWSRepo):
                 parts.append(block.get("text", ""))
         return "".join(parts)
 
-    def embed_text(self, text: str) -> list[float]:
-        return self.embed.embed_query(text)
 
-    def embed_pdf(self, docs: list[LcDocument]):
-        chunks = splitter.split_documents(docs)
-
-        texts = [chunk.page_content for chunk in chunks]
-        vectors = self.embed.embed_documents(
-            texts
-        )  # batch call instead of looping embed_query
-
-        return chunks, vectors
-
-    def _format_messages(
-        self, messages: list[dict], system_prompt: str | None = None
-    ) -> list[tuple]:
-        formatted = []
-        if system_prompt:
-            formatted.append(("system", system_prompt))
-        formatted.extend(
-            (_ROLE_MAP.get(m["role"], m["role"]), m["content"]) for m in messages
-        )
-        return formatted
-
-
-bedrockRepo = BedrockRepo()
-
-
-if __name__ == "__main__":
-    bedrockRepo = BedrockRepo()
-
-    messages = [{"role": "user", "content": "What is the capital of the philippines"}]
-
-    try:
-        response = bedrockRepo.chat(messages=messages)
-
-        __import__("pprint").pprint(response)
-    except Exception as e:
-        # botocore will raise on anything that doesn't look like a valid
-        # response shape (missing fields, wrong types, bad JSON) — the
-        # exception message is usually exactly what's mismatched.
-        print(f"❌ boto3 rejected the response: {e}")
-        raise
-
-    try:
-        response = bedrockRepo.embed_text(text="This is just a quick embedding test")
-        __import__("pprint").pprint(response)
-        print(len(response), response[:5])
-    except Exception as e:
-        # botocore will raise on anything that doesn't look like a valid
-        # response shape (missing fields, wrong types, bad JSON) — the
-        # exception message is usually exactly what's mismatched.
-        print(f"❌ boto3 rejected the response: {e}")
-        raise
+@lru_cache
+def get_bedrock_client() -> BedrockRepo:
+    return BedrockRepo()

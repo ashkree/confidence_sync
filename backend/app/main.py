@@ -4,11 +4,15 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.exceptions.handlers import register_exception_handlers
 from app.routes.auth import auth_router
 from app.routes.documents import document_router
 from app.routes.tickets import ticket_router
 
 app = FastAPI(debug=True)
+
+# Exception Handlers
+register_exception_handlers(app)
 
 # Routers
 main_route = APIRouter(prefix="/api/v1")

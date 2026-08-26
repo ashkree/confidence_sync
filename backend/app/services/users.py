@@ -1,10 +1,21 @@
+import uuid
+
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.exceptions.auth import UserNotFoundError
 from app.models import User
 from app.models.user import UserRole
 from app.schemas.users import Admin, Employee, UserBase, UserProfile
 
 
-def is_admin(user_role: UserRole) -> bool:
-    return user_role == UserRole.ADMIN
+async def read_user_by_cognito_sub(
+    db: AsyncSession, cognito_sub: str | uuid.UUID
+) -> User:
+    result = await db.scalar(select(User).where(User.cognito_sub == cognito_sub))
+    if result is None:
+        raise UserNotFoundError("User not found")
+    return result
 
 
 def to_user_base(user: User) -> UserBase:

@@ -5,13 +5,13 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, with_polymorphic
 
+from app.exceptions.tickets import TicketNotFoundError
 from app.models import DocumentChunk, HrRequest, ItTicket, Ticket, User
 from app.models.ticket import TicketPriority, TicketStatus, TicketType
 from app.models.ticket_comment import TicketComment
 from app.models.user import UserDepartment
 from app.repository.bedrock import bedrockRepo
 from app.schemas.tickets import TicketCommentCreate, TicketCreate
-from app.services.users import is_admin
 
 # Ticket query that eagerly joins in HrRequest and ItTicket columns,
 # so subclass-specific attributes are available without an extra
@@ -41,37 +41,6 @@ Rules:
 - Keep the tone practical and direct, as if briefing a colleague — not customer-facing, not overly formal.
 - Never suggest actions that could compromise security, bypass access controls, or violate a documented policy, even if it would resolve the ticket faster.
 """
-
-
-def can_access(user: User, ticket: Ticket) -> bool:
-
-    if is_admin(user.role) and is_in_scope(user.department, ticket.type):
-        return True
-
-    if is_owner(ticket.poster_id, user.id):
-        return True
-
-    return False
-
-
-def is_owner(ticket_poster_id: uuid.UUID, user_id: uuid.UUID):
-    return ticket_poster_id == user_id
-
-
-def is_in_scope(
-    user_department: UserDepartment | None, ticket_type: TicketType
-) -> bool:
-
-    if user_department == None:
-        return False
-
-    if ticket_type == TicketType.IT_TICKET and user_department != UserDepartment.IT:
-        return False
-
-    if ticket_type == TicketType.HR_REQUEST and user_department != UserDepartment.HR:
-        return False
-
-    return True
 
 
 def _ticket_query():
@@ -120,7 +89,8 @@ async def read_tickets_by_department(
             _ticket_query().where(TicketWithSubtypes.type == TicketType.HR_REQUEST)
         )
         return list(result.all())
-    raise PermissionError(f"No ticket access for department: {current_user.department}")
+
+    return []
 
 
 async def create_ticket(
@@ -130,16 +100,11 @@ async def create_ticket(
     Create a new ticket based on what what the actual type of TicketCreate is
     """
 
-    # Create the ticket on the database
     ticket = ticket_data.to_orm(poster_id=current_user.id)
-
-    # Summarize ticket
-
-    # Generate ticket information from documents
 
     messages = [f"Subject: {ticket.subject}", f"Description: {ticket.description}"]
 
-    query_vector = bedrockRepo.embed_text("\n".join(messages))
+    query_vector = await bedrockRepo.embed_text("\n".join(messages))
 
     chunks = await db.scalars(
         select(DocumentChunk.content)
@@ -158,7 +123,7 @@ async def create_ticket(
         f"Retrieved context:\n{context_text}"
     )
 
-    response = bedrockRepo.chat(
+    response = await bedrockRepo.chat(
         messages=[{"role": "user", "content": f"{user_message}"}],
         system_prompt=TICKET_TRIAGE_SYSTEM_PROMPT,
     )
@@ -172,9 +137,13 @@ async def create_ticket(
     return ticket
 
 
-async def read_ticket_by_id(db: AsyncSession, target_id: uuid.UUID) -> Ticket | None:
+async def read_ticket_by_id(db: AsyncSession, target_id: uuid.UUID) -> Ticket:
 
     result = await db.scalar(_ticket_query().where(Ticket.id == target_id))
+
+    if result is None:
+        raise TicketNotFoundError(target_id)
+
     return result
 
 
@@ -220,10 +189,11 @@ async def update_ticket_assignee(
 async def create_ticket_comment(
     db: AsyncSession,
     comment_data: TicketCommentCreate,
+    ticket_id: uuid.UUID,
     author_id: uuid.UUID,
 ) -> TicketComment:
 
-    comment = comment_data.to_orm(author_id)
+    comment = comment_data.to_orm(ticket_id, author_id)
 
     db.add(comment)
     await db.commit()

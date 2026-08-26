@@ -1,4 +1,3 @@
-import asyncio
 import uuid
 from typing import Literal
 
@@ -7,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import HrRequest, ItTicket, Ticket, TicketComment
 from app.models.hr_request import RequestType
 from app.models.it_ticket import ITRequestType
-from app.repository.bedrock import bedrockRepo
+from app.repository.bedrock import get_bedrock_client
 from app.services.tickets import read_ticket_comments
 
 
@@ -69,7 +68,7 @@ def _format_message(role: Literal["user", "assistant"], content: str) -> dict:
     }
 
 
-def summarize_ticket(ticket: Ticket, comments: list[TicketComment]):
+async def summarize_ticket(ticket: Ticket, comments: list[TicketComment]):
 
     TICKET_SUMMARY_SYSTEM_PROMPT = """You are summarizing a support ticket and its comment thread for an internal admin dashboard. The summary will be read by staff who need to quickly understand the situation without reading the full thread.
 
@@ -100,7 +99,9 @@ Output plain text only, no headers or bullet points."""
     message = [_format_message("user", "\n".join([baseTicket, commentThread]))]
 
     # trigger ai summarization
-    response = bedrockRepo.chat(message, system_prompt=TICKET_SUMMARY_SYSTEM_PROMPT)
+    response = await get_bedrock_client().chat(
+        message, system_prompt=TICKET_SUMMARY_SYSTEM_PROMPT
+    )
 
     return response
 
@@ -118,7 +119,7 @@ async def generate_ticket_summary(db: AsyncSession, ticket: Ticket) -> Ticket:
       - manual summarize endpoint
     """
     comments = await read_ticket_comments(db, ticket.id)
-    summary = await asyncio.to_thread(summarize_ticket, ticket, list(comments))
+    summary = await summarize_ticket(ticket, list(comments))
 
     ticket.ai_summary = summary
     await db.commit()

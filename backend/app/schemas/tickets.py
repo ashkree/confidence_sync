@@ -150,11 +150,12 @@ class TicketAssigneePatch(BaseModel):
 
 
 class TicketCommentCreate(BaseModel):
-    ticket_id: uuid.UUID
     body: str
 
-    def to_orm(self, author_id: uuid.UUID) -> TicketComment:
-        return TicketComment(**self.model_dump(), author_id=author_id)
+    def to_orm(self, ticket_id: uuid.UUID, author_id: uuid.UUID) -> TicketComment:
+        return TicketComment(
+            **self.model_dump(), ticket_id=ticket_id, author_id=author_id
+        )
 
 
 class TicketCommentResponse(BaseModel):
