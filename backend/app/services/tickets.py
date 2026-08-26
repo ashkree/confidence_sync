@@ -1,22 +1,11 @@
 import uuid
-from collections.abc import Sequence
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload, with_polymorphic
-
-from app.exceptions.tickets import TicketNotFoundError
-from app.models import DocumentChunk, HrRequest, ItTicket, Ticket, User
+from app.models import Ticket, User
 from app.models.ticket import TicketPriority, TicketStatus, TicketType
 from app.models.ticket_comment import TicketComment
 from app.models.user import UserDepartment
-from app.repository.bedrock import bedrockRepo
+from app.repository.ticket import TicketRepo
 from app.schemas.tickets import TicketCommentCreate, TicketCreate
-
-# Ticket query that eagerly joins in HrRequest and ItTicket columns,
-# so subclass-specific attributes are available without an extra
-# lazy-load query, regardless of which subtype each row actually is.
-TicketWithSubtypes = with_polymorphic(Ticket, [HrRequest, ItTicket])
 
 TICKET_TRIAGE_SYSTEM_PROMPT = """\
 You are an assistant that helps IT and HR administrators triage support tickets. You will be given a ticket (subject and description) along with a set of retrieved reference passages from internal documentation (IT manuals or HR policies). Your job is to help the admin understand what's likely going on and what to do next — you are not resolving the ticket yourself, you are briefing the human who will.
@@ -43,151 +32,97 @@ Rules:
 """
 
 
-def _ticket_query():
-    """
-    Uses a with_polymorphic call for Ticket to get subtype data and uses
-    selectInLoad to eagerly load relationships.
-    """
-
-    return select(TicketWithSubtypes).options(
-        selectinload(TicketWithSubtypes.poster),
-        selectinload(TicketWithSubtypes.assignee),
-    )
-
-
-async def read_tickets_by_poster(
-    db: AsyncSession, current_user: User
-) -> list[Ticket] | None:
-    """
-    Queries the database for the current user's tickets.
-    Returns a plain list of concrete HrRequest / ItTicket instances so that
-    all subclass columns are eagerly available for Pydantic serialization.
-    """
-
-    result = await db.scalars(
-        _ticket_query().where(TicketWithSubtypes.poster_id == current_user.id)
-    )
-
-    return list(result.all())
-
-
 async def read_tickets_by_department(
-    db: AsyncSession, current_user: User
+    ticket_repo: TicketRepo, current_user: User
 ) -> list[Ticket]:
     """
     A query scoped to the current user's department and access level.
     Returns a plain list of concrete HrRequest / ItTicket instances so that
     all subclass columns are eagerly available for Pydantic serialization.
     """
-    if current_user.department == UserDepartment.IT:
-        result = await db.scalars(
-            _ticket_query().where(TicketWithSubtypes.type == TicketType.IT_TICKET)
-        )
-        return list(result.all())
-    if current_user.department == UserDepartment.HR:
-        result = await db.scalars(
-            _ticket_query().where(TicketWithSubtypes.type == TicketType.HR_REQUEST)
-        )
-        return list(result.all())
 
+    if current_user.department == UserDepartment.IT:
+        return await ticket_repo.read_by_type(TicketType.IT_TICKET)
+    if current_user.department == UserDepartment.HR:
+        return await ticket_repo.read_by_type(TicketType.HR_REQUEST)
     return []
 
 
 async def create_ticket(
-    db: AsyncSession, current_user: User, ticket_data: TicketCreate
+    ticket_repo: TicketRepo, current_user: User, ticket_data: TicketCreate
 ):
     """
     Create a new ticket based on what what the actual type of TicketCreate is
     """
 
+    # create the ticket model
     ticket = ticket_data.to_orm(poster_id=current_user.id)
 
-    messages = [f"Subject: {ticket.subject}", f"Description: {ticket.description}"]
+    # generate additional information
+    # messages = [f"Subject: {ticket.subject}", f"Description: {ticket.description}"]
+    #
+    # query_vector = await get_bedrock_client().embed_text("\n".join(messages))
+    #
+    # chunks = await db.scalars(
+    #     select(DocumentChunk.content)
+    #     .order_by(DocumentChunk.embedding.cosine_distance(query_vector))
+    #     .limit(3)
+    # )
+    #
+    # context_chunks = list(chunks.all())
+    # context_text = (
+    #     "\n\n".join(context_chunks) if context_chunks else "No relevant context found."
+    # )
+    #
+    # user_message = (
+    #     f"Ticket subject: {ticket.subject}\n"
+    #     f"Ticket description: {ticket.description}\n\n"
+    #     f"Retrieved context:\n{context_text}"
+    # )
+    #
+    # response = await get_bedrock_client().chat(
+    #     messages=[{"role": "user", "content": f"{user_message}"}],
+    #     system_prompt=TICKET_TRIAGE_SYSTEM_PROMPT,
+    # )
+    #
+    # ticket.information = response
 
-    query_vector = await bedrockRepo.embed_text("\n".join(messages))
-
-    chunks = await db.scalars(
-        select(DocumentChunk.content)
-        .order_by(DocumentChunk.embedding.cosine_distance(query_vector))
-        .limit(3)
-    )
-
-    context_chunks = list(chunks.all())
-    context_text = (
-        "\n\n".join(context_chunks) if context_chunks else "No relevant context found."
-    )
-
-    user_message = (
-        f"Ticket subject: {ticket.subject}\n"
-        f"Ticket description: {ticket.description}\n\n"
-        f"Retrieved context:\n{context_text}"
-    )
-
-    response = await bedrockRepo.chat(
-        messages=[{"role": "user", "content": f"{user_message}"}],
-        system_prompt=TICKET_TRIAGE_SYSTEM_PROMPT,
-    )
-
-    ticket.information = response
-
-    db.add(ticket)
-    await db.commit()
-    await db.refresh(ticket)
-
-    return ticket
-
-
-async def read_ticket_by_id(db: AsyncSession, target_id: uuid.UUID) -> Ticket:
-
-    result = await db.scalar(_ticket_query().where(Ticket.id == target_id))
-
-    if result is None:
-        raise TicketNotFoundError(target_id)
-
-    return result
+    return await ticket_repo.create(ticket)
 
 
 async def update_ticket_status(
-    db: AsyncSession,
+    ticket_repo: TicketRepo,
     ticket: Ticket,
     new_status: TicketStatus,
 ) -> Ticket:
-
     ticket.status = new_status
-
-    await db.commit()
-    await db.refresh(ticket, attribute_names=["updated_at"])
-    return ticket
+    return await ticket_repo.save(ticket, refresh=["updated_at"])
 
 
 async def update_ticket_priority(
-    db: AsyncSession,
+    ticket_repo: TicketRepo,
     ticket: Ticket,
     new_priority: TicketPriority,
 ) -> Ticket:
 
     ticket.priority = new_priority
 
-    await db.commit()
-    await db.refresh(ticket, attribute_names=["updated_at"])
-    return ticket
+    return await ticket_repo.save(ticket, refresh=["updated_at"])
 
 
 async def update_ticket_assignee(
-    db: AsyncSession,
+    ticket_repo: TicketRepo,
     ticket: Ticket,
     new_assignee_id: uuid.UUID | None,
 ) -> Ticket:
 
     ticket.assignee_id = new_assignee_id
 
-    await db.commit()
-    await db.refresh(ticket, attribute_names=["assignee", "updated_at"])
-    return ticket
+    return await ticket_repo.save(ticket, refresh=["assignee", "updated_at"])
 
 
 async def create_ticket_comment(
-    db: AsyncSession,
+    ticket_repo: TicketRepo,
     comment_data: TicketCommentCreate,
     ticket_id: uuid.UUID,
     author_id: uuid.UUID,
@@ -195,19 +130,6 @@ async def create_ticket_comment(
 
     comment = comment_data.to_orm(ticket_id, author_id)
 
-    db.add(comment)
-    await db.commit()
-    await db.refresh(comment)
-    return comment
+    # also needs to trigger summarization (only summarization)
 
-
-async def read_ticket_comments(
-    db: AsyncSession, ticket_id: uuid.UUID
-) -> Sequence[TicketComment]:
-    result = await db.scalars(
-        select(TicketComment)
-        .options(selectinload(TicketComment.author))
-        .where(TicketComment.ticket_id == ticket_id)
-        .order_by(TicketComment.created_at)
-    )
-    return result.all()
+    return await ticket_repo.add_comment(comment)

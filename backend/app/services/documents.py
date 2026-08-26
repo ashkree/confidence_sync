@@ -8,16 +8,14 @@ from fastapi import UploadFile
 from fastapi.responses import StreamingResponse
 from langchain_core.documents import Document as LcDocument
 from pymupdf import open as open_pdf
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.exceptions.documents import DepartmentNotConfiguredError, DocumentNotFoundError
 from app.exceptions.external import S3ObjectNotFoundError
 from app.models import User
-from app.models.document_chunks import DocumentChunk
 from app.models.documents import Document, DocumentCategory
 from app.models.user import UserDepartment
 from app.repository.bedrock import get_bedrock_client
+from app.repository.document import DocumentRepo
 from app.repository.s3 import get_s3_client
 
 DEPARTMENT_BUCKETS = {
@@ -42,7 +40,7 @@ def extract_pdf_documents(pdf, filename: str) -> list[LcDocument]:
 
 
 async def create_document(
-    db: AsyncSession, current_user: User, file: UploadFile, file_name: str
+    document_repo: DocumentRepo, current_user: User, file: UploadFile, file_name: str
 ) -> None:
     department = current_user.department
 
@@ -76,39 +74,24 @@ async def create_document(
         if department == UserDepartment.IT
         else DocumentCategory.HR_POLICY,
     )
-    db.add(new_document)
-    await db.flush()
 
-    db.add_all(
-        DocumentChunk(
-            document_id=new_document.id,
-            content=chunk.page_content,
-            page_number=chunk.metadata.get("page"),
-            chunk_index=idx,
-            embedding=vector,
-        )
-        for idx, (chunk, vector) in enumerate(zip(chunks, vectors))
-    )
-
-    await db.commit()
+    await document_repo.create(new_document)
+    await document_repo.batch_create_chunks(new_document.id, chunks, vectors)
 
 
 async def read_document(
-    db: AsyncSession,
+    document_repo: DocumentRepo,
     target_id: uuid.UUID,
     disposition: Literal["inline", "attachment"] = "attachment",
 ) -> StreamingResponse:
-    document = await db.scalar(select(Document).where(Document.id == target_id))
-    if document is None:
-        raise DocumentNotFoundError(target_id)
+
+    document = document_repo.read_by_id(target_id)
 
     try:
         body = await get_s3_client().download_file(
             document.s3_bucket, str(document.object_key)
         )
     except S3ObjectNotFoundError:
-        # the DB row exists but the S3 object is gone — surface it as a
-        # document-not-found to the client, not an S3 implementation detail
         raise DocumentNotFoundError(target_id)
 
     filename = quote(document.file_name)
@@ -119,17 +102,11 @@ async def read_document(
     )
 
 
-async def read_documents(db: AsyncSession, category: DocumentCategory | None = None):
+async def read_documents(
+    document_repo: DocumentRepo, category: DocumentCategory | None = None
+):
 
-    if category is None:
-        response = await db.scalars(select(Document))
-
-    else:
-        response = await db.scalars(
-            select(Document).where(Document.category == category)
-        )
-
-    return list(response.all())
+    return await document_repo.read_documents(category)
 
 
 async def update_document(bucket_name: str):
