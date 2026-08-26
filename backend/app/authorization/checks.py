@@ -10,7 +10,7 @@ from app.models.user import UserDepartment, UserRole
 
 def role_is(role: UserRole):
     def check(user: User) -> None:
-        if not (role == UserRole.ADMIN and user.role != role):
+        if user.role != role:
             raise RoleRequiredError(role)
 
     return check
