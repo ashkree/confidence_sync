@@ -31,7 +31,7 @@ export async function validateToken(token: string) {
   return MOCK_USERS[username] ?? null;
 }
 
-export async function refresh(refreshToken: string) {
+export async function refresh(refreshToken: string, _email?: string) {
   await new Promise((r) => setTimeout(r, 100));
 
   if (!refreshToken.startsWith(REFRESH_PREFIX)) {

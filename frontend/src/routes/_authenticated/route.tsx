@@ -9,6 +9,7 @@ import {
   User,
 } from "lucide-react";
 import { useAuth } from "@/auth";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: ({ context, location }) => {
@@ -110,6 +111,7 @@ function RouteComponent() {
           </main>
         </SidebarInset>
       </SidebarProvider>
+      <ChatWidget />
     </div>
   );
 }

@@ -26,11 +26,11 @@ export async function validateToken(token: string) {
   return res.json();
 }
 
-export async function refresh(refreshToken: string) {
+export async function refresh(refreshToken: string, email: string) {
   const res = await fetch("/api/v1/auth/refresh", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refresh_token: refreshToken }),
+    body: JSON.stringify({ email, refresh_token: refreshToken }),
   });
   if (!res.ok) throw new Error("Refresh token failed");
   const data = await res.json();

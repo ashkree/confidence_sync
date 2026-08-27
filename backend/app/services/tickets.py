@@ -106,4 +106,4 @@ async def summarize_ticket(
     ticket = await ticket_repo.read_by_id(ticket_id)
     comments = await ticket_repo.read_comments(ticket_id)
     ticket.ai_summary = await generate_ticket_summary(ticket, comments)
-    return await ticket_repo.save(ticket, refresh=["poster", "assignee"])
+    return await ticket_repo.save(ticket, refresh=["poster", "assignee", "updated_at"])

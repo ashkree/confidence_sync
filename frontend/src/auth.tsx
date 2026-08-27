@@ -15,7 +15,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
+  const storedEmail = localStorage.getItem("auth-email");
   const isAuthenticated = user !== null;
 
   // checks for token existence and validates it, falling back to a
@@ -38,8 +38,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (storedRefreshToken) setRefreshToken(storedRefreshToken);
       })
       .catch(async () => {
-        if (!storedRefreshToken) {
+        if (!storedRefreshToken || !storedEmail) {
           localStorage.removeItem("auth-token");
+          localStorage.removeItem("refresh-token");
+          localStorage.removeItem("auth-email");
           return;
         }
 
@@ -48,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             token: newToken,
             refreshToken: newRefreshToken,
             user: refreshedUser,
-          } = await apiRefresh(storedRefreshToken);
+          } = await apiRefresh(storedRefreshToken, storedEmail);
 
           setUser(refreshedUser);
           setAccessToken(newToken);
@@ -61,6 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch {
           localStorage.removeItem("auth-token");
           localStorage.removeItem("refresh-token");
+          localStorage.removeItem("auth-email");
         }
       })
       .finally(() => setIsLoading(false));
@@ -78,6 +81,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("auth-token", token);
     if (newRefreshToken) {
       localStorage.setItem("refresh-token", newRefreshToken);
+      localStorage.setItem("auth-email", user.email);
+      localStorage.removeItem("auth-email");
     }
   };
 

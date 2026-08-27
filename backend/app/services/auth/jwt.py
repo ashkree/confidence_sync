@@ -19,7 +19,7 @@ def get_cognito_jwks_base_url() -> str:
 def get_issuer() -> str:
     """Used only for validating the iss claim — must match what cognito-local actually issues."""
     if settings.use_cognito_local and settings.app_env == "development":
-        return f"{settings.cognito_endpoint_url}/{settings.cognito_user_pool_id}"
+        return f"http://0.0.0.0:9229/{settings.cognito_user_pool_id}"
     return f"https://cognito-idp.{settings.aws_region}.amazonaws.com/{settings.cognito_user_pool_id}"
 
 
