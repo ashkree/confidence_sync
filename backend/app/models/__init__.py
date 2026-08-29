@@ -1,4 +1,6 @@
 from app.models.base import Base
+from app.models.chat_message import ChatMessage
+from app.models.chat_session import ChatSession
 from app.models.document_chunks import DocumentChunk
 from app.models.documents import Document
 from app.models.hr_request import HrRequest
@@ -16,4 +18,6 @@ __all__ = [
     "TicketComment",
     "Document",
     "DocumentChunk",
+    "ChatMessage",
+    "ChatSession",
 ]
