@@ -1,4 +1,4 @@
 export interface ChatMessage {
-  role: "assistant" | "human";
+  role: "ASSISTANT" | "USER";
   content: string;
 }

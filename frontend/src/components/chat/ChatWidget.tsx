@@ -41,35 +41,22 @@ export function ChatWidget({ initialMessages }: ChatWidgetProps) {
   useEffect(() => {
     if (!isOpen) return;
 
-    let sessionId = localStorage.getItem("chat_session_id");
+    const sessionId = localStorage.getItem("chat_session_id");
 
-    if (!sessionId) {
-      // No existing session — create a new UUID, no backend fetch needed
-      sessionId = crypto.randomUUID();
-      localStorage.setItem("chat_session_id", sessionId);
-
-      // Initialize with greeting if no messages passed in
-      if (messages.length === 0) {
-        setMessages([
-          {
-            role: "assistant",
-            content: `Hello ${user?.name ?? "there"}! How may I help you today?`,
-          },
-        ]);
-      }
-      return;
-    }
-
-    // Existing session — fetch history from backend
+    // Always call backend — pass null if no stored session.
+    // Backend creates a new session when session_id is omitted.
     setIsLoadingHistory(true);
     fetchChatMessages(sessionId)
-      .then((fetched) => {
-        if (fetched.length > 0) {
-          setMessages(fetched);
+      .then((response) => {
+        // Store whatever session_id the backend returned
+        localStorage.setItem("chat_session_id", response.session_id);
+
+        if (response.messages.length > 0) {
+          setMessages(response.messages);
         } else {
           setMessages([
             {
-              role: "assistant",
+              role: "ASSISTANT",
               content: `Hello ${user?.name ?? "there"}! How may I help you today?`,
             },
           ]);
@@ -79,7 +66,7 @@ export function ChatWidget({ initialMessages }: ChatWidgetProps) {
         // On error, still show greeting
         setMessages([
           {
-            role: "assistant",
+            role: "ASSISTANT",
             content: `Hello ${user?.name ?? "there"}! How may I help you today?`,
           },
         ]);
@@ -103,23 +90,29 @@ export function ChatWidget({ initialMessages }: ChatWidgetProps) {
       if (!sessionId || !content.trim()) return;
 
       setIsSending(true);
+      setSendError(null);
 
       try {
         // Optimistically show the user's message
-        const userMessage: ChatMessage = { role: "human", content };
+        const userMessage: ChatMessage = { role: "USER", content };
         setMessages((prev) => [...prev, userMessage]);
         form.reset();
 
         // Show pending indicator for assistant reply
         setIsPendingReply(true);
 
-        const assistantReply = await sendChatMessage(sessionId, content);
+        const response = await sendChatMessage(sessionId, content);
 
         // Add the assistant reply only on success
-        setMessages((prev) => [...prev, assistantReply]);
-      } catch {
+        setMessages((prev) => [...prev, response.message]);
+      } catch (error) {
         // Remove the optimistically added user message on failure
         setMessages((prev) => prev.slice(0, -1));
+        setSendError(
+          error instanceof Error
+            ? error.message
+            : "Failed to send message. Please try again.",
+        );
       } finally {
         setIsSending(false);
         setIsPendingReply(false);
@@ -130,6 +123,7 @@ export function ChatWidget({ initialMessages }: ChatWidgetProps) {
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
+    setSendError(null);
     form.reset();
   }, [form]);
 
@@ -198,7 +192,7 @@ export function ChatWidget({ initialMessages }: ChatWidgetProps) {
                       key={i}
                       className={cn(
                         "max-w-[80%] rounded-lg px-3 py-2 text-sm",
-                        msg.role === "assistant"
+                        msg.role === "ASSISTANT"
                           ? "bg-muted text-foreground self-start"
                           : "bg-primary text-primary-foreground ml-auto",
                       )}
@@ -234,7 +228,10 @@ export function ChatWidget({ initialMessages }: ChatWidgetProps) {
                   {(field) => (
                     <Textarea
                       value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(e) => {
+                        if (sendError) setSendError(null);
+                        field.handleChange(e.target.value);
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault();
@@ -260,6 +257,11 @@ export function ChatWidget({ initialMessages }: ChatWidgetProps) {
                   )}
                 </Button>
               </form>
+              {sendError && (
+                <p className="mt-2 text-xs font-medium text-destructive">
+                  {sendError}
+                </p>
+              )}
             </div>
           </DialogPrimitive.Popup>
         </DialogPrimitive.Portal>

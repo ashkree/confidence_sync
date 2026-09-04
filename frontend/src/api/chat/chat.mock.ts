@@ -1,24 +1,29 @@
 import type { ChatMessage } from "@/types";
+import type { MessagesResponse, SendMessageResponse } from "./chat.service";
 
+let mockSessionId = crypto.randomUUID();
 const mockHistory: ChatMessage[] = [];
 
 export async function fetchChatMessages(
-  _sessionId: string,
-): Promise<ChatMessage[]> {
+  sessionId: string | null,
+): Promise<MessagesResponse> {
   await new Promise((r) => setTimeout(r, 500));
-  return [...mockHistory];
+  if (!sessionId) {
+    mockSessionId = crypto.randomUUID();
+  }
+  return { session_id: mockSessionId, messages: [...mockHistory] };
 }
 
 export async function sendChatMessage(
-  _sessionId: string,
+  sessionId: string,
   content: string,
-): Promise<ChatMessage> {
+): Promise<SendMessageResponse> {
   await new Promise((r) => setTimeout(r, 1000));
-  mockHistory.push({ role: "human", content });
+  mockHistory.push({ role: "USER", content });
   const reply: ChatMessage = {
-    role: "assistant",
+    role: "ASSISTANT",
     content: `I received your message: "${content}". This is a mock response.`,
   };
   mockHistory.push(reply);
-  return reply;
+  return { session_id: sessionId, message: reply };
 }

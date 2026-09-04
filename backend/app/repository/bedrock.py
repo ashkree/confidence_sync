@@ -9,9 +9,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from app.config import settings
 from app.exceptions.external import BedrockUnavailableError
+from app.models.chat_message import MessageRole
 from app.repository.aws import AWSRepo
-
-_ROLE_MAP = {"user": "human", "assistant": "ai"}
 
 splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20)
 
@@ -31,7 +30,9 @@ class BedrockRepo(AWSRepo):
         self.embed = BedrockEmbeddings(client=self.client)
 
     # Async wrapper functions
-    async def chat(self, messages: list[dict], system_prompt: str | None = None) -> str:
+    async def chat(
+        self, messages: list[tuple[MessageRole, str]], system_prompt: str | None = None
+    ) -> str:
         return await asyncio.to_thread(self._chat, messages, system_prompt)
 
     async def embed_text(self, text: str) -> list[float]:
@@ -41,9 +42,12 @@ class BedrockRepo(AWSRepo):
         return await asyncio.to_thread(self._embed_pdf, docs)
 
     # Sync callers
-    def _chat(self, messages: list[dict], system_prompt: str | None = None) -> str:
-
-        formatted = self._format_messages(messages, system_prompt)
+    def _chat(
+        self, messages: list[tuple[MessageRole, str]], system_prompt: str | None = None
+    ) -> str:
+        formatted = (
+            [("system", system_prompt)] + messages if system_prompt else messages
+        )
 
         try:
             response = self.converse.invoke(formatted)
@@ -76,19 +80,6 @@ class BedrockRepo(AWSRepo):
             ) from e
 
         return chunks, vectors
-
-    # Static methods
-    @staticmethod
-    def _format_messages(
-        messages: list[dict], system_prompt: str | None = None
-    ) -> list[tuple]:
-        formatted = []
-        if system_prompt:
-            formatted.append(("system", system_prompt))
-        formatted.extend(
-            (_ROLE_MAP.get(m["role"], m["role"]), m["content"]) for m in messages
-        )
-        return formatted
 
     @staticmethod
     def _extract_text(content: str | list[str | dict]) -> str:

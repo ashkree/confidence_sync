@@ -1,7 +1,7 @@
 import uuid
-from typing import Literal
 
 from app.models import HrRequest, ItTicket, Ticket, TicketComment
+from app.models.chat_message import MessageRole
 from app.models.hr_request import RequestType
 from app.models.it_ticket import ITRequestType
 from app.repository.bedrock import get_bedrock_client
@@ -130,13 +130,6 @@ def _format_ticket_comments(
     return "\n".join(thread)
 
 
-def _format_message(role: Literal["user", "assistant"], content: str) -> dict:
-    return {
-        "role": role,
-        "content": [{"text": content}],
-    }
-
-
 async def generate_ticket_summary(
     ticket: Ticket, comments: list[TicketComment] | None = None
 ) -> str:
@@ -150,7 +143,7 @@ async def generate_ticket_summary(
         )
         parts.append(f"<comments>\n{formatted_comments}\n</comments>")
 
-    formatted_message = [_format_message("user", "\n\n".join(parts))]
+    formatted_message = [(MessageRole.USER, "\n\n".join(parts))]
 
     return await get_bedrock_client().chat(
         messages=formatted_message,
@@ -180,6 +173,6 @@ async def generate_ticket_information(
     user_message = "\n\n".join(parts)
 
     return await get_bedrock_client().chat(
-        messages=[_format_message("user", user_message)],
+        messages=[(MessageRole.USER, user_message)],
         system_prompt=TICKET_INFORMATION_PROMPT,
     )

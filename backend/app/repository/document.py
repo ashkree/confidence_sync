@@ -57,9 +57,15 @@ class DocumentRepo:
         )
         await self.db.commit()
 
-    async def cosine_distance(self, query: Sequence[float], limit: int = 3):
+    async def cosine_distance(
+        self,
+        query: Sequence[float],
+        limit: int = 5,
+        threshold: float = 0.3,
+    ):
         chunks = await self.db.scalars(
             select(DocumentChunk.content)
+            .where(DocumentChunk.embedding.cosine_distance(query) <= threshold)
             .order_by(DocumentChunk.embedding.cosine_distance(query))
             .limit(limit)
         )

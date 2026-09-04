@@ -11,20 +11,33 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
   return res.json();
 }
 
-/** Retrieve chat history for an existing session */
+/** Response shape from GET /chat/messages */
+export interface MessagesResponse {
+  session_id: string;
+  messages: ChatMessage[];
+}
+
+/** Response shape from POST /chat/send */
+export interface SendMessageResponse {
+  session_id: string;
+  message: ChatMessage;
+}
+
+/** Retrieve chat history for an existing session, or create a new session */
 export async function fetchChatMessages(
-  sessionId: string,
-): Promise<ChatMessage[]> {
-  return fetchWithAuth(
-    `/api/v1/chat/messages?session_id=${encodeURIComponent(sessionId)}`,
-  );
+  sessionId: string | null,
+): Promise<MessagesResponse> {
+  const url = sessionId
+    ? `/api/v1/chat/messages?session_id=${encodeURIComponent(sessionId)}`
+    : `/api/v1/chat/messages`;
+  return fetchWithAuth(url);
 }
 
 /** Send a message and receive the assistant's reply */
 export async function sendChatMessage(
   sessionId: string,
   content: string,
-): Promise<ChatMessage> {
+): Promise<SendMessageResponse> {
   return fetchWithAuth("/api/v1/chat/send", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

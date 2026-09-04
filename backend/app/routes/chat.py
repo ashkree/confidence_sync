@@ -1,8 +1,12 @@
+import uuid
+
 from fastapi import APIRouter, Depends, Query
 
 from app.authorization.guards import require_authenticated
+from app.repository.chat import ChatRepo, get_chat_repo
+from app.repository.document import DocumentRepo, get_document_repo
 from app.schemas.chat import MessagesResponse, PostMessageRequest, SendMessageResponse
-from app.services.chat import read_messages, write_message
+from app.services.chat import get_active_session, write_message
 
 chat_router = APIRouter(prefix="/chat")
 
@@ -13,17 +17,22 @@ chat_router = APIRouter(prefix="/chat")
     dependencies=[Depends(require_authenticated)],
 )
 async def get_messages(
-    session_id: str = Query(...),
+    session_id: uuid.UUID | None = Query(None),
+    chat_repo: ChatRepo = Depends(get_chat_repo),
 ):
-    raise await read_messages()
+    return await get_active_session(chat_repo, session_id)
 
 
 @chat_router.post(
-    "/messages",
+    "/send",
     response_model=SendMessageResponse,
     dependencies=[Depends(require_authenticated)],
 )
 async def send_message(
     request: PostMessageRequest,
+    chat_repo: ChatRepo = Depends(get_chat_repo),
+    document_repo: DocumentRepo = Depends(get_document_repo),
 ):
-    raise await write_message()
+    return await write_message(
+        chat_repo, document_repo, request.session_id, request.content
+    )

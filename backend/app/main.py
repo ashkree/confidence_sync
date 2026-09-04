@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.exceptions.handlers import register_exception_handlers
 from app.routes.auth import auth_router
+from app.routes.chat import chat_router
 from app.routes.documents import document_router
 from app.routes.tickets import ticket_router
 
@@ -19,6 +20,7 @@ main_route = APIRouter(prefix="/api/v1")
 main_route.include_router(document_router)
 main_route.include_router(ticket_router)
 main_route.include_router(auth_router)
+main_route.include_router(chat_router)
 
 app.include_router(main_route)
 

@@ -1,18 +1,20 @@
-import datetime
-from typing import Literal
+import uuid
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
-
-class PostMessageRequest(BaseModel):
-    session_id: str | None = None
-    content: str
+from app.models.chat_message import MessageRole
 
 
 class ChatMessage(BaseModel):
-    role: Literal["assistant", "user"]
+    model_config = ConfigDict(from_attributes=True)
+
+    role: MessageRole
     content: str
-    created_at: datetime.datetime
+
+
+class PostMessageRequest(BaseModel):
+    session_id: uuid.UUID
+    content: str
 
 
 class MessagesResponse(BaseModel):

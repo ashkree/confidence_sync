@@ -7,3 +7,5 @@ const useMock = USE_MOCK_DATA;
 export const { fetchChatMessages, sendChatMessage } = useMock
   ? mock
   : service;
+
+export type { MessagesResponse, SendMessageResponse } from "./chat.service";
