@@ -8,6 +8,7 @@ from sqlalchemy.orm import selectinload
 from app.database import get_db
 from app.exceptions.chat import SessionNotFoundError
 from app.models import ChatMessage, ChatSession
+from app.models.chat_message import MessageRole
 
 
 class ChatRepo:
@@ -54,7 +55,7 @@ class ChatRepo:
         await self.db.commit()
 
     @staticmethod
-    def as_history(session: ChatSession) -> list[tuple[str, str]]:
+    def as_history(session: ChatSession) -> list[tuple[MessageRole, str]]:
         """Return all messages in a session as (role, content) tuples."""
         return [message.as_turn() for message in session.messages]
 

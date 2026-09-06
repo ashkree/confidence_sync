@@ -33,6 +33,6 @@ class ChatMessage(Base):
         server_default=func.now(),
     )
 
-    def as_turn(self) -> tuple[str, str]:
+    def as_turn(self) -> tuple[MessageRole, str]:
         """Return this message as a (role, content) tuple."""
-        return (self.role.value.lower(), self.content)
+        return (self.role, self.content)

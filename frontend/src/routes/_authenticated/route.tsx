@@ -35,6 +35,11 @@ const employee_group = {
       isActive: true,
     },
     {
+      title: "My Tickets",
+      url: "/ticket/my",
+      icon: Tickets,
+    },
+    {
       title: "Submit a request",
       url: "/ticket/submit",
       icon: Plus,

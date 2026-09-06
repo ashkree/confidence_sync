@@ -4,7 +4,12 @@ import type {
   TicketPriority,
   TicketStatus,
 } from "@/types";
-import { getAllTickets, getAllComments, getUserNameById } from "@/data";
+import {
+  getAllTickets,
+  getAllComments,
+  getUserNameById,
+  getUserByEmail,
+} from "@/data";
 import { formatDate } from "@/lib/date";
 
 let _mockTickets: Ticket[] | null = null;
@@ -61,7 +66,11 @@ export async function fetchTickets(): Promise<Ticket[]> {
 
 export async function fetchMyTickets(): Promise<Ticket[]> {
   await new Promise((resolve) => setTimeout(resolve, 500));
-  return [];
+  const email = localStorage.getItem("auth-email");
+  const user = email ? getUserByEmail(email) : null;
+  const tickets = getMockTickets();
+  if (!user) return tickets;
+  return tickets.filter((t) => t.poster_id === user.id);
 }
 
 export async function fetchTicket(id: string): Promise<Ticket | null> {

@@ -103,7 +103,7 @@ async def write_message(
         turn = content
 
     response = await get_bedrock_client().chat(
-        messages=[*history, (MessageRole.USER.value.lower(), turn)],
+        messages=[*history, (MessageRole.USER, turn)],
         system_prompt=CHAT_SYSTEM_PROMPT,
     )
 

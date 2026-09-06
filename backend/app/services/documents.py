@@ -116,8 +116,8 @@ async def update_document(bucket_name: str):
     raise NotImplementedError
 
 
-async def delete_document(bucket_name: str):
-    # TODO: Delete a document from a bucket
-    # TODO: Delete database entry
-    # TODO: Delete vectors
-    raise NotImplementedError
+async def delete_document(document_repo: DocumentRepo, document_id: uuid.UUID) -> None:
+    document = await document_repo.read_by_id(document_id)
+
+    await get_s3_client().delete_file(document.s3_bucket, str(document.object_key))
+    await document_repo.delete(document)

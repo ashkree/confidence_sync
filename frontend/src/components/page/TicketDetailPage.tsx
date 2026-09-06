@@ -24,7 +24,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Clock, FileText, Sparkles, User, UserCheck, UserMinus } from "lucide-react";
+import {
+  ArrowLeft,
+  Clock,
+  FileText,
+  Sparkles,
+  User,
+  UserCheck,
+  UserMinus,
+} from "lucide-react";
 import { formatDate } from "@/lib/date";
 import { cn } from "@/lib/utils";
 import type { TicketPriority, TicketStatus, TicketComment } from "@/types";
@@ -269,7 +277,7 @@ export function TicketDetailPage() {
       </Card>
 
       {/* Information Card — only rendered when the field has content */}
-      {ticket.information && (
+      {isAdmin && ticket.information && (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Information</CardTitle>
@@ -333,7 +341,10 @@ export function TicketDetailPage() {
                   <SelectItem value="LOW">Low</SelectItem>
                 </SelectContent>
               </Select>
-              <Button onClick={handlePriorityUpdate} disabled={isUpdatingPriority}>
+              <Button
+                onClick={handlePriorityUpdate}
+                disabled={isUpdatingPriority}
+              >
                 {isUpdatingPriority ? "Updating..." : "Update"}
               </Button>
             </div>

@@ -45,9 +45,11 @@ class BedrockRepo(AWSRepo):
     def _chat(
         self, messages: list[tuple[MessageRole, str]], system_prompt: str | None = None
     ) -> str:
-        formatted = (
-            [("system", system_prompt)] + messages if system_prompt else messages
-        )
+
+        formatted = [(role.value.lower(), content) for role, content in messages]
+
+        if system_prompt:
+            formatted = [("system", system_prompt), *formatted]
 
         try:
             response = self.converse.invoke(formatted)

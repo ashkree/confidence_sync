@@ -28,6 +28,7 @@ import { ChevronsUpDownIcon, LogOutIcon, UsersRound } from "lucide-react";
 import { MOCK_USERS } from "@/api/auth";
 import { SHOW_DEV_TOOLS } from "@/lib/env";
 import { useAppEnv } from "@/contexts/app-env";
+import { useNavigate } from "@tanstack/react-router";
 
 export function NavUser({
   user,
@@ -41,20 +42,27 @@ export function NavUser({
   const { isMobile } = useSidebar();
   const [sheetOpen, setSheetOpen] = useState(false);
   const { appEnv } = useAppEnv();
+  const navigate = useNavigate();
 
   const handleSwitch = async (email: string) => {
     if (onSwitchUser) {
-      const prefix = email.split('@')[0];
+      const prefix = email.split("@")[0];
       await onSwitchUser(email, `${prefix}123!`);
       setSheetOpen(false);
+      navigate({ to: "/employee" });
+
       window.location.reload();
     }
   };
 
   const mockEntries = MOCK_USERS ? Object.entries(MOCK_USERS) : [];
   const employees = mockEntries.filter(([, u]) => u.role === "EMPLOYEE");
-  const hrAdmins = mockEntries.filter(([, u]) => u.role === "ADMIN" && u.department === "HR");
-  const itAdmins = mockEntries.filter(([, u]) => u.role === "ADMIN" && u.department === "IT");
+  const hrAdmins = mockEntries.filter(
+    ([, u]) => u.role === "ADMIN" && u.department === "HR",
+  );
+  const itAdmins = mockEntries.filter(
+    ([, u]) => u.role === "ADMIN" && u.department === "IT",
+  );
 
   return (
     <>
@@ -63,7 +71,10 @@ export function NavUser({
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <SidebarMenuButton size="lg" className="aria-expanded:bg-muted" />
+                <SidebarMenuButton
+                  size="lg"
+                  className="aria-expanded:bg-muted"
+                />
               }
             >
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -118,7 +129,9 @@ export function NavUser({
             </SheetHeader>
             <div className="flex flex-col gap-4 p-4 overflow-y-auto">
               <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-2">Employees</h4>
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                  Employees
+                </h4>
                 <div className="flex flex-col gap-1">
                   {employees.map(([email, u]) => (
                     <Button
@@ -132,7 +145,9 @@ export function NavUser({
                         <span className="text-xs opacity-70">{email}</span>
                       </div>
                       {user?.email === email && (
-                        <Badge variant="secondary" className="ml-auto text-xs">Active</Badge>
+                        <Badge variant="secondary" className="ml-auto text-xs">
+                          Active
+                        </Badge>
                       )}
                     </Button>
                   ))}
@@ -140,7 +155,9 @@ export function NavUser({
               </div>
               <Separator />
               <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-2">HR Admins</h4>
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                  HR Admins
+                </h4>
                 <div className="flex flex-col gap-1">
                   {hrAdmins.map(([email, u]) => (
                     <Button
@@ -154,7 +171,9 @@ export function NavUser({
                         <span className="text-xs opacity-70">{email}</span>
                       </div>
                       {user?.email === email && (
-                        <Badge variant="secondary" className="ml-auto text-xs">Active</Badge>
+                        <Badge variant="secondary" className="ml-auto text-xs">
+                          Active
+                        </Badge>
                       )}
                     </Button>
                   ))}
@@ -162,7 +181,9 @@ export function NavUser({
               </div>
               <Separator />
               <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-2">IT Admins</h4>
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                  IT Admins
+                </h4>
                 <div className="flex flex-col gap-1">
                   {itAdmins.map(([email, u]) => (
                     <Button
@@ -176,7 +197,9 @@ export function NavUser({
                         <span className="text-xs opacity-70">{email}</span>
                       </div>
                       {user?.email === email && (
-                        <Badge variant="secondary" className="ml-auto text-xs">Active</Badge>
+                        <Badge variant="secondary" className="ml-auto text-xs">
+                          Active
+                        </Badge>
                       )}
                     </Button>
                   ))}

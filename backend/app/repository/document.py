@@ -20,6 +20,10 @@ class DocumentRepo:
         self.db.add(document)
         await self.db.flush()
 
+    async def delete(self, document: Document) -> None:
+        await self.db.delete(document)
+        await self.db.commit()
+
     async def read_by_id(self, id: uuid.UUID):
 
         document = await self.db.scalar(select(Document).where(Document.id == id))

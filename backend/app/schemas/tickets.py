@@ -40,6 +40,8 @@ class HrRequestCreate(TicketCreateBase):
     type: Literal[TicketType.HR_REQUEST] = TicketType.HR_REQUEST
     request_type: RequestType
     document_type: DocumentType | None = None
+    from_date: FormattedDate | None = None
+    to_date: FormattedDate | None = None
 
     def to_orm(self, poster_id: uuid.UUID) -> HrRequest:
         return HrRequest(**self.model_dump(exclude={"type"}), poster_id=poster_id)

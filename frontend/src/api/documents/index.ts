@@ -10,4 +10,5 @@ export const {
   createDocument,
   viewDocument,
   downloadDocument,
+  deleteDocument,
 } = useMock ? mock : service;

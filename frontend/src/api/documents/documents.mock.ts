@@ -83,3 +83,9 @@ export async function viewDocument(id: string): Promise<void> {
 export async function downloadDocument(id: string): Promise<void> {
   return getDocument(id, "download");
 }
+
+export async function deleteDocument(id: string): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  _mockDocuments = getMockDocuments().filter((d) => d.id !== id);
+  saveMockDocuments();
+}

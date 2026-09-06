@@ -32,7 +32,9 @@ class TicketRepo:
 
     async def read_by_poster(self, poster_id: uuid.UUID) -> list[Ticket]:
         result = await self.db.scalars(
-            self._query().where(TicketWithSubtypes.poster_id == poster_id)
+            self._query()
+            .where(TicketWithSubtypes.poster_id == poster_id)
+            .order_by(Ticket.updated_at.desc())
         )
         return list(result.all())
 

@@ -76,3 +76,9 @@ export async function viewDocument(id: string): Promise<void> {
 export async function downloadDocument(id: string): Promise<void> {
   return getDocument(id, "download");
 }
+
+export async function deleteDocument(id: string): Promise<void> {
+  await fetchWithAuth(`/api/v1/documents/${id}`, {
+    method: "DELETE",
+  });
+}

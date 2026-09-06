@@ -48,12 +48,12 @@ const schema = z.object({
   department: z.enum(["HR", "IT"], { message: "Department is required" }),
   priority: z.string(),
   request_type: z.string(),
-  document_type: z.string(),
+  document_type: z.string().optional(),
   from_date: z.date().optional(),
   to_date: z.date().optional(),
-  device_type: z.string(),
-  fault_code: z.string(),
-  software_name: z.string(),
+  device_type: z.string().optional(),
+  fault_code: z.string().optional(),
+  software_name: z.string().optional(),
 });
 
 export function TicketSubmissionPage() {
@@ -68,12 +68,12 @@ export function TicketSubmissionPage() {
       department: search.department || "",
       priority: "MEDIUM",
       request_type: search.requestType || search.ticketType || "",
-      document_type: "",
+      document_type: undefined as string | undefined,
       from_date: undefined as Date | undefined,
       to_date: undefined as Date | undefined,
-      device_type: "",
-      fault_code: "",
-      software_name: "",
+      device_type: undefined as string | undefined,
+      fault_code: undefined as string | undefined,
+      software_name: undefined as string | undefined,
     },
     validators: {
       // @ts-expect-error Zod optional properties mismatch with required properties in defaultValues
@@ -82,8 +82,12 @@ export function TicketSubmissionPage() {
     onSubmit: async ({ value }) => {
       const newTicket = await createTicket({
         ...value,
-        from_date: value.from_date ? format(value.from_date, "dd/MM/yyyy") : undefined,
-        to_date: value.to_date ? format(value.to_date, "dd/MM/yyyy") : undefined,
+        from_date: value.from_date
+          ? format(value.from_date, "dd/MM/yyyy")
+          : undefined,
+        to_date: value.to_date
+          ? format(value.to_date, "dd/MM/yyyy")
+          : undefined,
         type: value.department === "HR" ? "HR_REQUEST" : "IT_TICKET",
         priority: value.priority as "LOW" | "MEDIUM" | "HIGH",
         poster_id: user?.id,
@@ -118,7 +122,8 @@ export function TicketSubmissionPage() {
           >
             <form.Field name="subject">
               {(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel>Subject</FieldLabel>
@@ -131,7 +136,9 @@ export function TicketSubmissionPage() {
                         placeholder="Brief summary of the issue or request"
                       />
                     </FieldContent>
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 );
               }}
@@ -139,7 +146,8 @@ export function TicketSubmissionPage() {
 
             <form.Field name="description">
               {(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel>Description</FieldLabel>
@@ -153,7 +161,9 @@ export function TicketSubmissionPage() {
                         className="min-h-[100px]"
                       />
                     </FieldContent>
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 );
               }}
@@ -161,7 +171,8 @@ export function TicketSubmissionPage() {
 
             <form.Field name="department">
               {(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel>Department</FieldLabel>
@@ -170,16 +181,25 @@ export function TicketSubmissionPage() {
                         value={field.state.value}
                         onValueChange={(val) => field.handleChange(val || "")}
                       >
-                        <SelectTrigger className="w-full" aria-invalid={isInvalid}>
+                        <SelectTrigger
+                          className="w-full"
+                          aria-invalid={isInvalid}
+                        >
                           <SelectValue placeholder="Select department" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="HR">Human Resources (HR)</SelectItem>
-                          <SelectItem value="IT">Information Technology (IT)</SelectItem>
+                          <SelectItem value="HR">
+                            Human Resources (HR)
+                          </SelectItem>
+                          <SelectItem value="IT">
+                            Information Technology (IT)
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </FieldContent>
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 );
               }}
@@ -197,25 +217,40 @@ export function TicketSubmissionPage() {
                       <div className="space-y-6 p-4 border rounded-md bg-muted/20">
                         <form.Field name="request_type">
                           {(field) => {
-                            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                            const isInvalid =
+                              field.state.meta.isTouched &&
+                              !field.state.meta.isValid;
                             return (
                               <Field data-invalid={isInvalid}>
                                 <FieldLabel>Request Type</FieldLabel>
                                 <FieldContent>
                                   <Select
                                     value={field.state.value}
-                                    onValueChange={(val) => field.handleChange(val || "")}
+                                    onValueChange={(val) =>
+                                      field.handleChange(val || "")
+                                    }
                                   >
-                                    <SelectTrigger className="w-full" aria-invalid={isInvalid}>
+                                    <SelectTrigger
+                                      className="w-full"
+                                      aria-invalid={isInvalid}
+                                    >
                                       <SelectValue placeholder="Select request type" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="LEAVE_REQUEST">Leave Request</SelectItem>
-                                      <SelectItem value="DOCUMENT_REQUEST">Document Request</SelectItem>
+                                      <SelectItem value="LEAVE_REQUEST">
+                                        Leave Request
+                                      </SelectItem>
+                                      <SelectItem value="DOCUMENT_REQUEST">
+                                        Document Request
+                                      </SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </FieldContent>
-                                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                                {isInvalid && (
+                                  <FieldError
+                                    errors={field.state.meta.errors}
+                                  />
+                                )}
                               </Field>
                             );
                           }}
@@ -225,7 +260,9 @@ export function TicketSubmissionPage() {
                           <div className="grid grid-cols-2 gap-4">
                             <form.Field name="from_date">
                               {(field) => {
-                                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                                const isInvalid =
+                                  field.state.meta.isTouched &&
+                                  !field.state.meta.isValid;
                                 return (
                                   <Field data-invalid={isInvalid}>
                                     <FieldLabel>From Date</FieldLabel>
@@ -237,34 +274,49 @@ export function TicketSubmissionPage() {
                                             variant={"outline"}
                                             className={cn(
                                               "w-full justify-start text-left font-normal",
-                                              !field.state.value && "text-muted-foreground",
+                                              !field.state.value &&
+                                                "text-muted-foreground",
                                             )}
                                           >
                                             <CalendarIcon className="mr-2 h-4 w-4" />
                                             {field.state.value ? (
-                                              format(field.state.value, "dd/MM/yyyy")
+                                              format(
+                                                field.state.value,
+                                                "dd/MM/yyyy",
+                                              )
                                             ) : (
                                               <span>Pick a date</span>
                                             )}
                                           </Button>
                                         </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0" align="start">
+                                        <PopoverContent
+                                          className="w-auto p-0"
+                                          align="start"
+                                        >
                                           <Calendar
                                             mode="single"
                                             selected={field.state.value}
-                                            onSelect={(date) => field.handleChange(date)}
+                                            onSelect={(date) =>
+                                              field.handleChange(date)
+                                            }
                                           />
                                         </PopoverContent>
                                       </Popover>
                                     </FieldContent>
-                                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                                    {isInvalid && (
+                                      <FieldError
+                                        errors={field.state.meta.errors}
+                                      />
+                                    )}
                                   </Field>
                                 );
                               }}
                             </form.Field>
                             <form.Field name="to_date">
                               {(field) => {
-                                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                                const isInvalid =
+                                  field.state.meta.isTouched &&
+                                  !field.state.meta.isValid;
                                 return (
                                   <Field data-invalid={isInvalid}>
                                     <FieldLabel>To Date</FieldLabel>
@@ -276,27 +328,40 @@ export function TicketSubmissionPage() {
                                             variant={"outline"}
                                             className={cn(
                                               "w-full justify-start text-left font-normal",
-                                              !field.state.value && "text-muted-foreground",
+                                              !field.state.value &&
+                                                "text-muted-foreground",
                                             )}
                                           >
                                             <CalendarIcon className="mr-2 h-4 w-4" />
                                             {field.state.value ? (
-                                              format(field.state.value, "dd/MM/yyyy")
+                                              format(
+                                                field.state.value,
+                                                "dd/MM/yyyy",
+                                              )
                                             ) : (
                                               <span>Pick a date</span>
                                             )}
                                           </Button>
                                         </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0" align="start">
+                                        <PopoverContent
+                                          className="w-auto p-0"
+                                          align="start"
+                                        >
                                           <Calendar
                                             mode="single"
                                             selected={field.state.value}
-                                            onSelect={(date) => field.handleChange(date)}
+                                            onSelect={(date) =>
+                                              field.handleChange(date)
+                                            }
                                           />
                                         </PopoverContent>
                                       </Popover>
                                     </FieldContent>
-                                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                                    {isInvalid && (
+                                      <FieldError
+                                        errors={field.state.meta.errors}
+                                      />
+                                    )}
                                   </Field>
                                 );
                               }}
@@ -307,25 +372,40 @@ export function TicketSubmissionPage() {
                         {requestType === "DOCUMENT_REQUEST" && (
                           <form.Field name="document_type">
                             {(field) => {
-                              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                              const isInvalid =
+                                field.state.meta.isTouched &&
+                                !field.state.meta.isValid;
                               return (
                                 <Field data-invalid={isInvalid}>
                                   <FieldLabel>Document Type</FieldLabel>
                                   <FieldContent>
                                     <Select
                                       value={field.state.value}
-                                      onValueChange={(val) => field.handleChange(val || "")}
+                                      onValueChange={(val) =>
+                                        field.handleChange(val || undefined)
+                                      }
                                     >
-                                      <SelectTrigger className="w-full" aria-invalid={isInvalid}>
+                                      <SelectTrigger
+                                        className="w-full"
+                                        aria-invalid={isInvalid}
+                                      >
                                         <SelectValue placeholder="Select document" />
                                       </SelectTrigger>
                                       <SelectContent>
-                                        <SelectItem value="SALARY_CERTIFICATE">Salary Certificate</SelectItem>
-                                        <SelectItem value="NOC">NOC (No Objection Certificate)</SelectItem>
+                                        <SelectItem value="SALARY_CERTIFICATE">
+                                          Salary Certificate
+                                        </SelectItem>
+                                        <SelectItem value="NOC">
+                                          NOC (No Objection Certificate)
+                                        </SelectItem>
                                       </SelectContent>
                                     </Select>
                                   </FieldContent>
-                                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                                  {isInvalid && (
+                                    <FieldError
+                                      errors={field.state.meta.errors}
+                                    />
+                                  )}
                                 </Field>
                               );
                             }}
@@ -339,25 +419,40 @@ export function TicketSubmissionPage() {
                       <div className="space-y-6 p-4 border rounded-md bg-muted/20">
                         <form.Field name="request_type">
                           {(field) => {
-                            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                            const isInvalid =
+                              field.state.meta.isTouched &&
+                              !field.state.meta.isValid;
                             return (
                               <Field data-invalid={isInvalid}>
                                 <FieldLabel>Ticket Type</FieldLabel>
                                 <FieldContent>
                                   <Select
                                     value={field.state.value}
-                                    onValueChange={(val) => field.handleChange(val || "")}
+                                    onValueChange={(val) =>
+                                      field.handleChange(val || "")
+                                    }
                                   >
-                                    <SelectTrigger className="w-full" aria-invalid={isInvalid}>
+                                    <SelectTrigger
+                                      className="w-full"
+                                      aria-invalid={isInvalid}
+                                    >
                                       <SelectValue placeholder="Select ticket type" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="HARDWARE_ISSUE">Hardware Issue</SelectItem>
-                                      <SelectItem value="SOFTWARE_ISSUE">Software Issue</SelectItem>
+                                      <SelectItem value="HARDWARE_ISSUE">
+                                        Hardware Issue
+                                      </SelectItem>
+                                      <SelectItem value="SOFTWARE_ISSUE">
+                                        Software Issue
+                                      </SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </FieldContent>
-                                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                                {isInvalid && (
+                                  <FieldError
+                                    errors={field.state.meta.errors}
+                                  />
+                                )}
                               </Field>
                             );
                           }}
@@ -367,7 +462,9 @@ export function TicketSubmissionPage() {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <form.Field name="device_type">
                               {(field) => {
-                                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                                const isInvalid =
+                                  field.state.meta.isTouched &&
+                                  !field.state.meta.isValid;
                                 return (
                                   <Field data-invalid={isInvalid}>
                                     <FieldLabel>Device Type</FieldLabel>
@@ -375,19 +472,27 @@ export function TicketSubmissionPage() {
                                       <Input
                                         value={field.state.value}
                                         onBlur={field.handleBlur}
-                                        onChange={(e) => field.handleChange(e.target.value)}
+                                        onChange={(e) =>
+                                          field.handleChange(e.target.value)
+                                        }
                                         aria-invalid={isInvalid}
                                         placeholder="e.g. Laptop, Monitor"
                                       />
                                     </FieldContent>
-                                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                                    {isInvalid && (
+                                      <FieldError
+                                        errors={field.state.meta.errors}
+                                      />
+                                    )}
                                   </Field>
                                 );
                               }}
                             </form.Field>
                             <form.Field name="fault_code">
                               {(field) => {
-                                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                                const isInvalid =
+                                  field.state.meta.isTouched &&
+                                  !field.state.meta.isValid;
                                 return (
                                   <Field data-invalid={isInvalid}>
                                     <FieldLabel>Fault Code</FieldLabel>
@@ -395,13 +500,19 @@ export function TicketSubmissionPage() {
                                       <Input
                                         value={field.state.value}
                                         onBlur={field.handleBlur}
-                                        onChange={(e) => field.handleChange(e.target.value)}
+                                        onChange={(e) =>
+                                          field.handleChange(e.target.value)
+                                        }
                                         aria-invalid={isInvalid}
                                         placeholder="e.g. E012"
                                         maxLength={4}
                                       />
                                     </FieldContent>
-                                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                                    {isInvalid && (
+                                      <FieldError
+                                        errors={field.state.meta.errors}
+                                      />
+                                    )}
                                   </Field>
                                 );
                               }}
@@ -412,7 +523,9 @@ export function TicketSubmissionPage() {
                         {requestType === "SOFTWARE_ISSUE" && (
                           <form.Field name="software_name">
                             {(field) => {
-                              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                              const isInvalid =
+                                field.state.meta.isTouched &&
+                                !field.state.meta.isValid;
                               return (
                                 <Field data-invalid={isInvalid}>
                                   <FieldLabel>Software Name</FieldLabel>
@@ -420,12 +533,18 @@ export function TicketSubmissionPage() {
                                     <Input
                                       value={field.state.value}
                                       onBlur={field.handleBlur}
-                                      onChange={(e) => field.handleChange(e.target.value)}
+                                      onChange={(e) =>
+                                        field.handleChange(e.target.value)
+                                      }
                                       aria-invalid={isInvalid}
                                       placeholder="e.g. Microsoft Outlook, Slack"
                                     />
                                   </FieldContent>
-                                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                                  {isInvalid && (
+                                    <FieldError
+                                      errors={field.state.meta.errors}
+                                    />
+                                  )}
                                 </Field>
                               );
                             }}
@@ -440,7 +559,11 @@ export function TicketSubmissionPage() {
 
             <form.Subscribe selector={(state) => state.canSubmit}>
               {(canSubmit) => (
-                <Button type="submit" disabled={!canSubmit} className="w-full sm:w-auto">
+                <Button
+                  type="submit"
+                  disabled={!canSubmit}
+                  className="w-full sm:w-auto"
+                >
                   Submit Request
                 </Button>
               )}

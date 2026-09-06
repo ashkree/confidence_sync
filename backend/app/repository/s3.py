@@ -30,6 +30,9 @@ class S3Repo(AWSRepo):
     async def download_file(self, bucket_name: str, object_name: str):
         return await asyncio.to_thread(self._download_file, bucket_name, object_name)
 
+    async def delete_file(self, bucket_name: str, object_key: str):
+        await asyncio.to_thread(self._delete_file, bucket_name, object_key)
+
     def _upload_file(self, file_obj, bucket_name, object_key, extra_args=None):
         merged_extra_args = {"ContentType": "application/pdf"}
         if extra_args:
@@ -51,6 +54,12 @@ class S3Repo(AWSRepo):
         except (ClientError, BotoCoreError) as e:
             raise S3UnavailableError(f"S3 download failed: {e}") from e
         return response["Body"]
+
+    def _delete_file(self, bucket_name: str, object_key: str):
+        try:
+            self.client.delete_object(Bucket=bucket_name, Key=object_key)
+        except (ClientError, BotoCoreError) as e:
+            raise S3UnavailableError(f"S3 delete failed: {e}") from e
 
 
 @lru_cache

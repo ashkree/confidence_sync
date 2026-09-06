@@ -22,6 +22,7 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import {
   createDocument,
+  deleteDocument,
   downloadDocument,
   viewDocument,
 } from "@/api/documents";
@@ -53,7 +54,15 @@ function RowActions({ row }: { row: Row<Document> }) {
         <DropdownMenuItem onClick={() => downloadDocument(doc.id)}>
           Download
         </DropdownMenuItem>
-        <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+        <DropdownMenuItem
+          variant="destructive"
+          onClick={async () => {
+            await deleteDocument(doc.id);
+            window.location.reload();
+          }}
+        >
+          Delete
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
