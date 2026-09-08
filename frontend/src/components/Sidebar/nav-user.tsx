@@ -5,6 +5,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -24,7 +25,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import type { User } from "@/types";
-import { ChevronsUpDownIcon, LogOutIcon, UsersRound } from "lucide-react";
+import {
+  ChevronsUpDownIcon,
+  LogOutIcon,
+  UserIcon,
+  UsersRound,
+} from "lucide-react";
 import { MOCK_USERS } from "@/api/auth";
 import { SHOW_DEV_TOOLS } from "@/lib/env";
 import { useAppEnv } from "@/contexts/app-env";
@@ -73,7 +79,7 @@ export function NavUser({
               render={
                 <SidebarMenuButton
                   size="lg"
-                  className="aria-expanded:bg-muted"
+                  className="aria-expanded:bg-sidebar-accent aria-expanded:text-sidebar-accent-foreground"
                 />
               }
             >
@@ -99,6 +105,18 @@ export function NavUser({
                   </div>
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  onClick={() => {
+                    navigate({ to: "/profile" });
+                  }}
+                >
+                  <UserIcon />
+                  My Profile
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
               {SHOW_DEV_TOOLS && appEnv !== "prod" && (
                 <DropdownMenuItem onClick={() => setSheetOpen(true)}>
                   <UsersRound />

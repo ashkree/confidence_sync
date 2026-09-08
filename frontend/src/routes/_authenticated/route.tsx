@@ -6,7 +6,6 @@ import {
   LayoutDashboard,
   Plus,
   Tickets,
-  User,
 } from "lucide-react";
 import { useAuth } from "@/auth";
 import { ChatWidget } from "@/components/chat/ChatWidget";
@@ -48,15 +47,6 @@ const employee_group = {
       title: "Knowledge Base",
       url: "/kb",
       icon: BookOpenIcon,
-    },
-    {
-      title: "My Profile",
-      url: "/profile",
-      icon: User,
-      items: {
-        title: "test",
-        url: "#",
-      },
     },
   ],
 };

@@ -85,6 +85,13 @@ function getBaseColumns<TData extends Ticket>(options: {
         );
       },
     }),
+    helper.accessor("updated_at" as any, {
+      header: "Updated At",
+      cell: (info) => {
+        const value = info.getValue() as string;
+        return new Date(value).toLocaleDateString();
+      },
+    }),
   ];
 }
 
