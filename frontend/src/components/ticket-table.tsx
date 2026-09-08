@@ -6,7 +6,12 @@ import { cn } from "@/lib/utils";
 import { getPriorityColor, getStatusColor } from "@/lib/ticket-colors";
 import { useNavigate } from "@tanstack/react-router";
 
-function getBaseColumns<TData extends Ticket>(): ColumnDef<TData, any>[] {
+function getBaseColumns<TData extends Ticket>(options: {
+  showPoster: boolean;
+  showAssignee: boolean;
+  showPriority: boolean;
+  showType: boolean;
+}): ColumnDef<TData, any>[] {
   const helper = createColumnHelper<TData>();
 
   return [
@@ -14,28 +19,58 @@ function getBaseColumns<TData extends Ticket>(): ColumnDef<TData, any>[] {
       header: "Subject",
       cell: (info) => info.getValue(),
     }),
-    helper.accessor("poster_name" as any, {
-      header: "Poster",
-      cell: (info) => info.getValue(),
-    }),
-    helper.accessor("assignee_name" as any, {
-      header: "Assignee",
-      cell: (info) => info.getValue() ?? "Unassigned",
-    }),
-    helper.accessor("priority" as any, {
-      header: "Priority",
-      cell: (info) => {
-        const value = info.getValue() as string;
-        return (
-          <Badge
-            variant="outline"
-            className={cn("capitalize font-semibold", getPriorityColor(value))}
-          >
-            {value}
-          </Badge>
-        );
-      },
-    }),
+    ...(options.showType
+      ? [
+          helper.accessor("type" as any, {
+            header: "Type",
+            cell: (info) => {
+              const value = info.getValue() as string;
+              return (
+                <span className="capitalize">
+                  {value === "HR_REQUEST" ? "HR Request" : "IT Ticket"}
+                </span>
+              );
+            },
+          }),
+        ]
+      : []),
+    ...(options.showPoster
+      ? [
+          helper.accessor("poster_name" as any, {
+            header: "Poster",
+            cell: (info) => info.getValue(),
+          }),
+        ]
+      : []),
+    ...(options.showAssignee
+      ? [
+          helper.accessor("assignee_name" as any, {
+            header: "Assignee",
+            cell: (info) => info.getValue() ?? "Unassigned",
+          }),
+        ]
+      : []),
+    ...(options.showPriority
+      ? [
+          helper.accessor("priority" as any, {
+            header: "Priority",
+            cell: (info) => {
+              const value = info.getValue() as string;
+              return (
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "capitalize font-semibold",
+                    getPriorityColor(value),
+                  )}
+                >
+                  {value}
+                </Badge>
+              );
+            },
+          }),
+        ]
+      : []),
     helper.accessor("status" as any, {
       header: "Status",
       cell: (info) => {
@@ -56,17 +91,33 @@ function getBaseColumns<TData extends Ticket>(): ColumnDef<TData, any>[] {
 interface TicketTableProps<TData extends Ticket> {
   columns?: ColumnDef<TData, any>[];
   data: TData[];
+  showPoster?: boolean;
+  showAssignee?: boolean;
+  showPriority?: boolean;
+  showType?: boolean;
 }
 
 export function TicketTable<TData extends Ticket>({
   columns = [],
   data,
+  showPoster = false,
+  showAssignee = false,
+  showPriority = false,
+  showType = false,
 }: TicketTableProps<TData>) {
   const navigate = useNavigate();
 
   return (
     <DataTable
-      columns={[...getBaseColumns<TData>(), ...columns]}
+      columns={[
+        ...getBaseColumns<TData>({
+          showPoster,
+          showAssignee,
+          showPriority,
+          showType,
+        }),
+        ...columns,
+      ]}
       data={data}
       onRowClick={(row) => {
         navigate({

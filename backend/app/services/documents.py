@@ -9,7 +9,11 @@ from fastapi.responses import StreamingResponse
 from langchain_core.documents import Document as LcDocument
 from pymupdf import open as open_pdf
 
-from app.exceptions.documents import DepartmentNotConfiguredError, DocumentNotFoundError
+from app.exceptions.documents import (
+    DepartmentNotConfiguredError,
+    DocumentDeleteDeniedError,
+    DocumentNotFoundError,
+)
 from app.exceptions.external import S3ObjectNotFoundError
 from app.models import User
 from app.models.documents import Document, DocumentCategory
@@ -39,10 +43,9 @@ def extract_pdf_documents(pdf, filename: str) -> list[LcDocument]:
     return docs
 
 
-async def create_document(
-    document_repo: DocumentRepo, current_user: User, file: UploadFile, file_name: str
-) -> None:
-    department = current_user.department
+def _get_bucket_and_department(user: User):
+
+    department = user.department
 
     if department is None:
         raise DepartmentNotConfiguredError(department)
@@ -50,6 +53,15 @@ async def create_document(
     bucket_name = DEPARTMENT_BUCKETS.get(department)
     if bucket_name is None:
         raise DepartmentNotConfiguredError(department)
+
+    return bucket_name, department
+
+
+async def create_document(
+    document_repo: DocumentRepo, current_user: User, file: UploadFile, file_name: str
+) -> None:
+
+    bucket_name, department = _get_bucket_and_department(current_user)
 
     object_key = uuid.uuid4()
     filename = file_name.lower().replace(" ", "-")
@@ -116,8 +128,16 @@ async def update_document(bucket_name: str):
     raise NotImplementedError
 
 
-async def delete_document(document_repo: DocumentRepo, document_id: uuid.UUID) -> None:
+async def delete_document(
+    current_user: User, document_repo: DocumentRepo, document_id: uuid.UUID
+) -> None:
+
+    bucket_name, _ = _get_bucket_and_department(current_user)
+
     document = await document_repo.read_by_id(document_id)
+
+    if bucket_name != document.s3_bucket:
+        raise DocumentDeleteDeniedError(document_id)
 
     await get_s3_client().delete_file(document.s3_bucket, str(document.object_key))
     await document_repo.delete(document)

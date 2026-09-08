@@ -20,3 +20,11 @@ class DepartmentNotConfiguredError(DocumentError, ForbiddenError):
     def __init__(self, department: UserDepartment | None):
         self.department = department
         super().__init__(f"No document bucket configured for department: {department}")
+
+
+class DocumentDeleteDeniedError(DocumentError, ForbiddenError):
+    """User is not allowed to delete this document."""
+
+    def __init__(self, id: uuid.UUID):
+        self.id = id
+        super().__init__(f"You can not delete the document with id {id}")

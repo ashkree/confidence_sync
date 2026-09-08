@@ -69,7 +69,13 @@ function RouteComponent() {
         </Card>
       </div>
 
-      <TicketTable<ItTicket> columns={ticket_columns} data={itTickets} />
+      <TicketTable<ItTicket>
+        columns={ticket_columns}
+        data={itTickets}
+        showPoster
+        showAssignee
+        showPriority
+      />
       </div>
     </>
   );

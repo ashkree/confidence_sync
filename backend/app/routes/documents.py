@@ -8,7 +8,12 @@ from app.models import User
 from app.models.documents import DocumentCategory
 from app.repository.document import DocumentRepo, get_document_repo
 from app.schemas.documents import DocumentResponse
-from app.services.documents import create_document, delete_document, read_document, read_documents
+from app.services.documents import (
+    create_document,
+    delete_document,
+    read_document,
+    read_documents,
+)
 
 document_router = APIRouter(prefix="/documents")
 
@@ -58,4 +63,4 @@ async def delete_document_route(
     current_user: User = Depends(require_admin),
 ):
     """Delete a document and its associated chunks and S3 object."""
-    await delete_document(document_repo, id)
+    await delete_document(current_user, document_repo, id)
