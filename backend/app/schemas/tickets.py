@@ -1,3 +1,4 @@
+import datetime
 import uuid
 from typing import Annotated, Literal
 
@@ -65,6 +66,7 @@ class TicketListResponseBase(BaseModel):
     status: TicketStatus
     priority: TicketPriority
     subject: str
+    updated_at: datetime.datetime
 
 
 class HrRequestListResponse(TicketListResponseBase):
