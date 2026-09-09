@@ -1,9 +1,10 @@
-import { fetchTickets } from "@/api/tickets";
+import { fetchTickets } from "@/features/tickets/api";
+
 import { createFileRoute } from "@tanstack/react-router";
-import { TicketTable } from "@/components/ticket-table";
+import { TicketTable } from "@/features/tickets/components/ticket-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createColumnHelper } from "@tanstack/react-table";
-import type { HrRequest } from "@/types";
+import type { HrRequest } from "@/features/tickets/types";
 import HeroSection from "@/components/sections/HeroSection";
 
 const helper = createColumnHelper<HrRequest>();
@@ -46,45 +47,46 @@ function RouteComponent() {
     <>
       <HeroSection title="HR Requests" />
       <div className="p-6 space-y-6">
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Unassigned Requests
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{unassignedCount}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Open Requests
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{openCount}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Pending Requests
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{pendingCount}</div>
+            </CardContent>
+          </Card>
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Unassigned Requests
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{unassignedCount}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Open Requests</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{openCount}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Pending Requests
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{pendingCount}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <TicketTable<HrRequest>
-        columns={ticket_columns}
-        data={hrTickets}
-        showPoster
-        showAssignee
-        showPriority
-      />
+        <TicketTable<HrRequest>
+          columns={ticket_columns}
+          data={hrTickets}
+          showPoster
+          showAssignee
+          showPriority
+        />
       </div>
     </>
   );

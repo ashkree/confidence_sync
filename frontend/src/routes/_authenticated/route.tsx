@@ -1,14 +1,9 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/Sidebar/app-sidebar";
-import {
-  BookOpenIcon,
-  LayoutDashboard,
-  Plus,
-  Tickets,
-} from "lucide-react";
-import { useAuth } from "@/auth";
-import { ChatWidget } from "@/components/chat/ChatWidget";
+import { AppSidebar } from "@/components/layout/app-sidebar";
+import { BookOpenIcon, LayoutDashboard, Plus, Tickets } from "lucide-react";
+import { useAuth } from "@/features/auth/auth-context";
+import { ChatWidget } from "@/features/chat/components/chat-widget";
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: ({ context, location }) => {

@@ -1,9 +1,9 @@
-import { H1, H2 } from "@/utils/typography";
+import { H1, H2 } from "@/components/typography";
 
-export default function HeroSection({ 
-  title = "Hello, User", 
-  subtitle
-}: { 
+export default function HeroSection({
+  title = "Hello, User",
+  subtitle,
+}: {
   title?: string;
   subtitle?: string;
 }) {

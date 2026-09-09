@@ -1,4 +1,4 @@
-import { useAuth } from "./auth";
+import { useAuth } from "@/features/auth/auth-context.ts";
 import { TooltipProvider } from "./components/ui/tooltip.tsx";
 import { routeTree } from "./routeTree.gen.ts";
 import { createRouter, RouterProvider } from "@tanstack/react-router";

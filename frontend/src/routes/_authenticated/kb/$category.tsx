@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { KnowledgeBaseDetailPage } from "@/components/page/KnowledgeBaseDetailPage";
-import { fetchDocuments } from "@/api/documents";
+import { KnowledgeBaseDetailPage } from "@/features/knowledge-base/components/kb-detail-page";
+import { fetchDocuments } from "@/features/knowledge-base/api";
 
 const CATEGORY_CONFIG: Record<
   string,
@@ -9,22 +9,26 @@ const CATEGORY_CONFIG: Record<
   "hr-policies": {
     category: "HR_POLICY",
     title: "HR Policies",
-    subtitle: "Employee policies, code of conduct, and organizational guidelines.",
+    subtitle:
+      "Employee policies, code of conduct, and organizational guidelines.",
   },
   HR_POLICY: {
     category: "HR_POLICY",
     title: "HR Policies",
-    subtitle: "Employee policies, code of conduct, and organizational guidelines.",
+    subtitle:
+      "Employee policies, code of conduct, and organizational guidelines.",
   },
   "it-manuals": {
     category: "IT_MANUAL",
     title: "IT Manuals",
-    subtitle: "Technical manuals, device setup guides, and troubleshooting steps.",
+    subtitle:
+      "Technical manuals, device setup guides, and troubleshooting steps.",
   },
   IT_MANUAL: {
     category: "IT_MANUAL",
     title: "IT Manuals",
-    subtitle: "Technical manuals, device setup guides, and troubleshooting steps.",
+    subtitle:
+      "Technical manuals, device setup guides, and troubleshooting steps.",
   },
 };
 

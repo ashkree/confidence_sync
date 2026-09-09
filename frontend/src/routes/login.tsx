@@ -1,31 +1,7 @@
 import { GalleryVerticalEnd } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-  FieldError,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectSeparator,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import * as z from "zod";
-import { useForm } from "@tanstack/react-form";
-import { useState } from "react";
 
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { useAuth } from "@/auth";
-import { MOCK_USERS } from "@/api/auth";
-import { SHOW_DEV_TOOLS } from "@/lib/env";
-import { useAppEnv } from "@/contexts/app-env";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { LoginForm } from "@/features/auth/components/login-form";
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search) => ({
@@ -41,180 +17,6 @@ export const Route = createFileRoute("/login")({
   component: LoginComponent,
 });
 
-const loginSchema = z.object({
-  email: z.email("Invalid email").min(1, "Email is required"),
-  password: z.string().min(1, "Password is required"),
-});
-
-function getMockUsersByRole() {
-  if (!MOCK_USERS) return { employees: [], hrAdmins: [], itAdmins: [] };
-  const entries = Object.entries(MOCK_USERS);
-  return {
-    employees: entries.filter(([, u]) => u.role === "EMPLOYEE"),
-    hrAdmins: entries.filter(
-      ([, u]) => u.role === "ADMIN" && u.department === "HR",
-    ),
-    itAdmins: entries.filter(
-      ([, u]) => u.role === "ADMIN" && u.department === "IT",
-    ),
-  };
-}
-
-function LoginForm() {
-  const { login } = useAuth();
-  const navigate = useNavigate();
-  const [loginError, setLoginError] = useState<string | null>(null);
-  const { appEnv } = useAppEnv();
-
-  const form = useForm({
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-    validators: {
-      onSubmit: loginSchema,
-    },
-    onSubmit: async ({ value }) => {
-      try {
-        setLoginError(null);
-        await login(value.email, value.password);
-        navigate({ to: "/employee" });
-      } catch {
-        setLoginError("Incorrect email or password. Please try again.");
-      }
-    },
-  });
-
-  const handleQuickLogin = async (email: string | null) => {
-    if (!email) return;
-    const prefix = email.split('@')[0];
-    await login(email, `${prefix}123!`);
-    navigate({ to: "/employee" });
-  };
-
-  const { employees, hrAdmins, itAdmins } = getMockUsersByRole();
-
-  return (
-    <form
-      className="flex flex-col gap-6"
-      onSubmit={(e) => {
-        e.preventDefault();
-        form.handleSubmit();
-      }}
-    >
-      <FieldGroup>
-        <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Login to your account</h1>
-          <p className="text-sm text-balance text-muted-foreground">
-            Enter your email below to login to your account
-          </p>
-        </div>
-
-        {SHOW_DEV_TOOLS && appEnv !== "prod" && MOCK_USERS && (
-          <Field>
-            <FieldLabel>Quick Login (Mock)</FieldLabel>
-            <Select onValueChange={handleQuickLogin}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a mock user..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Employees</SelectLabel>
-                  {employees.map(([email, user]) => (
-                    <SelectItem key={email} value={email}>
-                      {user.name} — {email}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-                <SelectSeparator />
-                <SelectGroup>
-                  <SelectLabel>HR Admins</SelectLabel>
-                  {hrAdmins.map(([email, user]) => (
-                    <SelectItem key={email} value={email}>
-                      {user.name} — {email}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-                <SelectSeparator />
-                <SelectGroup>
-                  <SelectLabel>IT Admins</SelectLabel>
-                  {itAdmins.map(([email, user]) => (
-                    <SelectItem key={email} value={email}>
-                      {user.name} — {email}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </Field>
-        )}
-
-        <form.Field name="email">
-          {(field) => {
-            const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
-            return (
-              <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                <Input
-                  id={field.name}
-                  type="email"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  aria-invalid={isInvalid}
-                  placeholder="m@example.com"
-                  autoComplete="email"
-                />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-              </Field>
-            );
-          }}
-        </form.Field>
-
-        <form.Field name="password">
-          {(field) => {
-            const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
-            return (
-              <Field data-invalid={isInvalid}>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                  <a
-                    href="#"
-                    className="ml-auto text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-                <Input
-                  id={field.name}
-                  type="password"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  aria-invalid={isInvalid}
-                  autoComplete="current-password"
-                />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-              </Field>
-            );
-          }}
-        </form.Field>
-
-        {loginError && (
-          <Field>
-            <p className="text-sm font-medium text-destructive">{loginError}</p>
-          </Field>
-        )}
-        <Field>
-          <Button type="submit">Login</Button>
-        </Field>
-      </FieldGroup>
-    </form>
-  );
-}
-
 function LoginComponent() {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
@@ -224,7 +26,7 @@ function LoginComponent() {
             <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <GalleryVerticalEnd className="size-4" />
             </div>
-            Acme Inc.
+            Confidence Sync
           </a>
         </div>
         <div className="flex flex-1 items-center justify-center">

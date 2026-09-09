@@ -1,5 +1,5 @@
-import { fetchDocuments } from "@/api/documents";
-import { DocumentsPage } from "@/components/page/DocumentsPage";
+import { fetchDocuments } from "@/features/knowledge-base/api";
+import { DocumentsPage } from "@/features/knowledge-base/components/kb-documents-page";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/admin/it/manuals")({

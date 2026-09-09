@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { fetchMyTickets } from "@/api/tickets";
-import { TicketTable } from "@/components/ticket-table";
+import { fetchMyTickets } from "@/features/tickets/api";
+import { TicketTable } from "@/features/tickets/components/ticket-table";
 import { buttonVariants } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
-import type { Ticket } from "@/types";
+import type { Ticket } from "@/features/tickets/types";
 import HeroSection from "@/components/sections/HeroSection";
 
 export const Route = createFileRoute("/_authenticated/ticket/my")({
@@ -32,4 +32,3 @@ function MyTicketsPage() {
     </>
   );
 }
-

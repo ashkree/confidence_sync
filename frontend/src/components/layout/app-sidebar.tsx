@@ -1,0 +1,62 @@
+"use client";
+
+import * as React from "react";
+
+import { NavMain } from "@/components/layout/nav-main";
+import { NavUser } from "@/components/layout/nav-user";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarRail,
+} from "@/components/ui/sidebar";
+import { type LucideIcon } from "lucide-react";
+import { SidebarToggle } from "./sidebar-toggle";
+import { useNavigate } from "@tanstack/react-router";
+import { useAuth } from "@/features/auth/auth-context";
+
+export type LinkItem = {
+  title: string;
+  url: string;
+  icon?: LucideIcon;
+};
+
+export type LinkGroup = {
+  name: string;
+  items: LinkItem[];
+};
+
+export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  groups: LinkGroup[];
+}
+
+export function AppSidebar({ groups, ...props }: AppSidebarProps) {
+  const { user, logout, login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate({
+      to: "/login",
+      search: {
+        redirect: "/employee",
+      },
+    });
+  };
+
+  return (
+    <Sidebar collapsible="icon" {...props}>
+      <SidebarHeader>
+        <SidebarToggle />
+      </SidebarHeader>
+      <SidebarContent>
+        <NavMain groups={groups} />
+      </SidebarContent>
+      <SidebarFooter>
+        <NavUser user={user} onLogout={handleLogout} onSwitchUser={login} />
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
+  );
+}

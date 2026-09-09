@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { KnowledgeBaseHubPage } from "@/components/page/KnowledgeBaseHubPage";
-import { fetchDocuments } from "@/api/documents";
+import { KnowledgeBaseHubPage } from "@/features/knowledge-base/components/kb-hub-page";
+import { fetchDocuments } from "@/features/knowledge-base/api";
 
 export const Route = createFileRoute("/_authenticated/kb/")({
   loader: async () => {
@@ -15,4 +15,3 @@ export const Route = createFileRoute("/_authenticated/kb/")({
   },
   component: KnowledgeBaseHubPage,
 });
-

@@ -1,6 +1,6 @@
-import { fetchDocuments } from "@/api/documents";
-import { DocumentsPage } from "@/components/page/DocumentsPage";
+import { fetchDocuments } from "@/features/knowledge-base/api";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocumentsPage } from "@/features/knowledge-base/components/kb-documents-page";
 
 export const Route = createFileRoute("/_authenticated/admin/hr/policies")({
   component: RouteComponent,

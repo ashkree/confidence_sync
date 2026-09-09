@@ -1,6 +1,6 @@
+import { fetchTicket } from "@/features/tickets/api";
+import { TicketDetailPage } from "@/features/tickets/components/ticket-detail-page";
 import { createFileRoute } from "@tanstack/react-router";
-import { TicketDetailPage } from "@/components/page/TicketDetailPage";
-import { fetchTicket } from "@/api/tickets";
 
 export const Route = createFileRoute("/_authenticated/ticket/$ticketId")({
   validateSearch: (search: Record<string, unknown>) => ({

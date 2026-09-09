@@ -3,9 +3,9 @@ import HeroSection from "@/components/sections/HeroSection";
 import QuickActions from "@/components/sections/QuickActions";
 import PendingRequestsSection from "@/components/sections/PendingRequestsSection";
 import TopicSection from "@/components/sections/TopicsSection";
-import { useAuth } from "@/auth";
-import type { Ticket } from "@/types";
-import { fetchMyTickets } from "@/api/tickets";
+import { useAuth } from "@/features/auth/auth-context";
+import type { Ticket } from "@/features/tickets/types";
+import { fetchMyTickets } from "@/features/tickets/api";
 export const Route = createFileRoute("/_authenticated/employee/")({
   component: Component,
   loader: async () => {

@@ -1,4 +1,4 @@
-import { usePermissions } from "@/hooks/usePermission";
+import { usePermissions } from "@/features/auth/hooks/usePermission";
 
 interface PermissionGuardProps {
   children: React.ReactNode;

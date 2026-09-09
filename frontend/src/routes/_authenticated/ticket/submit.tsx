@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { TicketSubmissionPage } from "@/components/page/TicketSubmissionPage";
+import { TicketSubmissionPage } from "@/features/tickets/components/ticket-submission-page";
 
 export type TicketSubmitSearch = {
   department?: "hr" | "it";
