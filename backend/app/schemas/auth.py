@@ -1,7 +1,5 @@
 from pydantic import BaseModel
 
-from app.schemas.users import UserBase
-
 
 class LoginRequest(BaseModel):
     email: str
@@ -13,7 +11,5 @@ class RefreshRequest(BaseModel):
     refresh_token: str
 
 
-class LoginResponse(BaseModel):
+class TokenResponse(BaseModel):
     token: str
-    refresh_token: str | None = None
-    user: UserBase

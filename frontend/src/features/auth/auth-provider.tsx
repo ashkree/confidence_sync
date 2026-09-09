@@ -81,7 +81,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (newRefreshToken) {
       localStorage.setItem("refresh-token", newRefreshToken);
       localStorage.setItem("auth-email", user.email);
-      localStorage.removeItem("auth-email");
     }
   };
 

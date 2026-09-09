@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     # development settings
     app_env: str = "development"
     use_cognito_local: bool = True
+    cookie_secure: bool = True
 
 
 # Loaded from .env file

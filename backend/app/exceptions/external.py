@@ -12,6 +12,11 @@ class CognitoUnavailableError(ExternalServiceErrorMixin, ExternalServiceError):
         super().__init__(detail)
 
 
+class CognitoMissingRefreshTokenError(ExternalServiceErrorMixin, ExternalServiceError):
+    def __init__(self, detail: str = "Cognito did not issue a refresh token"):
+        super().__init__(detail)
+
+
 class BedrockUnavailableError(ExternalServiceErrorMixin, ExternalServiceError):
     def __init__(self, detail: str = "Bedrock request failed"):
         super().__init__(detail)

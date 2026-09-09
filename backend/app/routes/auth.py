@@ -1,72 +1,78 @@
 # app/routes/auth.py
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, Response, status
 
 from app.authorization.guards import require_authenticated
+from app.config import settings
+from app.exceptions.external import CognitoMissingRefreshTokenError
 from app.models import User
-from app.repository.user import UserRepo, get_user_repo
-from app.schemas.auth import LoginRequest, LoginResponse, RefreshRequest
+from app.schemas.auth import LoginRequest, TokenResponse
 from app.schemas.users import UserBase, UserProfile
-from app.services.auth.cognito import authenticate_and_fetch_user, refresh_user_token
+from app.services.auth.cognito import (
+    authenticate,
+    refresh_tokens,
+)
 from app.services.users import to_user_base, to_user_profile
+
+REFRESH_COOKIE_KEY = "refresh_token"
+EMAIL_COOKIE_KEY = "refresh_email"
+REFRESH_PATH = "/api/v1/auth/refresh"
+REFRESH_MAX_AGE = 60 * 60 * 24 * 30
+
+
+def _set_refresh_cookies(response: Response, email: str, token: str) -> None:
+    def set_cookie(key: str, value: str) -> None:
+        response.set_cookie(
+            key=key,
+            value=value,
+            httponly=True,  # JS cannot read it
+            secure=settings.cookie_secure,
+            samesite="lax",  # not sent on cross-site requests
+            path=REFRESH_PATH,  # only sent to the refresh endpoint
+            max_age=60 * 60 * 24 * 30,
+        )
+
+    set_cookie(EMAIL_COOKIE_KEY, email)
+    set_cookie(REFRESH_COOKIE_KEY, token)
+
 
 auth_router = APIRouter(prefix="/auth")
 
 
 @auth_router.post(
     "/login",
-    response_model=LoginResponse,
+    response_model=TokenResponse,
     summary="Log in",
 )
 async def post_login(
     payload: LoginRequest,
-    user_repo: UserRepo = Depends(get_user_repo),
+    response: Response,
 ):
-    """Exchange email and password for an access token.
 
-    Returns:
-        LoginResponse: Access token, refresh token, and the user.
+    accessToken, refreshToken = await authenticate(payload.email, payload.password)
 
-    Raises:
-        InvalidCredentialsError 401: Email or password was rejected.
-        AccountNotConfirmedError 403: Account exists but isn't confirmed.
-        CognitoUnavailableError 503: The identity provider is unreachable.
-    """
-    result = await authenticate_and_fetch_user(
-        user_repo, payload.email, payload.password
-    )
+    if not refreshToken:
+        raise CognitoMissingRefreshTokenError()
 
-    return LoginResponse(
-        token=result.access_token,
-        refresh_token=result.refresh_token,
-        user=to_user_base(result.user),
-    )
+    _set_refresh_cookies(response, payload.email, refreshToken)
+
+    return TokenResponse(token=accessToken)
 
 
 @auth_router.post(
     "/refresh",
-    response_model=LoginResponse,
+    response_model=TokenResponse,
     summary="Refresh an access token",
 )
-async def post_refresh(
-    payload: RefreshRequest,
-    user_repo: UserRepo = Depends(get_user_repo),
-):
-    """Exchange a refresh token for a new access token.
+async def post_refresh(request: Request):
+    refresh_token = request.cookies.get(REFRESH_COOKIE_KEY)
+    email = request.cookies.get(EMAIL_COOKIE_KEY)
 
-    Returns:
-        LoginResponse: A new access token, the refresh token, and the user.
+    if not refresh_token or not email:
+        raise CognitoMissingRefreshTokenError()
 
-    Raises:
-        InvalidCredentialsError 401: Refresh token was rejected or has expired.
-        CognitoUnavailableError 503: The identity provider is unreachable.
-    """
-    result = await refresh_user_token(user_repo, payload.email, payload.refresh_token)
+    access_token, _ = await refresh_tokens(email, refresh_token)
 
-    return LoginResponse(
-        token=result.access_token,
-        refresh_token=result.refresh_token or payload.refresh_token,
-        user=to_user_base(result.user),
-    )
+    return TokenResponse(token=access_token)
 
 
 @auth_router.get(
