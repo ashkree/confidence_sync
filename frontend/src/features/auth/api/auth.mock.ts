@@ -1,50 +1,43 @@
 // api/auth/auth.mock.ts
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { getUsersByEmail } from "@/mocks";
+import { setAccessToken } from "@/lib/auth-token";
+import type { User } from "../types";
 
 export const MOCK_USERS = getUsersByEmail();
 
-const REFRESH_PREFIX = "mock-refresh-";
 const ACCESS_PREFIX = "mock-token-";
+const SESSION_KEY = "mock-session-email";
 
-export async function login(username: string, _password: string) {
+export async function login(email: string, _password: string) {
   await new Promise((r) => setTimeout(r, 300));
 
-  const user = MOCK_USERS[username];
-  if (!user)
+  const user = MOCK_USERS[email];
+  if (!user) {
     throw new Error(
-      `Mock user "${username}" not found. Available users:\n` +
+      `Mock user "${email}" not found. Available users:\n` +
         Object.keys(MOCK_USERS).join("\n"),
     );
-
-  return {
-    token: `${ACCESS_PREFIX}${username}`,
-    refreshToken: `${REFRESH_PREFIX}${username}`,
-    user,
-  };
-}
-
-export async function validateToken(token: string) {
-  await new Promise((r) => setTimeout(r, 100));
-
-  const username = token.replace(ACCESS_PREFIX, "");
-  return MOCK_USERS[username] ?? null;
-}
-
-export async function refresh(refreshToken: string, _email?: string) {
-  await new Promise((r) => setTimeout(r, 100));
-
-  if (!refreshToken.startsWith(REFRESH_PREFIX)) {
-    throw new Error("Invalid mock refresh token");
   }
 
-  const username = refreshToken.replace(REFRESH_PREFIX, "");
-  const user = MOCK_USERS[username];
-  if (!user) throw new Error("Invalid mock refresh token");
+  // Stands in for the httpOnly cookie: something outside memory that
+  // survives reload so hydrate() can resolve a user on boot.
+  sessionStorage.setItem(SESSION_KEY, email);
 
-  return {
-    token: `${ACCESS_PREFIX}${username}`,
-    refreshToken: `${REFRESH_PREFIX}${username}`,
-    user,
-  };
+  return { token: `${ACCESS_PREFIX}${email}` };
+}
+
+export async function hydrate(): Promise<User> {
+  await new Promise((r) => setTimeout(r, 100));
+
+  const email = sessionStorage.getItem(SESSION_KEY);
+  const user = email ? MOCK_USERS[email] : null;
+  if (!user) throw new Error("No mock session");
+
+  setAccessToken(`${ACCESS_PREFIX}${email}`);
+  return user;
+}
+
+export async function logout(): Promise<void> {
+  sessionStorage.removeItem(SESSION_KEY);
 }

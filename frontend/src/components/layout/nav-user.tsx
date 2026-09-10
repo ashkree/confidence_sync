@@ -53,8 +53,7 @@ export function NavUser({
 
   const handleSwitch = async (email: string) => {
     if (onSwitchUser) {
-      const prefix = email.split("@")[0];
-      await onSwitchUser(email, `${prefix}123!`);
+      await onSwitchUser(email, "Passw0rd!");
       setSheetOpen(false);
       navigate({ to: "/employee" });
 

@@ -75,6 +75,12 @@ async def post_refresh(request: Request):
     return TokenResponse(token=access_token)
 
 
+@auth_router.post("/logout", status_code=status.HTTP_204_NO_CONTENT, summary="Log out")
+async def post_logout(response: Response):
+    response.delete_cookie(REFRESH_COOKIE_KEY, path=REFRESH_PATH)
+    response.delete_cookie(EMAIL_COOKIE_KEY, path=REFRESH_PATH)
+
+
 @auth_router.get(
     "/me",
     response_model=UserBase,

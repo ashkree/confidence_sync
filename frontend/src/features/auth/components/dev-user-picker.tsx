@@ -40,7 +40,7 @@ export function DevUserPicker({
 
   const handleQuickLogin = async (email: string | null) => {
     if (!email) return;
-    onSelect(email, `${email.split("@")[0]}123!`);
+    onSelect(email, "Passw0rd!");
   };
 
   const { employees, hrAdmins, itAdmins } = getMockUsersByRole();
