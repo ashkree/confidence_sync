@@ -95,7 +95,7 @@ export function TicketSubmissionPage() {
         priority: value.priority as "LOW" | "MEDIUM" | "HIGH",
         poster_id: user?.id,
         poster_name: user?.name,
-      } as unknown as Partial<Ticket>);
+      } as unknown as any);
       navigate({
         to: "/ticket/$ticketId",
         params: { ticketId: newTicket.id },

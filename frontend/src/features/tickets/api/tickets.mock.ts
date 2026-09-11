@@ -4,6 +4,7 @@ import type {
   TicketPriority,
   TicketStatus,
 } from "../types";
+import type { TicketCreatePayload } from "../form/types";
 import {
   getAllTickets,
   getAllComments,
@@ -79,15 +80,18 @@ export async function fetchTicket(id: string): Promise<Ticket | null> {
   return ticket || null;
 }
 
-export async function createTicket(data: Partial<Ticket>): Promise<Ticket> {
+export async function createTicket(data: TicketCreatePayload): Promise<Ticket> {
   await new Promise((resolve) => setTimeout(resolve, 500));
+  const email = localStorage.getItem("auth-email");
+  const user = email ? getUserByEmail(email) : null;
   const newTicket = {
     ...data,
     id: `uuid-${data.type === "HR_REQUEST" ? "hr" : "it"}-${Date.now()}`,
     status: "OPEN" as const,
     priority: "MEDIUM" as const,
+    poster_id: user?.id || "user-1",
+    poster_name: user?.name || "Current User",
     assignee_id: null,
-    poster_name: data.poster_name || "Current User",
     assignee_name: null,
     information: null,
     ai_summary: null,
