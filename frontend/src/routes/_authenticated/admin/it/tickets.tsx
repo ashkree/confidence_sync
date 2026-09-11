@@ -4,6 +4,7 @@ import { TicketTable } from "@/features/tickets/components/ticket-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createColumnHelper } from "@tanstack/react-table";
 import type { ItTicket } from "@/features/tickets/types";
+import { CATALOG_BY_REQUEST_TYPE } from "@/features/tickets/catalog";
 import HeroSection from "@/components/sections/HeroSection";
 
 const helper = createColumnHelper<ItTicket>();
@@ -11,9 +12,10 @@ const helper = createColumnHelper<ItTicket>();
 const ticket_columns = [
   helper.accessor("request_type", {
     header: "Issue Type",
-    cell: (info) => (
-      <span className="capitalize">{info.getValue().replace("_", " ")}</span>
-    ),
+    cell: (info) => {
+      const val = info.getValue();
+      return <span>{CATALOG_BY_REQUEST_TYPE[val]?.label ?? val}</span>;
+    },
   }),
 ];
 
@@ -29,9 +31,7 @@ function RouteComponent() {
   const openCount = data.filter((t) => t.status === "OPEN").length;
   const pendingCount = data.filter((t) => t.status === "PENDING").length;
 
-  // We cast data to ItTicket[] to satisfy the generic TicketTable props
-  // since the loader returns a general Ticket[]
-  const itTickets = data as ItTicket[];
+  const itTickets = data.filter((t): t is ItTicket => t.type === "IT_TICKET");
 
   return (
     <>

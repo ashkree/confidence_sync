@@ -5,6 +5,7 @@ import { TicketTable } from "@/features/tickets/components/ticket-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createColumnHelper } from "@tanstack/react-table";
 import type { HrRequest } from "@/features/tickets/types";
+import { CATALOG_BY_REQUEST_TYPE, humanizeEnum } from "@/features/tickets/catalog";
 import HeroSection from "@/components/sections/HeroSection";
 
 const helper = createColumnHelper<HrRequest>();
@@ -12,19 +13,16 @@ const helper = createColumnHelper<HrRequest>();
 const ticket_columns = [
   helper.accessor("request_type", {
     header: "Request Type",
-    cell: (info) => (
-      <span className="capitalize">{info.getValue().replace("_", " ")}</span>
-    ),
+    cell: (info) => {
+      const val = info.getValue();
+      return <span>{CATALOG_BY_REQUEST_TYPE[val]?.label ?? val}</span>;
+    },
   }),
   helper.accessor("document_type", {
     header: "Document Type",
     cell: (info) => {
       const val = info.getValue();
-      return (
-        <span className="capitalize">
-          {val ? val.replace("_", " ") : "N/A"}
-        </span>
-      );
+      return <span>{val ? humanizeEnum(val) : "N/A"}</span>;
     },
   }),
 ];
@@ -41,7 +39,7 @@ function RouteComponent() {
   const openCount = data.filter((t) => t.status === "OPEN").length;
   const pendingCount = data.filter((t) => t.status === "PENDING").length;
 
-  const hrTickets = data as HrRequest[];
+  const hrTickets = data.filter((t): t is HrRequest => t.type === "HR_REQUEST");
 
   return (
     <>

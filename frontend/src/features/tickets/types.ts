@@ -4,26 +4,27 @@ export type TicketStatus = "OPEN" | "PENDING" | "RESOLVED" | "CLOSED";
 
 export type TicketPriority = "HIGH" | "MEDIUM" | "LOW";
 
-export interface Ticket {
+export interface BaseTicket {
   id: string;
-  poster_id: string;
-  assignee_id: string | null;
-  poster_name: string;
-  assignee_name: string | null;
   type: TicketType;
   status: TicketStatus;
-  priority: TicketPriority;
   subject: string;
   description: string;
-  information: string | null;
-  ai_summary: string | null;
   created_at: string;
   updated_at: string;
+  ai_summary: string | null;
+  // Sensitive admin-only fields (omitted in employee responses)
+  priority?: TicketPriority;
+  poster_id?: string;
+  poster_name?: string;
+  assignee_id?: string | null;
+  assignee_name?: string | null;
+  information?: string | null;
 }
 
 export type ItRequestType = "HARDWARE_ISSUE" | "SOFTWARE_ISSUE";
 
-export interface ItTicket extends Ticket {
+export interface ItTicket extends BaseTicket {
   type: "IT_TICKET";
   request_type: ItRequestType;
   device_type: string | null;
@@ -35,13 +36,15 @@ export type HrRequestType = "LEAVE_REQUEST" | "DOCUMENT_REQUEST";
 
 export type DocumentType = "NOC" | "SALARY_CERTIFICATE";
 
-export interface HrRequest extends Ticket {
+export interface HrRequest extends BaseTicket {
   type: "HR_REQUEST";
   request_type: HrRequestType;
   document_type: DocumentType | null;
   from_date: string | null;
   to_date: string | null;
 }
+
+export type Ticket = ItTicket | HrRequest;
 
 export interface TicketComment {
   id: string;
