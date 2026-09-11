@@ -28,6 +28,8 @@ import { Route as AuthenticatedAdminHrPoliciesRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminHrRequestsRouteImport } from './routes/_authenticated/admin/hr/requests'
 import { Route as AuthenticatedAdminItManualsRouteImport } from './routes/_authenticated/admin/it/manuals'
 import { Route as AuthenticatedAdminItTicketsRouteImport } from './routes/_authenticated/admin/it/tickets'
+import { Route as AuthenticatedTicketSubmitIndexRouteImport } from './routes/_authenticated/ticket/submit/index'
+import { Route as AuthenticatedTicketSubmitRequestTypeRouteImport } from './routes/_authenticated/ticket/submit/$requestType'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -133,6 +135,18 @@ const AuthenticatedAdminItTicketsRoute =
     path: '/tickets',
     getParentRoute: () => AuthenticatedAdminItRouteRoute,
   } as any)
+const AuthenticatedTicketSubmitIndexRoute =
+  AuthenticatedTicketSubmitIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedTicketSubmitRoute,
+  } as any)
+const AuthenticatedTicketSubmitRequestTypeRoute =
+  AuthenticatedTicketSubmitRequestTypeRouteImport.update({
+    id: '/$requestType',
+    path: '/$requestType',
+    getParentRoute: () => AuthenticatedTicketSubmitRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -145,7 +159,7 @@ export interface FileRoutesByFullPath {
   '/kb/$category': typeof AuthenticatedKbCategoryRoute
   '/ticket/$ticketId': typeof AuthenticatedTicketTicketIdRoute
   '/ticket/my': typeof AuthenticatedTicketMyRoute
-  '/ticket/submit': typeof AuthenticatedTicketSubmitRoute
+  '/ticket/submit': typeof AuthenticatedTicketSubmitRouteWithChildren
   '/employee/': typeof AuthenticatedEmployeeIndexRoute
   '/kb/': typeof AuthenticatedKbIndexRoute
   '/profile/': typeof AuthenticatedProfileIndexRoute
@@ -153,6 +167,8 @@ export interface FileRoutesByFullPath {
   '/admin/hr/requests': typeof AuthenticatedAdminHrRequestsRoute
   '/admin/it/manuals': typeof AuthenticatedAdminItManualsRoute
   '/admin/it/tickets': typeof AuthenticatedAdminItTicketsRoute
+  '/ticket/submit/$requestType': typeof AuthenticatedTicketSubmitRequestTypeRoute
+  '/ticket/submit/': typeof AuthenticatedTicketSubmitIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -165,7 +181,6 @@ export interface FileRoutesByTo {
   '/kb/$category': typeof AuthenticatedKbCategoryRoute
   '/ticket/$ticketId': typeof AuthenticatedTicketTicketIdRoute
   '/ticket/my': typeof AuthenticatedTicketMyRoute
-  '/ticket/submit': typeof AuthenticatedTicketSubmitRoute
   '/employee': typeof AuthenticatedEmployeeIndexRoute
   '/kb': typeof AuthenticatedKbIndexRoute
   '/profile': typeof AuthenticatedProfileIndexRoute
@@ -173,6 +188,8 @@ export interface FileRoutesByTo {
   '/admin/hr/requests': typeof AuthenticatedAdminHrRequestsRoute
   '/admin/it/manuals': typeof AuthenticatedAdminItManualsRoute
   '/admin/it/tickets': typeof AuthenticatedAdminItTicketsRoute
+  '/ticket/submit/$requestType': typeof AuthenticatedTicketSubmitRequestTypeRoute
+  '/ticket/submit': typeof AuthenticatedTicketSubmitIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -187,7 +204,7 @@ export interface FileRoutesById {
   '/_authenticated/kb/$category': typeof AuthenticatedKbCategoryRoute
   '/_authenticated/ticket/$ticketId': typeof AuthenticatedTicketTicketIdRoute
   '/_authenticated/ticket/my': typeof AuthenticatedTicketMyRoute
-  '/_authenticated/ticket/submit': typeof AuthenticatedTicketSubmitRoute
+  '/_authenticated/ticket/submit': typeof AuthenticatedTicketSubmitRouteWithChildren
   '/_authenticated/employee/': typeof AuthenticatedEmployeeIndexRoute
   '/_authenticated/kb/': typeof AuthenticatedKbIndexRoute
   '/_authenticated/profile/': typeof AuthenticatedProfileIndexRoute
@@ -195,6 +212,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/hr/requests': typeof AuthenticatedAdminHrRequestsRoute
   '/_authenticated/admin/it/manuals': typeof AuthenticatedAdminItManualsRoute
   '/_authenticated/admin/it/tickets': typeof AuthenticatedAdminItTicketsRoute
+  '/_authenticated/ticket/submit/$requestType': typeof AuthenticatedTicketSubmitRequestTypeRoute
+  '/_authenticated/ticket/submit/': typeof AuthenticatedTicketSubmitIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -217,6 +236,8 @@ export interface FileRouteTypes {
     | '/admin/hr/requests'
     | '/admin/it/manuals'
     | '/admin/it/tickets'
+    | '/ticket/submit/$requestType'
+    | '/ticket/submit/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -229,7 +250,6 @@ export interface FileRouteTypes {
     | '/kb/$category'
     | '/ticket/$ticketId'
     | '/ticket/my'
-    | '/ticket/submit'
     | '/employee'
     | '/kb'
     | '/profile'
@@ -237,6 +257,8 @@ export interface FileRouteTypes {
     | '/admin/hr/requests'
     | '/admin/it/manuals'
     | '/admin/it/tickets'
+    | '/ticket/submit/$requestType'
+    | '/ticket/submit'
   id:
     | '__root__'
     | '/'
@@ -258,6 +280,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/hr/requests'
     | '/_authenticated/admin/it/manuals'
     | '/_authenticated/admin/it/tickets'
+    | '/_authenticated/ticket/submit/$requestType'
+    | '/_authenticated/ticket/submit/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -403,6 +427,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminItTicketsRouteImport
       parentRoute: typeof AuthenticatedAdminItRouteRoute
     }
+    '/_authenticated/ticket/submit/': {
+      id: '/_authenticated/ticket/submit/'
+      path: '/'
+      fullPath: '/ticket/submit/'
+      preLoaderRoute: typeof AuthenticatedTicketSubmitIndexRouteImport
+      parentRoute: typeof AuthenticatedTicketSubmitRoute
+    }
+    '/_authenticated/ticket/submit/$requestType': {
+      id: '/_authenticated/ticket/submit/$requestType'
+      path: '/$requestType'
+      fullPath: '/ticket/submit/$requestType'
+      preLoaderRoute: typeof AuthenticatedTicketSubmitRequestTypeRouteImport
+      parentRoute: typeof AuthenticatedTicketSubmitRoute
+    }
   }
 }
 
@@ -454,12 +492,29 @@ const AuthenticatedAdminRouteRouteWithChildren =
     AuthenticatedAdminRouteRouteChildren,
   )
 
+interface AuthenticatedTicketSubmitRouteChildren {
+  AuthenticatedTicketSubmitRequestTypeRoute: typeof AuthenticatedTicketSubmitRequestTypeRoute
+  AuthenticatedTicketSubmitIndexRoute: typeof AuthenticatedTicketSubmitIndexRoute
+}
+
+const AuthenticatedTicketSubmitRouteChildren: AuthenticatedTicketSubmitRouteChildren =
+  {
+    AuthenticatedTicketSubmitRequestTypeRoute:
+      AuthenticatedTicketSubmitRequestTypeRoute,
+    AuthenticatedTicketSubmitIndexRoute: AuthenticatedTicketSubmitIndexRoute,
+  }
+
+const AuthenticatedTicketSubmitRouteWithChildren =
+  AuthenticatedTicketSubmitRoute._addFileChildren(
+    AuthenticatedTicketSubmitRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
   AuthenticatedKbCategoryRoute: typeof AuthenticatedKbCategoryRoute
   AuthenticatedTicketTicketIdRoute: typeof AuthenticatedTicketTicketIdRoute
   AuthenticatedTicketMyRoute: typeof AuthenticatedTicketMyRoute
-  AuthenticatedTicketSubmitRoute: typeof AuthenticatedTicketSubmitRoute
+  AuthenticatedTicketSubmitRoute: typeof AuthenticatedTicketSubmitRouteWithChildren
   AuthenticatedEmployeeIndexRoute: typeof AuthenticatedEmployeeIndexRoute
   AuthenticatedKbIndexRoute: typeof AuthenticatedKbIndexRoute
   AuthenticatedProfileIndexRoute: typeof AuthenticatedProfileIndexRoute
@@ -470,7 +525,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedKbCategoryRoute: AuthenticatedKbCategoryRoute,
   AuthenticatedTicketTicketIdRoute: AuthenticatedTicketTicketIdRoute,
   AuthenticatedTicketMyRoute: AuthenticatedTicketMyRoute,
-  AuthenticatedTicketSubmitRoute: AuthenticatedTicketSubmitRoute,
+  AuthenticatedTicketSubmitRoute: AuthenticatedTicketSubmitRouteWithChildren,
   AuthenticatedEmployeeIndexRoute: AuthenticatedEmployeeIndexRoute,
   AuthenticatedKbIndexRoute: AuthenticatedKbIndexRoute,
   AuthenticatedProfileIndexRoute: AuthenticatedProfileIndexRoute,
