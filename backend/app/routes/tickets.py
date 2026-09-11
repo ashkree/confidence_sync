@@ -7,6 +7,7 @@ from app.authorization.guards import require_admin, require_authenticated
 from app.authorization.tickets import can_access, is_in_scope
 from app.exceptions.tickets import TicketAccessDeniedError
 from app.models import User
+from app.models.user import UserRole
 from app.repository.document import DocumentRepo, get_document_repo
 from app.repository.ticket import TicketRepo, get_ticket_repo
 from app.schemas.tickets import (
@@ -14,7 +15,9 @@ from app.schemas.tickets import (
     TicketCommentCreate,
     TicketCommentResponse,
     TicketCreate,
+    TicketDetailEmployeeResponse,
     TicketDetailResponse,
+    TicketListEmployeeResponse,
     TicketListReponse,
     TicketPriorityPatch,
     TicketStatusPatch,
@@ -34,7 +37,7 @@ ticket_router = APIRouter(prefix="/tickets")
 
 @ticket_router.post(
     "",
-    response_model=TicketDetailResponse,
+    response_model=None,
     status_code=status.HTTP_201_CREATED,
     summary="Create a ticket",
 )
@@ -43,14 +46,17 @@ async def create_ticket_route(
     ticket_repo: TicketRepo = Depends(get_ticket_repo),
     document_repo: DocumentRepo = Depends(get_document_repo),
     current_user: User = Depends(require_authenticated),
-):
+) -> TicketDetailResponse | TicketDetailEmployeeResponse:
     """Create a new HR request or IT ticket.
 
     Returns:
-        TicketDetailResponse: The newly created ticket.
+        TicketDetailResponse | TicketDetailEmployeeResponse: The newly created ticket.
     """
 
-    return await create_ticket(ticket_repo, document_repo, current_user, payload)
+    created = await create_ticket(ticket_repo, document_repo, current_user, payload)
+    if current_user.role == UserRole.EMPLOYEE:
+        return TicketDetailEmployeeResponse.model_validate(created)
+    return created
 
 
 @ticket_router.get(
@@ -76,36 +82,37 @@ async def get_tickets(
 
 @ticket_router.get(
     "/me",
-    response_model=list[TicketListReponse],
+    response_model=list[TicketListEmployeeResponse],
     summary="List my tickets",
 )
 async def get_own_tickets(
     ticket_repo: TicketRepo = Depends(get_ticket_repo),
     current_user: User = Depends(require_authenticated),
-):
+) -> list[TicketListEmployeeResponse]:
     """Get all tickets submitted by the current user.
 
     Returns:
-        list[TicketListReponse]: A list of tickets submitted by the user.
+        list[TicketListEmployeeResponse]: A list of tickets submitted by the user.
     """
 
-    return await ticket_repo.read_by_poster(current_user.id)
+    tickets = await ticket_repo.read_by_poster(current_user.id)
+    return [TicketListEmployeeResponse.model_validate(t) for t in tickets]
 
 
 @ticket_router.get(
     "/{id}",
-    response_model=TicketDetailResponse,
+    response_model=None,
     summary="Get ticket details",
 )
 async def get_ticket(
     id: uuid.UUID,
     ticket_repo: TicketRepo = Depends(get_ticket_repo),
     current_user: User = Depends(require_authenticated),
-):
+) -> TicketDetailResponse | TicketDetailEmployeeResponse:
     """Get the details for a specific ticket.
 
     Returns:
-        TicketDetailResponse: Detailed information for the requested ticket.
+        TicketDetailResponse | TicketDetailEmployeeResponse: Detailed information for the requested ticket.
 
     Raises:
         TicketAccessDeniedError 403: If the user is not authorized to view the ticket.
@@ -115,6 +122,9 @@ async def get_ticket(
 
     if not can_access(current_user, ticket):
         raise TicketAccessDeniedError(id)
+
+    if current_user.role == UserRole.EMPLOYEE:
+        return TicketDetailEmployeeResponse.model_validate(ticket)
 
     return ticket
 

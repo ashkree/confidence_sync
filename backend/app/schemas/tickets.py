@@ -53,32 +53,52 @@ TicketCreate = Annotated[ItTicketCreate | HrRequestCreate, Field(discriminator="
 
 # SHORT TICKET RESPONSES
 # used with list views
-class TicketListResponseBase(BaseModel):
-    """Base schema for ticket summaries returned in list views."""
+class TicketListEmployeeResponseBase(BaseModel):
+    """Base schema for ticket summaries returned in employee list views."""
 
     model_config = ConfigDict(from_attributes=True)
     id: uuid.UUID
-    poster_id: uuid.UUID
-    assignee_id: uuid.UUID | None
-    poster_name: str
-    assignee_name: str | None
     type: TicketType
     status: TicketStatus
-    priority: TicketPriority
     subject: str
     updated_at: datetime.datetime
 
 
-class HrRequestListResponse(TicketListResponseBase):
-    """Schema for HR request summaries returned in list views."""
+class TicketListResponseBase(TicketListEmployeeResponseBase):
+    """Base schema for ticket summaries returned in admin list views."""
+
+    poster_id: uuid.UUID
+    assignee_id: uuid.UUID | None
+    poster_name: str
+    assignee_name: str | None
+    priority: TicketPriority
+
+
+class HrRequestListEmployeeResponse(TicketListEmployeeResponseBase):
+    """Schema for HR request summaries in employee list views."""
 
     type: Literal[TicketType.HR_REQUEST] = TicketType.HR_REQUEST
     request_type: RequestType
-    document_type: DocumentType | None
+    document_type: DocumentType | None = None
+
+
+class ItTicketListEmployeeResponse(TicketListEmployeeResponseBase):
+    """Schema for IT ticket summaries in employee list views."""
+
+    type: Literal[TicketType.IT_TICKET] = TicketType.IT_TICKET
+    request_type: ITRequestType
+
+
+class HrRequestListResponse(TicketListResponseBase):
+    """Schema for HR request summaries returned in admin list views."""
+
+    type: Literal[TicketType.HR_REQUEST] = TicketType.HR_REQUEST
+    request_type: RequestType
+    document_type: DocumentType | None = None
 
 
 class ItTicketListResponse(TicketListResponseBase):
-    """Schema for IT ticket summaries returned in list views."""
+    """Schema for IT ticket summaries returned in admin list views."""
 
     type: Literal[TicketType.IT_TICKET] = TicketType.IT_TICKET
     request_type: ITRequestType
@@ -88,35 +108,54 @@ TicketListReponse = Annotated[
     HrRequestListResponse | ItTicketListResponse, Field(discriminator="type")
 ]
 
+TicketListResponse = TicketListReponse
+
+TicketListEmployeeResponse = Annotated[
+    HrRequestListEmployeeResponse | ItTicketListEmployeeResponse,
+    Field(discriminator="type"),
+]
+
 
 # DETAILED TICKET RESPONSE
 # used with detail pages
-class TicketDetailResponseBase(BaseModel):
+class TicketDetailEmployeeBase(BaseModel):
     """
-    Full Ticket Response for detail pages.
-    Contains comprehensive information about a ticket including AI summaries and timestamps.
+    Employee Ticket Response for detail pages.
+    Excludes internal triage signals (priority, poster, assignee, information).
     """
 
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
-    poster_id: uuid.UUID
-    assignee_id: uuid.UUID | None
-    poster_name: str
-    assignee_name: str | None
     type: TicketType
     status: TicketStatus
-    priority: TicketPriority
     subject: str
     description: str
-    information: str | None = None
     ai_summary: str | None = None
     created_at: FormattedDateTime
     updated_at: FormattedDateTime
 
 
-class ItTicketDetailResponse(TicketDetailResponseBase):
-    """Schema for the detailed view of an IT ticket, including specific device and software information."""
+class TicketDetailAdminBase(TicketDetailEmployeeBase):
+    """
+    Admin Ticket Response for detail pages.
+    Includes internal triage signals (priority, poster, assignee, information).
+    """
+
+    poster_id: uuid.UUID
+    assignee_id: uuid.UUID | None
+    poster_name: str
+    assignee_name: str | None
+    priority: TicketPriority
+    information: str | None = None
+
+
+# Alias for backward compatibility if any service imports TicketDetailResponseBase
+TicketDetailResponseBase = TicketDetailAdminBase
+
+
+class ItTicketDetailEmployeeResponse(TicketDetailEmployeeBase):
+    """Schema for employee view of an IT ticket."""
 
     type: Literal[TicketType.IT_TICKET] = TicketType.IT_TICKET
     request_type: ITRequestType
@@ -125,8 +164,28 @@ class ItTicketDetailResponse(TicketDetailResponseBase):
     software_name: str | None = None
 
 
-class HrRequestDetailResponse(TicketDetailResponseBase):
-    """Schema for the detailed view of an HR request, including specific document and date information."""
+class ItTicketDetailResponse(TicketDetailAdminBase):
+    """Schema for the detailed admin view of an IT ticket, including specific device and software information."""
+
+    type: Literal[TicketType.IT_TICKET] = TicketType.IT_TICKET
+    request_type: ITRequestType
+    device_type: str | None = None
+    fault_code: str | None = None
+    software_name: str | None = None
+
+
+class HrRequestDetailEmployeeResponse(TicketDetailEmployeeBase):
+    """Schema for employee view of an HR request."""
+
+    type: Literal[TicketType.HR_REQUEST] = TicketType.HR_REQUEST
+    request_type: RequestType
+    document_type: DocumentType | None = None
+    from_date: FormattedDate | None = None
+    to_date: FormattedDate | None = None
+
+
+class HrRequestDetailResponse(TicketDetailAdminBase):
+    """Schema for the detailed admin view of an HR request, including specific document and date information."""
 
     type: Literal[TicketType.HR_REQUEST] = TicketType.HR_REQUEST
     request_type: RequestType
@@ -137,6 +196,11 @@ class HrRequestDetailResponse(TicketDetailResponseBase):
 
 TicketDetailResponse = Annotated[
     ItTicketDetailResponse | HrRequestDetailResponse,
+    Field(discriminator="type"),
+]
+
+TicketDetailEmployeeResponse = Annotated[
+    ItTicketDetailEmployeeResponse | HrRequestDetailEmployeeResponse,
     Field(discriminator="type"),
 ]
 
