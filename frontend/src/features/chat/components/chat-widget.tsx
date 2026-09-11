@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/features/auth/auth-context";
 import { fetchChatMessages, sendChatMessage } from "@/features/chat/api";
+import { Markdown } from "@/components/ui/markdown";
 import type { ChatMessage } from "../types";
 
 const messageSchema = z.object({
@@ -190,10 +191,14 @@ export function ChatWidget({ initialMessages }: ChatWidgetProps) {
                         "max-w-[80%] rounded-lg px-3 py-2 text-sm",
                         msg.role === "ASSISTANT"
                           ? "bg-muted text-foreground self-start"
-                          : "bg-primary text-primary-foreground ml-auto",
+                          : "bg-primary text-primary-foreground ml-auto whitespace-pre-wrap",
                       )}
                     >
-                      {msg.content}
+                      {msg.role === "ASSISTANT" ? (
+                        <Markdown>{msg.content}</Markdown>
+                      ) : (
+                        msg.content
+                      )}
                     </div>
                   ))}
 
