@@ -64,15 +64,17 @@ export default function PendingRequestsSection({
                   >
                     {ticket.status}
                   </Badge>
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "capitalize text-xs font-semibold",
-                      getPriorityColor(ticket.priority),
-                    )}
-                  >
-                    {ticket.priority}
-                  </Badge>
+                  {ticket.priority && (
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "capitalize text-xs font-semibold",
+                        getPriorityColor(ticket.priority),
+                      )}
+                    >
+                      {ticket.priority}
+                    </Badge>
+                  )}
                 </div>
               </div>
             </Link>

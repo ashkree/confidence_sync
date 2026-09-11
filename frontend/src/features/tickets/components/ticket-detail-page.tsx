@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { getRouteApi } from "@tanstack/react-router";
 import {
   fetchTicket,
-  fetchTicketComments,
   addTicketComment,
   updateTicketStatus,
   updateTicketPriority,
@@ -35,17 +34,27 @@ import { formatDate } from "@/lib/date";
 import { cn } from "@/lib/utils";
 import type { TicketPriority, TicketStatus, TicketComment } from "../types";
 import { useAuth } from "@/features/auth/auth-context";
-import { usePermissions } from "@/features/auth/hooks/usePermission";
+import { useTicketVisibility } from "../hooks/use-ticket-visibility";
+import { TicketDetailFields } from "./ticket-detail-fields";
+import { CATALOG_BY_REQUEST_TYPE } from "../catalog";
+import { Markdown } from "@/components/ui/markdown";
 
 const routeApi = getRouteApi("/_authenticated/ticket/$ticketId");
 
 export function TicketDetailPage() {
-  const ticket = routeApi.useLoaderData();
+  const { ticket, initialComments } = routeApi.useLoaderData();
   const { user } = useAuth();
-  const { hasRole } = usePermissions();
-  const isAdmin = hasRole("ADMIN");
+  const {
+    showPriority,
+    showAssignee,
+    showPoster,
+    showInformation,
+    showAiSummary,
+    showAdminControls,
+    canGenerateSummary,
+  } = useTicketVisibility();
 
-  const [comments, setComments] = useState<TicketComment[]>([]);
+  const [comments, setComments] = useState<TicketComment[]>(initialComments ?? []);
   const [newComment, setNewComment] = useState("");
 
   // Track status, priority, and updatedAt reactively so header badges stay in sync
@@ -80,15 +89,28 @@ export function TicketDetailPage() {
   const [isUpdatingPriority, setIsUpdatingPriority] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
 
-  useEffect(() => {
-    if (ticket) {
-      fetchTicketComments(ticket.id).then(setComments);
-    }
-  }, [ticket]);
-
   if (!ticket) {
-    return <div className="container mx-auto p-6">...</div>;
+    return (
+      <div className="container mx-auto p-6 max-w-4xl">
+        <button
+          onClick={() => window.history.back()}
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back
+        </button>
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            <p className="text-lg font-medium">Ticket not found</p>
+            <p className="text-sm mt-1">
+              The requested ticket does not exist or you do not have permission to view it.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
+
+  const meta = CATALOG_BY_REQUEST_TYPE[ticket.request_type];
 
   const handleAddComment = async () => {
     if (!newComment.trim() || !user) return;
@@ -146,8 +168,8 @@ export function TicketDetailPage() {
       const newAssigneeId = isAssignedToMe ? null : (user?.id ?? null);
       const updated = await assignTicket(ticket.id, newAssigneeId);
       if (updated) {
-        setAssigneeId(updated.assignee_id);
-        setAssigneeName(updated.assignee_name);
+        setAssigneeId(updated.assignee_id ?? null);
+        setAssigneeName(updated.assignee_name ?? null);
       }
     } finally {
       setIsAssigning(false);
@@ -187,7 +209,12 @@ export function TicketDetailPage() {
                 Created {formatDate(ticket.created_at)}
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center flex-wrap">
+              {meta && (
+                <Badge variant="secondary" className="font-semibold">
+                  {meta.label}
+                </Badge>
+              )}
               {/* Badges read from local state so they update immediately after admin actions */}
               <Badge
                 variant="outline"
@@ -198,42 +225,54 @@ export function TicketDetailPage() {
               >
                 {currentStatus}
               </Badge>
-              <Badge
-                variant="outline"
-                className={cn(
-                  "capitalize font-semibold",
-                  getPriorityColor(currentPriority),
-                )}
-              >
-                {currentPriority}
-              </Badge>
+              {showPriority && currentPriority && (
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "capitalize font-semibold",
+                    getPriorityColor(currentPriority),
+                  )}
+                >
+                  {currentPriority}
+                </Badge>
+              )}
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
             <h3 className="text-sm font-medium mb-1">Description</h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
               {ticket.description}
             </p>
           </div>
+
+          <TicketDetailFields ticket={ticket} />
+
           <Separator />
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            {showPoster && (
+              <div>
+                <span className="font-medium">Poster</span>
+                <p className="text-muted-foreground">
+                  {ticket.poster_name ?? "Unknown"}
+                </p>
+              </div>
+            )}
+            {showAssignee && (
+              <div>
+                <span className="font-medium">Assignee</span>
+                <p className="text-muted-foreground">
+                  {assigneeName || "Unassigned"}
+                </p>
+              </div>
+            )}
             <div>
-              <span className="font-medium">Poster</span>
-              <p className="text-muted-foreground">{ticket.poster_name}</p>
-            </div>
-            <div>
-              <span className="font-medium">Assignee</span>
-              {/* Read-only in the metadata grid — admin controls live in the card below */}
+              <span className="font-medium">Department</span>
               <p className="text-muted-foreground">
-                {assigneeName || "Unassigned"}
-              </p>
-            </div>
-            <div>
-              <span className="font-medium">Type</span>
-              <p className="text-muted-foreground capitalize">
-                {ticket.type.replace("_", " ")}
+                {ticket.type === "HR_REQUEST"
+                  ? "Human Resources"
+                  : "Information Technology"}
               </p>
             </div>
             <div>
@@ -247,51 +286,53 @@ export function TicketDetailPage() {
       </Card>
 
       {/* Summary Card */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Summary</CardTitle>
-            {isAdmin && !aiSummary && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSummarize}
-                disabled={isSummarizing}
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                {isSummarizing ? "Generating..." : "Generate Summary"}
-              </Button>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          {aiSummary ? (
-            <p className="text-sm text-muted-foreground">{aiSummary}</p>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-6 text-muted-foreground">
-              <FileText className="w-10 h-10 mb-2 opacity-40" />
-              <p className="text-sm">No AI summary generated yet.</p>
+      {showAiSummary && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Summary</CardTitle>
+              {canGenerateSummary && !aiSummary && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSummarize}
+                  disabled={isSummarizing}
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  {isSummarizing ? "Generating..." : "Generate Summary"}
+                </Button>
+              )}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            {aiSummary ? (
+              <Markdown className="text-muted-foreground">{aiSummary}</Markdown>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-6 text-muted-foreground">
+                <FileText className="w-10 h-10 mb-2 opacity-40" />
+                <p className="text-sm">No AI summary generated yet.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Information Card — only rendered when the field has content */}
-      {isAdmin && ticket.information && (
+      {/* Information Card — only rendered when the field has content and role permits */}
+      {showInformation && ticket.information && (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Information</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+            <Markdown className="text-muted-foreground">
               {ticket.information}
-            </p>
+            </Markdown>
           </CardContent>
         </Card>
       )}
 
       {/* Admin Controls — status, priority, and assignee in one consolidated card */}
-      {isAdmin && (
+      {showAdminControls && (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Admin Controls</CardTitle>
