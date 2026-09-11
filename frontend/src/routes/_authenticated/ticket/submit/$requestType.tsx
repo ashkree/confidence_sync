@@ -23,12 +23,15 @@ function TicketSubmitFormPage() {
   const form = useTicketForm(module);
 
   useBlocker({
-    condition: form.state.isDirty && !form.state.isSubmitted,
-    withResolver: true,
-    blockerFn: () =>
-      window.confirm(
-        "You have unsaved changes. Are you sure you want to leave?",
-      ),
+    shouldBlockFn: () => {
+      if (form.state.isDirty && !form.state.isSubmitted) {
+        return !window.confirm(
+          "You have unsaved changes. Are you sure you want to leave?",
+        );
+      }
+      return false;
+    },
+    enableBeforeUnload: () => form.state.isDirty && !form.state.isSubmitted,
   });
 
   return (

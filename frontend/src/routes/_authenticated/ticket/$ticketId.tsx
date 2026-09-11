@@ -3,10 +3,6 @@ import { TicketDetailPage } from "@/features/tickets/components/ticket-detail-pa
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/ticket/$ticketId")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    department: (search.department as string) || "it",
-  }),
-  loaderDeps: ({ search: { department } }) => ({ department }),
   loader: async ({ params }) => {
     return fetchTicket(params.ticketId);
   },
