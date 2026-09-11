@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TextField, TextareaField } from "./fields";
-import type { RequestTypeMeta } from "./catalog";
+import type { RequestTypeMeta } from "../catalog";
 
 export function TicketFormShell({
   meta,

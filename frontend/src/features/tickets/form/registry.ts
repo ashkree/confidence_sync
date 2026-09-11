@@ -1,4 +1,4 @@
-import type { RequestTypeSlug } from "./catalog";
+import type { RequestTypeSlug } from "../catalog";
 import type { RequestTypeModule } from "./types";
 
 import leaveRequest from "./modules/leave-request";

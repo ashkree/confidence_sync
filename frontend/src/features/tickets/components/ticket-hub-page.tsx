@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronRight, BookOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import HeroSection from "@/components/sections/HeroSection";
-import { CATALOG, type RequestTypeSlug } from "../form/catalog";
+import { CATALOG, type RequestTypeSlug } from "../catalog";
 
 const groups = [
   {

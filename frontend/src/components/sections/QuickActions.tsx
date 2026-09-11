@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "@tanstack/react-router";
 import { AppWindow, Bed, Cpu, FileCheckCorner } from "lucide-react";
-import type { RequestTypeSlug } from "@/features/tickets/form/catalog";
+import type { RequestTypeSlug } from "@/features/tickets/catalog";
 
 const quick_actions: {
   icon: typeof Bed;

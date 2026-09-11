@@ -1,5 +1,5 @@
 import { createFileRoute, redirect, useBlocker } from "@tanstack/react-router";
-import { CATALOG, type RequestTypeSlug } from "@/features/tickets/form/catalog";
+import { CATALOG, type RequestTypeSlug } from "@/features/tickets/catalog";
 import { REGISTRY } from "@/features/tickets/form/registry";
 import { useTicketForm } from "@/features/tickets/form/use-ticket-form";
 import { TicketFormShell } from "@/features/tickets/form/ticket-form-shell";
