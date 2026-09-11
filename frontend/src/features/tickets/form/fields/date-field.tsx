@@ -29,23 +29,24 @@ export function DateField({
       <FieldLabel>{label}</FieldLabel>
       <FieldContent>
         <Popover>
-          {/* @ts-expect-error Base UI doesn't strongly type asChild */}
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                !field.state.value && "text-muted-foreground",
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {field.state.value ? (
-                format(field.state.value, "dd/MM/yyyy")
-              ) : (
-                <span>Pick a date</span>
-              )}
-            </Button>
-          </PopoverTrigger>
+          <PopoverTrigger
+            render={
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !field.state.value && "text-muted-foreground",
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {field.state.value ? (
+                  format(field.state.value, "dd/MM/yyyy")
+                ) : (
+                  <span>Pick a date</span>
+                )}
+              </Button>
+            }
+          />
           <PopoverContent className="w-auto p-0" align="start">
             <Calendar
               mode="single"
