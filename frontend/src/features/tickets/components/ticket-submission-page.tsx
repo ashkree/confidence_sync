@@ -4,25 +4,8 @@ import { useForm } from "@tanstack/react-form";
 import * as z from "zod";
 import { useNavigate, getRouteApi } from "@tanstack/react-router";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Card,
   CardContent,
@@ -31,11 +14,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Field,
-  FieldLabel,
-  FieldContent,
-  FieldError,
-} from "@/components/ui/field";
+  TextField,
+  TextareaField,
+  SelectField,
+  DateField,
+} from "../form/fields";
 import { createTicket } from "../api";
 import type { Ticket } from "../types";
 import { useAuth } from "@/features/auth/auth-context";
@@ -55,6 +38,26 @@ const schema = z.object({
   fault_code: z.string().optional(),
   software_name: z.string().optional(),
 });
+
+const DEPARTMENT_OPTIONS = [
+  { value: "HR", label: "Human Resources (HR)" },
+  { value: "IT", label: "Information Technology (IT)" },
+];
+
+const HR_REQUEST_OPTIONS = [
+  { value: "LEAVE_REQUEST", label: "Leave Request" },
+  { value: "DOCUMENT_REQUEST", label: "Document Request" },
+];
+
+const IT_REQUEST_OPTIONS = [
+  { value: "HARDWARE_ISSUE", label: "Hardware Issue" },
+  { value: "SOFTWARE_ISSUE", label: "Software Issue" },
+];
+
+const DOCUMENT_OPTIONS = [
+  { value: "SALARY_CERTIFICATE", label: "Salary Certificate" },
+  { value: "NOC", label: "NOC (No Objection Certificate)" },
+];
 
 export function TicketSubmissionPage() {
   const search = routeApi.useSearch();
@@ -121,88 +124,35 @@ export function TicketSubmissionPage() {
             className="space-y-6"
           >
             <form.Field name="subject">
-              {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel>Subject</FieldLabel>
-                    <FieldContent>
-                      <Input
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid}
-                        placeholder="Brief summary of the issue or request"
-                      />
-                    </FieldContent>
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
+              {(field) => (
+                <TextField
+                  field={field}
+                  label="Subject"
+                  placeholder="Brief summary of the issue or request"
+                />
+              )}
             </form.Field>
 
             <form.Field name="description">
-              {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel>Description</FieldLabel>
-                    <FieldContent>
-                      <Textarea
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid}
-                        placeholder="Please provide details..."
-                        className="min-h-25"
-                      />
-                    </FieldContent>
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
+              {(field) => (
+                <TextareaField
+                  field={field}
+                  label="Description"
+                  placeholder="Please provide details..."
+                  className="min-h-25"
+                />
+              )}
             </form.Field>
 
             <form.Field name="department">
-              {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel>Department</FieldLabel>
-                    <FieldContent>
-                      <Select
-                        value={field.state.value}
-                        onValueChange={(val) => field.handleChange(val || "")}
-                      >
-                        <SelectTrigger
-                          className="w-full"
-                          aria-invalid={isInvalid}
-                        >
-                          <SelectValue placeholder="Select department" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="HR">
-                            Human Resources (HR)
-                          </SelectItem>
-                          <SelectItem value="IT">
-                            Information Technology (IT)
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FieldContent>
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
+              {(field) => (
+                <SelectField
+                  field={field}
+                  label="Department"
+                  placeholder="Select department"
+                  options={DEPARTMENT_OPTIONS}
+                />
+              )}
             </form.Field>
 
             <form.Subscribe selector={(state) => state.values}>
@@ -216,199 +166,41 @@ export function TicketSubmissionPage() {
                     {department === "HR" && (
                       <div className="space-y-6 p-4 border rounded-md bg-muted/20">
                         <form.Field name="request_type">
-                          {(field) => {
-                            const isInvalid =
-                              field.state.meta.isTouched &&
-                              !field.state.meta.isValid;
-                            return (
-                              <Field data-invalid={isInvalid}>
-                                <FieldLabel>Request Type</FieldLabel>
-                                <FieldContent>
-                                  <Select
-                                    value={field.state.value}
-                                    onValueChange={(val) =>
-                                      field.handleChange(val || "")
-                                    }
-                                  >
-                                    <SelectTrigger
-                                      className="w-full"
-                                      aria-invalid={isInvalid}
-                                    >
-                                      <SelectValue placeholder="Select request type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="LEAVE_REQUEST">
-                                        Leave Request
-                                      </SelectItem>
-                                      <SelectItem value="DOCUMENT_REQUEST">
-                                        Document Request
-                                      </SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </FieldContent>
-                                {isInvalid && (
-                                  <FieldError
-                                    errors={field.state.meta.errors}
-                                  />
-                                )}
-                              </Field>
-                            );
-                          }}
+                          {(field) => (
+                            <SelectField
+                              field={field}
+                              label="Request Type"
+                              placeholder="Select request type"
+                              options={HR_REQUEST_OPTIONS}
+                            />
+                          )}
                         </form.Field>
 
                         {requestType === "LEAVE_REQUEST" && (
                           <div className="grid grid-cols-2 gap-4">
                             <form.Field name="from_date">
-                              {(field) => {
-                                const isInvalid =
-                                  field.state.meta.isTouched &&
-                                  !field.state.meta.isValid;
-                                return (
-                                  <Field data-invalid={isInvalid}>
-                                    <FieldLabel>From Date</FieldLabel>
-                                    <FieldContent>
-                                      <Popover>
-                                        {/* @ts-expect-error Base UI doesn't strongly type asChild */}
-                                        <PopoverTrigger asChild>
-                                          <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                              "w-full justify-start text-left font-normal",
-                                              !field.state.value &&
-                                                "text-muted-foreground",
-                                            )}
-                                          >
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {field.state.value ? (
-                                              format(
-                                                field.state.value,
-                                                "dd/MM/yyyy",
-                                              )
-                                            ) : (
-                                              <span>Pick a date</span>
-                                            )}
-                                          </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent
-                                          className="w-auto p-0"
-                                          align="start"
-                                        >
-                                          <Calendar
-                                            mode="single"
-                                            selected={field.state.value}
-                                            onSelect={(date) =>
-                                              field.handleChange(date)
-                                            }
-                                          />
-                                        </PopoverContent>
-                                      </Popover>
-                                    </FieldContent>
-                                    {isInvalid && (
-                                      <FieldError
-                                        errors={field.state.meta.errors}
-                                      />
-                                    )}
-                                  </Field>
-                                );
-                              }}
+                              {(field) => (
+                                <DateField field={field} label="From Date" />
+                              )}
                             </form.Field>
                             <form.Field name="to_date">
-                              {(field) => {
-                                const isInvalid =
-                                  field.state.meta.isTouched &&
-                                  !field.state.meta.isValid;
-                                return (
-                                  <Field data-invalid={isInvalid}>
-                                    <FieldLabel>To Date</FieldLabel>
-                                    <FieldContent>
-                                      <Popover>
-                                        {/* @ts-expect-error Base UI doesn't strongly type asChild */}
-                                        <PopoverTrigger asChild>
-                                          <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                              "w-full justify-start text-left font-normal",
-                                              !field.state.value &&
-                                                "text-muted-foreground",
-                                            )}
-                                          >
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {field.state.value ? (
-                                              format(
-                                                field.state.value,
-                                                "dd/MM/yyyy",
-                                              )
-                                            ) : (
-                                              <span>Pick a date</span>
-                                            )}
-                                          </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent
-                                          className="w-auto p-0"
-                                          align="start"
-                                        >
-                                          <Calendar
-                                            mode="single"
-                                            selected={field.state.value}
-                                            onSelect={(date) =>
-                                              field.handleChange(date)
-                                            }
-                                          />
-                                        </PopoverContent>
-                                      </Popover>
-                                    </FieldContent>
-                                    {isInvalid && (
-                                      <FieldError
-                                        errors={field.state.meta.errors}
-                                      />
-                                    )}
-                                  </Field>
-                                );
-                              }}
+                              {(field) => (
+                                <DateField field={field} label="To Date" />
+                              )}
                             </form.Field>
                           </div>
                         )}
 
                         {requestType === "DOCUMENT_REQUEST" && (
                           <form.Field name="document_type">
-                            {(field) => {
-                              const isInvalid =
-                                field.state.meta.isTouched &&
-                                !field.state.meta.isValid;
-                              return (
-                                <Field data-invalid={isInvalid}>
-                                  <FieldLabel>Document Type</FieldLabel>
-                                  <FieldContent>
-                                    <Select
-                                      value={field.state.value}
-                                      onValueChange={(val) =>
-                                        field.handleChange(val || undefined)
-                                      }
-                                    >
-                                      <SelectTrigger
-                                        className="w-full"
-                                        aria-invalid={isInvalid}
-                                      >
-                                        <SelectValue placeholder="Select document" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="SALARY_CERTIFICATE">
-                                          Salary Certificate
-                                        </SelectItem>
-                                        <SelectItem value="NOC">
-                                          NOC (No Objection Certificate)
-                                        </SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </FieldContent>
-                                  {isInvalid && (
-                                    <FieldError
-                                      errors={field.state.meta.errors}
-                                    />
-                                  )}
-                                </Field>
-                              );
-                            }}
+                            {(field) => (
+                              <SelectField
+                                field={field}
+                                label="Document Type"
+                                placeholder="Select document"
+                                options={DOCUMENT_OPTIONS}
+                              />
+                            )}
                           </form.Field>
                         )}
                       </div>
@@ -418,136 +210,49 @@ export function TicketSubmissionPage() {
                     {department === "IT" && (
                       <div className="space-y-6 p-4 border rounded-md bg-muted/20">
                         <form.Field name="request_type">
-                          {(field) => {
-                            const isInvalid =
-                              field.state.meta.isTouched &&
-                              !field.state.meta.isValid;
-                            return (
-                              <Field data-invalid={isInvalid}>
-                                <FieldLabel>Ticket Type</FieldLabel>
-                                <FieldContent>
-                                  <Select
-                                    value={field.state.value}
-                                    onValueChange={(val) =>
-                                      field.handleChange(val || "")
-                                    }
-                                  >
-                                    <SelectTrigger
-                                      className="w-full"
-                                      aria-invalid={isInvalid}
-                                    >
-                                      <SelectValue placeholder="Select ticket type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="HARDWARE_ISSUE">
-                                        Hardware Issue
-                                      </SelectItem>
-                                      <SelectItem value="SOFTWARE_ISSUE">
-                                        Software Issue
-                                      </SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </FieldContent>
-                                {isInvalid && (
-                                  <FieldError
-                                    errors={field.state.meta.errors}
-                                  />
-                                )}
-                              </Field>
-                            );
-                          }}
+                          {(field) => (
+                            <SelectField
+                              field={field}
+                              label="Ticket Type"
+                              placeholder="Select ticket type"
+                              options={IT_REQUEST_OPTIONS}
+                            />
+                          )}
                         </form.Field>
 
                         {requestType === "HARDWARE_ISSUE" && (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <form.Field name="device_type">
-                              {(field) => {
-                                const isInvalid =
-                                  field.state.meta.isTouched &&
-                                  !field.state.meta.isValid;
-                                return (
-                                  <Field data-invalid={isInvalid}>
-                                    <FieldLabel>Device Type</FieldLabel>
-                                    <FieldContent>
-                                      <Input
-                                        value={field.state.value}
-                                        onBlur={field.handleBlur}
-                                        onChange={(e) =>
-                                          field.handleChange(e.target.value)
-                                        }
-                                        aria-invalid={isInvalid}
-                                        placeholder="e.g. Laptop, Monitor"
-                                      />
-                                    </FieldContent>
-                                    {isInvalid && (
-                                      <FieldError
-                                        errors={field.state.meta.errors}
-                                      />
-                                    )}
-                                  </Field>
-                                );
-                              }}
+                              {(field) => (
+                                <TextField
+                                  field={field}
+                                  label="Device Type"
+                                  placeholder="e.g. Laptop, Monitor"
+                                />
+                              )}
                             </form.Field>
                             <form.Field name="fault_code">
-                              {(field) => {
-                                const isInvalid =
-                                  field.state.meta.isTouched &&
-                                  !field.state.meta.isValid;
-                                return (
-                                  <Field data-invalid={isInvalid}>
-                                    <FieldLabel>Fault Code</FieldLabel>
-                                    <FieldContent>
-                                      <Input
-                                        value={field.state.value}
-                                        onBlur={field.handleBlur}
-                                        onChange={(e) =>
-                                          field.handleChange(e.target.value)
-                                        }
-                                        aria-invalid={isInvalid}
-                                        placeholder="e.g. E012"
-                                        maxLength={4}
-                                      />
-                                    </FieldContent>
-                                    {isInvalid && (
-                                      <FieldError
-                                        errors={field.state.meta.errors}
-                                      />
-                                    )}
-                                  </Field>
-                                );
-                              }}
+                              {(field) => (
+                                <TextField
+                                  field={field}
+                                  label="Fault Code"
+                                  placeholder="e.g. E012"
+                                  maxLength={4}
+                                />
+                              )}
                             </form.Field>
                           </div>
                         )}
 
                         {requestType === "SOFTWARE_ISSUE" && (
                           <form.Field name="software_name">
-                            {(field) => {
-                              const isInvalid =
-                                field.state.meta.isTouched &&
-                                !field.state.meta.isValid;
-                              return (
-                                <Field data-invalid={isInvalid}>
-                                  <FieldLabel>Software Name</FieldLabel>
-                                  <FieldContent>
-                                    <Input
-                                      value={field.state.value}
-                                      onBlur={field.handleBlur}
-                                      onChange={(e) =>
-                                        field.handleChange(e.target.value)
-                                      }
-                                      aria-invalid={isInvalid}
-                                      placeholder="e.g. Microsoft Outlook, Slack"
-                                    />
-                                  </FieldContent>
-                                  {isInvalid && (
-                                    <FieldError
-                                      errors={field.state.meta.errors}
-                                    />
-                                  )}
-                                </Field>
-                              );
-                            }}
+                            {(field) => (
+                              <TextField
+                                field={field}
+                                label="Software Name"
+                                placeholder="e.g. Microsoft Outlook, Slack"
+                              />
+                            )}
                           </form.Field>
                         )}
                       </div>
