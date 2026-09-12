@@ -16,5 +16,3 @@ export const {
   assignTicket,
   summarizeTicket,
 } = useMock ? mock : service;
-
-// TODO: Need to remove ticket_id fro addTicketComment

@@ -46,7 +46,12 @@ origins = [
 ]
 
 app.add_middleware(
-    CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"]
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,  # ← this one
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["Content-Disposition"],
 )
 
 

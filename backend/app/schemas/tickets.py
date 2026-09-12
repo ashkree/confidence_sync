@@ -2,7 +2,7 @@ import datetime
 import uuid
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
 from app.models import HrRequest, ItTicket, TicketComment
 from app.models.hr_request import DocumentType, RequestType
@@ -10,10 +10,12 @@ from app.models.it_ticket import ITRequestType
 from app.models.ticket import TicketPriority, TicketStatus, TicketType
 from app.schemas.date_types import FormattedDate, FormattedDateTime
 
+# ---------------------------------------------------------------------------
 # TICKET CREATION SCHEMAS
+# ---------------------------------------------------------------------------
 
 
-# Status and Priority will use the default value on creation
+# Status and Priority use their server-side defaults on creation.
 class TicketCreateBase(BaseModel):
     """Base schema for creating a new ticket, containing common fields."""
 
@@ -51,21 +53,70 @@ class HrRequestCreate(TicketCreateBase):
 TicketCreate = Annotated[ItTicketCreate | HrRequestCreate, Field(discriminator="type")]
 
 
-# SHORT TICKET RESPONSES
-# used with list views
-class TicketListEmployeeResponseBase(BaseModel):
-    """Base schema for ticket summaries returned in employee list views."""
+# ---------------------------------------------------------------------------
+# SUBTYPE FIELD MIXINS
+#
+# Each subtype's own columns are declared exactly once here and mixed into the
+# employee/admin variants below. The `type` discriminator lives ONLY on these
+# mixins -- never on the shared bases -- so that multiple inheritance can't
+# clobber the Literal with a plain TicketType and break the discriminated union.
+# ---------------------------------------------------------------------------
+
+
+class ItListFields(BaseModel):
+    """IT columns present in list views."""
+
+    type: Literal[TicketType.IT_TICKET] = TicketType.IT_TICKET
+    request_type: ITRequestType
+
+
+class ItDetailFields(ItListFields):
+    """IT columns present in detail views."""
+
+    device_type: str | None = None
+    fault_code: str | None = None
+    software_name: str | None = None
+
+
+class HrListFields(BaseModel):
+    """HR columns present in list views."""
+
+    type: Literal[TicketType.HR_REQUEST] = TicketType.HR_REQUEST
+    request_type: RequestType
+    document_type: DocumentType | None = None
+
+
+class HrDetailFields(HrListFields):
+    """HR columns present in detail views."""
+
+    from_date: FormattedDate | None = None
+    to_date: FormattedDate | None = None
+
+
+# ---------------------------------------------------------------------------
+# SHARED BASES
+#
+# Employee bases carry only what a requester may see. Admin bases extend them
+# with internal triage signals. Adding a sensitive column to an admin base is
+# therefore hidden from employees by default.
+# ---------------------------------------------------------------------------
+
+
+class TicketListEmployeeBase(BaseModel):
+    """Common list fields visible to the ticket's poster."""
 
     model_config = ConfigDict(from_attributes=True)
+
     id: uuid.UUID
-    type: TicketType
     status: TicketStatus
     subject: str
+    # NOTE: raw datetime here while detail views use FormattedDateTime.
+    # Pre-existing inconsistency; the frontend formats this one client-side.
     updated_at: datetime.datetime
 
 
-class TicketListResponseBase(TicketListEmployeeResponseBase):
-    """Base schema for ticket summaries returned in admin list views."""
+class TicketListAdminBase(TicketListEmployeeBase):
+    """Common list fields visible to department admins."""
 
     poster_id: uuid.UUID
     assignee_id: uuid.UUID | None
@@ -74,60 +125,17 @@ class TicketListResponseBase(TicketListEmployeeResponseBase):
     priority: TicketPriority
 
 
-class HrRequestListEmployeeResponse(TicketListEmployeeResponseBase):
-    """Schema for HR request summaries in employee list views."""
-
-    type: Literal[TicketType.HR_REQUEST] = TicketType.HR_REQUEST
-    request_type: RequestType
-    document_type: DocumentType | None = None
-
-
-class ItTicketListEmployeeResponse(TicketListEmployeeResponseBase):
-    """Schema for IT ticket summaries in employee list views."""
-
-    type: Literal[TicketType.IT_TICKET] = TicketType.IT_TICKET
-    request_type: ITRequestType
-
-
-class HrRequestListResponse(TicketListResponseBase):
-    """Schema for HR request summaries returned in admin list views."""
-
-    type: Literal[TicketType.HR_REQUEST] = TicketType.HR_REQUEST
-    request_type: RequestType
-    document_type: DocumentType | None = None
-
-
-class ItTicketListResponse(TicketListResponseBase):
-    """Schema for IT ticket summaries returned in admin list views."""
-
-    type: Literal[TicketType.IT_TICKET] = TicketType.IT_TICKET
-    request_type: ITRequestType
-
-
-TicketListReponse = Annotated[
-    HrRequestListResponse | ItTicketListResponse, Field(discriminator="type")
-]
-
-TicketListResponse = TicketListReponse
-
-TicketListEmployeeResponse = Annotated[
-    HrRequestListEmployeeResponse | ItTicketListEmployeeResponse,
-    Field(discriminator="type"),
-]
-
-
-# DETAILED TICKET RESPONSE
-# used with detail pages
 class TicketDetailEmployeeBase(BaseModel):
-    """
-    Employee Ticket Response for detail pages.
-    Excludes internal triage signals (priority, poster, assignee, information).
+    """Common detail fields visible to the ticket's poster.
+
+    Excludes internal triage signals: priority, poster, assignee, information.
+    `ai_summary` IS included -- it is regenerated with the comment thread, so
+    it carries admin instructions the employee is meant to read.
     """
 
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
-    type: TicketType
     status: TicketStatus
     subject: str
     description: str
@@ -137,10 +145,7 @@ class TicketDetailEmployeeBase(BaseModel):
 
 
 class TicketDetailAdminBase(TicketDetailEmployeeBase):
-    """
-    Admin Ticket Response for detail pages.
-    Includes internal triage signals (priority, poster, assignee, information).
-    """
+    """Common detail fields visible to department admins."""
 
     poster_id: uuid.UUID
     assignee_id: uuid.UUID | None
@@ -150,48 +155,57 @@ class TicketDetailAdminBase(TicketDetailEmployeeBase):
     information: str | None = None
 
 
-# Alias for backward compatibility if any service imports TicketDetailResponseBase
-TicketDetailResponseBase = TicketDetailAdminBase
+# ---------------------------------------------------------------------------
+# LIST RESPONSES
+# ---------------------------------------------------------------------------
 
 
-class ItTicketDetailEmployeeResponse(TicketDetailEmployeeBase):
-    """Schema for employee view of an IT ticket."""
-
-    type: Literal[TicketType.IT_TICKET] = TicketType.IT_TICKET
-    request_type: ITRequestType
-    device_type: str | None = None
-    fault_code: str | None = None
-    software_name: str | None = None
+class ItTicketListEmployeeResponse(TicketListEmployeeBase, ItListFields):
+    """IT ticket summary as shown to the poster."""
 
 
-class ItTicketDetailResponse(TicketDetailAdminBase):
-    """Schema for the detailed admin view of an IT ticket, including specific device and software information."""
-
-    type: Literal[TicketType.IT_TICKET] = TicketType.IT_TICKET
-    request_type: ITRequestType
-    device_type: str | None = None
-    fault_code: str | None = None
-    software_name: str | None = None
+class HrRequestListEmployeeResponse(TicketListEmployeeBase, HrListFields):
+    """HR request summary as shown to the poster."""
 
 
-class HrRequestDetailEmployeeResponse(TicketDetailEmployeeBase):
-    """Schema for employee view of an HR request."""
-
-    type: Literal[TicketType.HR_REQUEST] = TicketType.HR_REQUEST
-    request_type: RequestType
-    document_type: DocumentType | None = None
-    from_date: FormattedDate | None = None
-    to_date: FormattedDate | None = None
+class ItTicketListResponse(TicketListAdminBase, ItListFields):
+    """IT ticket summary as shown to admins."""
 
 
-class HrRequestDetailResponse(TicketDetailAdminBase):
-    """Schema for the detailed admin view of an HR request, including specific document and date information."""
+class HrRequestListResponse(TicketListAdminBase, HrListFields):
+    """HR request summary as shown to admins."""
 
-    type: Literal[TicketType.HR_REQUEST] = TicketType.HR_REQUEST
-    request_type: RequestType
-    document_type: DocumentType | None = None
-    from_date: FormattedDate | None = None
-    to_date: FormattedDate | None = None
+
+TicketListResponse = Annotated[
+    ItTicketListResponse | HrRequestListResponse,
+    Field(discriminator="type"),
+]
+
+TicketListEmployeeResponse = Annotated[
+    ItTicketListEmployeeResponse | HrRequestListEmployeeResponse,
+    Field(discriminator="type"),
+]
+
+
+# ---------------------------------------------------------------------------
+# DETAIL RESPONSES
+# ---------------------------------------------------------------------------
+
+
+class ItTicketDetailEmployeeResponse(TicketDetailEmployeeBase, ItDetailFields):
+    """Full IT ticket as shown to the poster."""
+
+
+class HrRequestDetailEmployeeResponse(TicketDetailEmployeeBase, HrDetailFields):
+    """Full HR request as shown to the poster."""
+
+
+class ItTicketDetailResponse(TicketDetailAdminBase, ItDetailFields):
+    """Full IT ticket as shown to admins."""
+
+
+class HrRequestDetailResponse(TicketDetailAdminBase, HrDetailFields):
+    """Full HR request as shown to admins."""
 
 
 TicketDetailResponse = Annotated[
@@ -203,6 +217,26 @@ TicketDetailEmployeeResponse = Annotated[
     ItTicketDetailEmployeeResponse | HrRequestDetailEmployeeResponse,
     Field(discriminator="type"),
 ]
+
+
+# ---------------------------------------------------------------------------
+# TYPE ADAPTERS
+#
+# The response types above are Annotated unions, not BaseModel subclasses, so
+# they have no .model_validate(). Use these adapters to serialize an ORM object
+# by role. Built once at import -- constructing a TypeAdapter per request is
+# expensive.
+# ---------------------------------------------------------------------------
+
+TicketDetailAdapter: TypeAdapter = TypeAdapter(TicketDetailResponse)
+TicketDetailEmployeeAdapter: TypeAdapter = TypeAdapter(TicketDetailEmployeeResponse)
+TicketListAdapter: TypeAdapter = TypeAdapter(list[TicketListResponse])
+TicketListEmployeeAdapter: TypeAdapter = TypeAdapter(list[TicketListEmployeeResponse])
+
+
+# ---------------------------------------------------------------------------
+# PATCH & COMMENT SCHEMAS
+# ---------------------------------------------------------------------------
 
 
 class TicketStatusPatch(BaseModel):
@@ -227,8 +261,16 @@ class TicketCommentCreate(BaseModel):
 
 
 class TicketCommentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: uuid.UUID
     ticket_id: uuid.UUID
     author_name: str
     body: str
     created_at: FormattedDateTime
+
+
+class TicketEnrichmentResponse(BaseModel):
+    ready: bool
+    summary: str | None = None
+    next_steps: str | None = None

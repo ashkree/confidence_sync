@@ -1,24 +1,26 @@
-# app/routers/tickets.py
+# app/routes/tickets.py
 import uuid
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, BackgroundTasks, Depends, status
 
 from app.authorization.guards import require_admin, require_authenticated
 from app.authorization.tickets import can_access, is_in_scope
 from app.exceptions.tickets import TicketAccessDeniedError
-from app.models import User
+from app.models import Ticket, User
 from app.models.user import UserRole
-from app.repository.document import DocumentRepo, get_document_repo
 from app.repository.ticket import TicketRepo, get_ticket_repo
 from app.schemas.tickets import (
     TicketAssigneePatch,
     TicketCommentCreate,
     TicketCommentResponse,
     TicketCreate,
+    TicketDetailAdapter,
+    TicketDetailEmployeeAdapter,
     TicketDetailEmployeeResponse,
     TicketDetailResponse,
+    TicketEnrichmentResponse,
     TicketListEmployeeResponse,
-    TicketListReponse,
+    TicketListResponse,
     TicketPriorityPatch,
     TicketStatusPatch,
 )
@@ -35,6 +37,25 @@ from app.services.tickets import (
 ticket_router = APIRouter(prefix="/tickets")
 
 
+def serialize_detail(
+    ticket: Ticket, user: User
+) -> TicketDetailResponse | TicketDetailEmployeeResponse:
+    """Serialize a ticket for detail views, trimmed to what the caller may see.
+
+    Employees get the schema without priority, poster, assignee or information.
+    Both branches must go through an adapter: these routes declare
+    `response_model=None`, so FastAPI does no serialization of its own and
+    returning a raw ORM object would blow up in jsonable_encoder.
+    """
+
+    adapter = (
+        TicketDetailEmployeeAdapter
+        if user.role == UserRole.EMPLOYEE
+        else TicketDetailAdapter
+    )
+    return adapter.validate_python(ticket, from_attributes=True)
+
+
 @ticket_router.post(
     "",
     response_model=None,
@@ -43,38 +64,62 @@ ticket_router = APIRouter(prefix="/tickets")
 )
 async def create_ticket_route(
     payload: TicketCreate,
+    background_tasks: BackgroundTasks,
     ticket_repo: TicketRepo = Depends(get_ticket_repo),
-    document_repo: DocumentRepo = Depends(get_document_repo),
     current_user: User = Depends(require_authenticated),
 ) -> TicketDetailResponse | TicketDetailEmployeeResponse:
     """Create a new HR request or IT ticket.
 
+    Enrichment runs in the background, so the returned ticket has a null
+    summary and information — the client polls the detail endpoint for them.
+
     Returns:
-        TicketDetailResponse | TicketDetailEmployeeResponse: The newly created ticket.
+        The newly created ticket, trimmed to the caller's role.
     """
 
-    created = await create_ticket(ticket_repo, document_repo, current_user, payload)
-    if current_user.role == UserRole.EMPLOYEE:
-        return TicketDetailEmployeeResponse.model_validate(created)
-    return created
+    ticket = await create_ticket(ticket_repo, current_user, payload, background_tasks)
+
+    return serialize_detail(ticket, current_user)
+
+
+@ticket_router.get(
+    "/{id}/enrichment",
+    response_model=TicketEnrichmentResponse,
+    summary="Poll ticket enrichment state",
+)
+async def get_ticket_enrichment(
+    id: uuid.UUID,
+    ticket_repo: TicketRepo = Depends(get_ticket_repo),
+    current_user: User = Depends(require_authenticated),
+):
+
+    ticket = await ticket_repo.read_by_id(id)
+
+    if not can_access(current_user, ticket):
+        raise TicketAccessDeniedError(id)
+
+    is_admin = current_user.role is UserRole.ADMIN
+
+    return TicketEnrichmentResponse(
+        ready=ticket.ai_summary is not None,
+        summary=ticket.ai_summary,
+        next_steps=ticket.information if is_admin else None,
+    )
 
 
 @ticket_router.get(
     "",
-    response_model=list[TicketListReponse],
+    response_model=list[TicketListResponse],
     summary="List departmental tickets",
 )
 async def get_tickets(
     repo: TicketRepo = Depends(get_ticket_repo),
     current_user: User = Depends(require_admin),
 ):
-    """List tickets for the current user's department.
-
-    Only admins can access this endpoint. They see tickets relevant
-    to their respective department (HR or IT).
+    """List tickets for the current user's department. Admin only.
 
     Returns:
-        list[TicketListReponse]: A list of tickets in the department.
+        list[TicketListResponse]: A list of tickets in the department.
     """
 
     return await read_tickets_by_department(repo, current_user)
@@ -88,15 +133,17 @@ async def get_tickets(
 async def get_own_tickets(
     ticket_repo: TicketRepo = Depends(get_ticket_repo),
     current_user: User = Depends(require_authenticated),
-) -> list[TicketListEmployeeResponse]:
+):
     """Get all tickets submitted by the current user.
+
+    Always uses the employee schema -- this is the requester's own view of
+    their own tickets, so triage signals are omitted regardless of role.
 
     Returns:
         list[TicketListEmployeeResponse]: A list of tickets submitted by the user.
     """
 
-    tickets = await ticket_repo.read_by_poster(current_user.id)
-    return [TicketListEmployeeResponse.model_validate(t) for t in tickets]
+    return await ticket_repo.read_by_poster(current_user.id)
 
 
 @ticket_router.get(
@@ -112,7 +159,7 @@ async def get_ticket(
     """Get the details for a specific ticket.
 
     Returns:
-        TicketDetailResponse | TicketDetailEmployeeResponse: Detailed information for the requested ticket.
+        Detailed information for the requested ticket, trimmed to the caller's role.
 
     Raises:
         TicketAccessDeniedError 403: If the user is not authorized to view the ticket.
@@ -123,10 +170,7 @@ async def get_ticket(
     if not can_access(current_user, ticket):
         raise TicketAccessDeniedError(id)
 
-    if current_user.role == UserRole.EMPLOYEE:
-        return TicketDetailEmployeeResponse.model_validate(ticket)
-
-    return ticket
+    return serialize_detail(ticket, current_user)
 
 
 @ticket_router.patch(
@@ -192,7 +236,6 @@ async def patch_ticket_assignee(
 
     Returns:
         TicketDetailResponse: The updated ticket details.
-
     """
     ticket = await ticket_repo.read_by_id(id)
 
@@ -218,7 +261,6 @@ async def post_ticket_comment(
 
     Returns:
         TicketCommentResponse: The newly created comment.
-
     """
     ticket = await ticket_repo.read_by_id(id)
 

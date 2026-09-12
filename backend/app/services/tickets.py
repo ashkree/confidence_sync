@@ -1,13 +1,15 @@
 import uuid
 
+from fastapi import BackgroundTasks
+
 from app.models import Ticket, User
 from app.models.ticket import TicketPriority, TicketStatus, TicketType
 from app.models.ticket_comment import TicketComment
 from app.models.user import UserDepartment
-from app.repository.document import DocumentRepo
 from app.repository.ticket import TicketRepo
 from app.schemas.tickets import TicketCommentCreate, TicketCreate
-from app.services.ai import generate_ticket_information, generate_ticket_summary
+from app.services.ai.ticket_summary import generate_ticket_summary
+from app.services.ai.ticket_summary_and_info import enrich_new_ticket
 
 
 async def read_tickets_by_department(
@@ -28,24 +30,20 @@ async def read_tickets_by_department(
 
 async def create_ticket(
     ticket_repo: TicketRepo,
-    document_repo: DocumentRepo,
     current_user: User,
     ticket_data: TicketCreate,
+    background_tasks: BackgroundTasks,
 ):
     """
     Create a new ticket based on what what the actual type of TicketCreate is
     """
 
     # create the ticket model
-    ticket = ticket_data.to_orm(poster_id=current_user.id)
+    ticket = await ticket_repo.create(ticket_data.to_orm(current_user.id))
 
-    # generate summary
-    ticket.ai_summary = await generate_ticket_summary(ticket)
+    background_tasks.add_task(enrich_new_ticket, ticket.id)
 
-    # generate additional information
-    ticket.information = await generate_ticket_information(document_repo, ticket)
-
-    return await ticket_repo.create(ticket)
+    return ticket
 
 
 async def update_ticket_status(
