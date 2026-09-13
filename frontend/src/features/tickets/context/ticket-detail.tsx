@@ -1,17 +1,11 @@
 // frontend/src/features/tickets/context/ticket-detail.tsx
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 
-import { summarizeTicket } from "../api";
 import { useAssigneeControls } from "../hooks/use-assignee-controls";
 import { useCommentsControls } from "../hooks/use-comments-controls";
 import { usePriorityControls } from "../hooks/use-priority-controls";
 import { useStatusControls } from "../hooks/use-status-controls";
+import { useSummaryControls } from "../hooks/use-summary-controls";
 import type { Ticket, TicketComment } from "../types";
 
 interface TicketDetailContextValue {
@@ -21,9 +15,7 @@ interface TicketDetailContextValue {
   priority: ReturnType<typeof usePriorityControls>;
   assignee: ReturnType<typeof useAssigneeControls>;
   comments: ReturnType<typeof useCommentsControls>;
-  aiSummary: string | null;
-  isSummarizing: boolean;
-  handleSummarize: () => Promise<void>;
+  summary: ReturnType<typeof useSummaryControls>;
 }
 
 const TicketDetailContext = createContext<TicketDetailContextValue | null>(
@@ -40,35 +32,16 @@ export function TicketDetailProvider({
   children: React.ReactNode;
 }) {
   const [updatedAt, setUpdatedAt] = useState(initial.updated_at);
-  const [aiSummary, setAiSummary] = useState<string | null>(
-    initial.ai_summary ?? null,
-  );
-  const [isSummarizing, setIsSummarizing] = useState(false);
 
   const status = useStatusControls(initial, setUpdatedAt);
   const priority = usePriorityControls(initial, setUpdatedAt);
   const assignee = useAssigneeControls(initial, setUpdatedAt);
+  const summary = useSummaryControls(initial);
   const comments = useCommentsControls(
-    initial,
+    initial.id,
     initialComments,
-    setUpdatedAt,
-    setAiSummary,
+    summary.refresh,
   );
-
-  const handleSummarize = useCallback(async () => {
-    if (isSummarizing) return;
-
-    setIsSummarizing(true);
-    try {
-      const updated = await summarizeTicket(initial.id);
-      if (updated?.ai_summary) {
-        setAiSummary(updated.ai_summary);
-        setUpdatedAt(updated.updated_at);
-      }
-    } finally {
-      setIsSummarizing(false);
-    }
-  }, [initial.id, isSummarizing]);
 
   const value = useMemo(
     () => ({
@@ -78,21 +51,9 @@ export function TicketDetailProvider({
       priority,
       assignee,
       comments,
-      aiSummary,
-      isSummarizing,
-      handleSummarize,
+      summary,
     }),
-    [
-      initial,
-      updatedAt,
-      status,
-      priority,
-      assignee,
-      comments,
-      aiSummary,
-      isSummarizing,
-      handleSummarize,
-    ],
+    [initial, updatedAt, status, priority, assignee, comments, summary],
   );
 
   return <TicketDetailContext value={value}>{children}</TicketDetailContext>;

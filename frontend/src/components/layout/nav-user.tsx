@@ -24,6 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { User } from "@/features/auth/types";
 
 import {
@@ -50,6 +51,14 @@ export function NavUser({
   const [sheetOpen, setSheetOpen] = useState(false);
   const { appEnv } = useAppEnv();
   const navigate = useNavigate();
+
+  const initials = (user?.name ?? "?")
+    .trim()
+    .split(/\s+/)
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   const handleSwitch = async (email: string) => {
     if (onSwitchUser) {
@@ -79,15 +88,21 @@ export function NavUser({
               render={
                 <SidebarMenuButton
                   size="lg"
-                  className="aria-expanded:bg-sidebar-accent aria-expanded:text-sidebar-accent-foreground"
+                  tooltip={user?.name ?? "Account"}
+                  className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:size-8! aria-expanded:bg-sidebar-accent aria-expanded:text-sidebar-accent-foreground"
                 />
               }
             >
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <Avatar className="size-8 shrink-0 rounded-md">
+                <AvatarFallback className="rounded-md bg-sidebar-accent text-xs font-medium text-sidebar-accent-foreground">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                 <span className="truncate font-medium">{user?.name}</span>
-                <span className="truncate text-xs">{user?.email}</span>
+                <span className="truncate text-xs opacity-70">{user?.email}</span>
               </div>
-              <ChevronsUpDownIcon className="ml-auto size-4" />
+              <ChevronsUpDownIcon className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
             </DropdownMenuTrigger>
             <DropdownMenuContent
               className="w-fit"
@@ -98,9 +113,14 @@ export function NavUser({
               <DropdownMenuGroup>
                 <DropdownMenuLabel className="p-0 font-normal">
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                    <Avatar className="size-8 shrink-0 rounded-md">
+                      <AvatarFallback className="rounded-md bg-sidebar-accent text-xs font-medium text-sidebar-accent-foreground">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-medium">{user?.name}</span>
-                      <span className="truncate text-xs">{user?.email}</span>
+                      <span className="truncate text-xs opacity-70">{user?.email}</span>
                     </div>
                   </div>
                 </DropdownMenuLabel>

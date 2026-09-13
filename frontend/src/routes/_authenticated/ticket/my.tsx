@@ -16,17 +16,18 @@ function MyTicketsPage() {
 
   return (
     <>
-      <HeroSection title="My Tickets" />
-      <div className="p-6 space-y-8">
-        <div className="flex justify-end">
+      <HeroSection
+        title="My Tickets"
+        actions={
           <Link
             to="/ticket/submit"
             className={buttonVariants({ variant: "default" })}
           >
             <PlusIcon className="mr-2 h-4 w-4" /> New Request
           </Link>
-        </div>
-
+        }
+      />
+      <div className="p-6 space-y-8">
         <TicketTable<Ticket> showType data={data} />
       </div>
     </>

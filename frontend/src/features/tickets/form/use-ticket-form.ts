@@ -19,7 +19,11 @@ export function useTicketForm<TExtra extends Record<string, unknown>>(
       try {
         const payload = module.toPayload(value as any);
         const ticket = await createTicket(payload);
-        navigate({ to: "/ticket/$ticketId", params: { ticketId: ticket.id } });
+        navigate({
+          to: "/ticket/$ticketId",
+          params: { ticketId: ticket.id },
+          state: { createdTicket: ticket },
+        });
       } catch (err: unknown) {
         if (axios.isAxiosError(err) && err.response?.data) {
           const data = err.response.data;

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { AnyFieldApi } from "@tanstack/react-form";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
@@ -16,22 +17,41 @@ import {
   FieldError,
 } from "@/components/ui/field";
 
+interface DateFieldProps {
+  field: AnyFieldApi;
+  label: string;
+  disabled?: React.ComponentProps<typeof Calendar>["disabled"];
+  triggerRef?: React.Ref<HTMLButtonElement>;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onSelectDate?: (date: Date | undefined) => void;
+}
+
 export function DateField({
   field,
   label,
-}: {
-  field: AnyFieldApi;
-  label: string;
-}) {
+  disabled,
+  triggerRef,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  onSelectDate,
+}: DateFieldProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? controlledOnOpenChange! : setInternalOpen;
+
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
   return (
     <Field data-invalid={isInvalid}>
       <FieldLabel>{label}</FieldLabel>
       <FieldContent>
-        <Popover>
+        <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger
             render={
               <Button
+                ref={triggerRef}
                 variant="outline"
                 className={cn(
                   "w-full justify-start text-left font-normal",
@@ -51,7 +71,12 @@ export function DateField({
             <Calendar
               mode="single"
               selected={field.state.value}
-              onSelect={(date) => field.handleChange(date)}
+              onSelect={(date) => {
+                field.handleChange(date);
+                setOpen(false);
+                onSelectDate?.(date);
+              }}
+              disabled={disabled}
             />
           </PopoverContent>
         </Popover>

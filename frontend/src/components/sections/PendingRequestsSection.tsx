@@ -6,15 +6,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Plus } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import type { Ticket } from "@/features/tickets/types";
-import { cn } from "@/lib/utils";
 import {
-  getPriorityColor,
-  getStatusColor,
-} from "@/features/tickets/lib/ticket-colors";
+  PriorityBadge,
+  StatusBadge,
+} from "@/features/tickets/components/ticket-badges";
 
 export default function PendingRequestsSection({
   tickets = [],
@@ -55,25 +53,9 @@ export default function PendingRequestsSection({
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "capitalize text-xs font-semibold",
-                      getStatusColor(ticket.status),
-                    )}
-                  >
-                    {ticket.status}
-                  </Badge>
+                  <StatusBadge value={ticket.status} className="text-xs" />
                   {ticket.priority && (
-                    <Badge
-                      variant="outline"
-                      className={cn(
-                        "capitalize text-xs font-semibold",
-                        getPriorityColor(ticket.priority),
-                      )}
-                    >
-                      {ticket.priority}
-                    </Badge>
+                    <PriorityBadge value={ticket.priority} className="text-xs" />
                   )}
                 </div>
               </div>

@@ -2,6 +2,14 @@ import { useAuth } from "@/features/auth/auth-context.ts";
 import { TooltipProvider } from "./components/ui/tooltip.tsx";
 import { routeTree } from "./routeTree.gen.ts";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { Ticket } from "@/features/tickets/types.ts";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { retry: 1, refetchOnWindowFocus: false },
+  },
+});
 
 const router = createRouter({
   routeTree,
@@ -16,6 +24,9 @@ const router = createRouter({
 declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router;
+  }
+  interface HistoryState {
+    createdTicket?: Ticket;
   }
 }
 
@@ -36,7 +47,9 @@ export default function App() {
 
   return (
     <TooltipProvider>
-      <RouterProvider router={router} context={{ auth }} />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} context={{ auth }} />
+      </QueryClientProvider>
     </TooltipProvider>
   );
 }

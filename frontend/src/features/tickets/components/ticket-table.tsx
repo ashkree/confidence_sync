@@ -1,10 +1,8 @@
 import { createColumnHelper, type ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 import type { Ticket } from "../types";
-import { getPriorityColor, getStatusColor } from "../lib/ticket-colors";
+import { PriorityBadge, StatusBadge } from "./ticket-badges";
 
 function getBaseColumns<TData extends Ticket>(options: {
   showPoster: boolean;
@@ -56,17 +54,7 @@ function getBaseColumns<TData extends Ticket>(options: {
             header: "Priority",
             cell: (info) => {
               const value = info.getValue() as string;
-              return (
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    "capitalize font-semibold",
-                    getPriorityColor(value),
-                  )}
-                >
-                  {value}
-                </Badge>
-              );
+              return <PriorityBadge value={value} />;
             },
           }),
         ]
@@ -75,14 +63,7 @@ function getBaseColumns<TData extends Ticket>(options: {
       header: "Status",
       cell: (info) => {
         const value = info.getValue() as string;
-        return (
-          <Badge
-            variant="outline"
-            className={cn("capitalize font-semibold", getStatusColor(value))}
-          >
-            {value}
-          </Badge>
-        );
+        return <StatusBadge value={value} />;
       },
     }),
     helper.accessor("updated_at" as any, {

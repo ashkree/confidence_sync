@@ -53,3 +53,9 @@ export interface TicketComment {
   body: string;
   created_at: string;
 }
+
+export interface TicketEnrichment {
+  ready: boolean;
+  summary: string | null;
+  next_steps: string | null;
+}

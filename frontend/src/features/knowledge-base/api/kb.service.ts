@@ -55,5 +55,5 @@ export async function downloadDocument(id: string): Promise<void> {
 }
 
 export async function deleteDocument(id: string): Promise<void> {
-  await apiClient.delete(`/docuemnts/${id}`);
+  await apiClient.delete(`/documents/${id}`);
 }

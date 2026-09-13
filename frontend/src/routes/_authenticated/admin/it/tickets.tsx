@@ -1,7 +1,8 @@
 import { fetchTickets } from "@/features/tickets/api";
 import { createFileRoute } from "@tanstack/react-router";
 import { TicketTable } from "@/features/tickets/components/ticket-table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatCard } from "@/components/stat-card";
+import { CircleDot, Clock, Inbox } from "lucide-react";
 import { createColumnHelper } from "@tanstack/react-table";
 import type { ItTicket } from "@/features/tickets/types";
 import { CATALOG_BY_REQUEST_TYPE } from "@/features/tickets/catalog";
@@ -38,36 +39,27 @@ function RouteComponent() {
       <HeroSection title="IT Tickets" />
       <div className="p-6 space-y-6">
         <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Unassigned Tickets
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{unassignedCount}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Open Tickets
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{openCount}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Pending Tickets
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{pendingCount}</div>
-            </CardContent>
-          </Card>
+          <StatCard
+            label="Unassigned"
+            value={unassignedCount}
+            icon={Inbox}
+            tone="warn"
+            hint="Needs an owner"
+          />
+          <StatCard
+            label="Open"
+            value={openCount}
+            icon={CircleDot}
+            tone="info"
+            hint="Currently active"
+          />
+          <StatCard
+            label="Pending"
+            value={pendingCount}
+            icon={Clock}
+            tone="neutral"
+            hint="Waiting on info"
+          />
         </div>
 
         <TicketTable<ItTicket>

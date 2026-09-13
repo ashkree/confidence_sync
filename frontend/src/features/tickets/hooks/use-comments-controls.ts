@@ -1,15 +1,14 @@
 // frontend/src/features/tickets/hooks/use-comments-controls.ts
 import { useCallback, useMemo, useState } from "react";
 
-import { addTicketComment, fetchTicket } from "../api";
+import { addTicketComment } from "../api";
 import { useAuth } from "@/features/auth/auth-context";
-import type { Ticket, TicketComment } from "../types";
+import type { TicketComment } from "../types";
 
 export function useCommentsControls(
-  ticket: Ticket,
+  ticketId: string,
   initialComments: TicketComment[],
-  onTouched: (updatedAt: string) => void,
-  onSummaryRefresh: (summary: string | null) => void,
+  onPosted: () => void,
 ) {
   const { user } = useAuth();
   const [comments, setComments] = useState<TicketComment[]>(
@@ -23,24 +22,16 @@ export function useCommentsControls(
 
     setIsPending(true);
     try {
-      const addedComment = await addTicketComment(ticket.id, draft.trim());
+      const addedComment = await addTicketComment(ticketId, draft.trim());
       if (addedComment) {
         setComments((prev) => [...prev, addedComment]);
         setDraft("");
-
-        // The backend regenerates the AI summary on every comment, but the
-        // comment endpoint only returns the comment — re-fetch the ticket
-        // to pick up the refreshed summary.
-        const refreshed = await fetchTicket(ticket.id);
-        if (refreshed) {
-          onSummaryRefresh(refreshed.ai_summary ?? null);
-          onTouched(refreshed.updated_at);
-        }
+        onPosted(); // re-arm the summary poll
       }
     } finally {
       setIsPending(false);
     }
-  }, [ticket.id, draft, user, isPending, onTouched, onSummaryRefresh]);
+  }, [ticketId, draft, user, isPending, onPosted]);
 
   return useMemo(
     () => ({ comments, draft, setDraft, isPending, submit }),

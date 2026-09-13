@@ -1,9 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/date";
-import { getPriorityColor, getStatusColor } from "../../lib/ticket-colors";
+import { PriorityBadge, StatusBadge } from "../ticket-badges";
 import { useTicketVisibility } from "../../hooks/use-ticket-visibility";
 import { CATALOG_BY_REQUEST_TYPE } from "../../catalog";
 import { useTicketDetail } from "../../context/ticket-detail";
@@ -35,25 +34,9 @@ export function TicketDetailHeaderCard() {
               </Badge>
             )}
             {/* Badges read from state so they update immediately after admin actions */}
-            <Badge
-              variant="outline"
-              className={cn(
-                "capitalize font-semibold",
-                getStatusColor(currentStatus),
-              )}
-            >
-              {currentStatus}
-            </Badge>
+            <StatusBadge value={currentStatus} />
             {showPriority && currentPriority && (
-              <Badge
-                variant="outline"
-                className={cn(
-                  "capitalize font-semibold",
-                  getPriorityColor(currentPriority),
-                )}
-              >
-                {currentPriority}
-              </Badge>
+              <PriorityBadge value={currentPriority} />
             )}
           </div>
         </div>

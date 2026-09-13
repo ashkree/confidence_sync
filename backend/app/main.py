@@ -33,8 +33,6 @@ from fastapi.responses import JSONResponse
 
 @app.exception_handler(ResponseValidationError)
 async def debug_response_validation_error(request, exc: ResponseValidationError):
-    for err in exc.errors():
-        __import__("pprint").pprint(err)
     return JSONResponse(
         status_code=500, content={"detail": "response validation failed"}
     )

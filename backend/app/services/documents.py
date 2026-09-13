@@ -9,6 +9,7 @@ from fastapi.responses import StreamingResponse
 from langchain_core.documents import Document as LcDocument
 from pymupdf import open as open_pdf
 
+from app.config import settings
 from app.exceptions.documents import (
     DepartmentNotConfiguredError,
     DocumentDeleteDeniedError,
@@ -23,8 +24,8 @@ from app.repository.document import DocumentRepo
 from app.repository.s3 import get_s3_client
 
 DEPARTMENT_BUCKETS = {
-    UserDepartment.IT: "it_manuals",
-    UserDepartment.HR: "hr_policies",
+    UserDepartment.IT: settings.s3_it_manuals_bucket,
+    UserDepartment.HR: settings.s3_hr_policies_bucket,
 }
 
 

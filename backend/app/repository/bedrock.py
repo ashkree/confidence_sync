@@ -23,11 +23,11 @@ class BedrockRepo(AWSRepo):
             endpoint_url=settings.bedrock_endpoint_url,
         )
 
-        self.converse = ChatBedrockConverse(
-            client=self.client, model="anthropic.claude-3-haiku-20240307-v1:0"
-        )
+        self.converse = ChatBedrockConverse(client=self.client, model=settings.llm)
 
-        self.embed = BedrockEmbeddings(client=self.client)
+        self.embed = BedrockEmbeddings(
+            client=self.client, model_id=settings.embedding_model
+        )
 
     # Async wrapper functions
     async def chat(

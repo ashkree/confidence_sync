@@ -9,7 +9,10 @@ from app.models.user import UserDepartment
 from app.repository.ticket import TicketRepo
 from app.schemas.tickets import TicketCommentCreate, TicketCreate
 from app.services.ai.ticket_summary import generate_ticket_summary
-from app.services.ai.ticket_summary_and_info import enrich_new_ticket
+from app.services.ai.ticket_summary_and_info import (
+    enrich_new_ticket,
+    enrich_ticket_summary,
+)
 
 
 async def read_tickets_by_department(
@@ -82,16 +85,12 @@ async def create_ticket_comment(
     comment_data: TicketCommentCreate,
     ticket: Ticket,
     author_id: uuid.UUID,
+    background_tasks: BackgroundTasks,
 ) -> TicketComment:
-    ticket_id = ticket.id
-    ticket = await ticket_repo.read_by_id(ticket_id)
-
-    comment = comment_data.to_orm(ticket_id, author_id)
+    comment = comment_data.to_orm(ticket.id, author_id)
     added_comment = await ticket_repo.add_comment(comment)
 
-    comments = await ticket_repo.read_comments(ticket_id)
-    ticket.ai_summary = await generate_ticket_summary(ticket, comments)
-    await ticket_repo.save(ticket)
+    background_tasks.add_task(enrich_ticket_summary, ticket.id)
 
     return await ticket_repo.refresh_comment(added_comment)
 

@@ -1,6 +1,7 @@
 import type {
   Ticket,
   TicketComment,
+  TicketEnrichment,
   TicketPriority,
   TicketStatus,
 } from "../types";
@@ -15,6 +16,8 @@ import { formatDate } from "@/lib/date";
 
 let _mockTickets: Ticket[] | null = null;
 let _mockComments: TicketComment[] | null = null;
+
+const _enrichmentTimers = new Map<string, number>();
 
 function getMockTickets(): Ticket[] {
   if (!_mockTickets) {
@@ -101,6 +104,7 @@ export async function createTicket(data: TicketCreatePayload): Promise<Ticket> {
 
   _mockTickets = [...getMockTickets(), newTicket];
   saveMockTickets();
+  _enrichmentTimers.set(newTicket.id, Date.now());
   return newTicket;
 }
 
@@ -159,6 +163,7 @@ export async function addTicketComment(
   };
   _mockComments = [...getMockComments(), comment];
   saveMockComments();
+  _enrichmentTimers.set(ticketId, Date.now());
   return comment;
 }
 
@@ -203,4 +208,60 @@ export async function summarizeTicket(id: string): Promise<Ticket | null> {
   });
   if (found) saveMockTickets();
   return getMockTickets().find((t) => t.id === id) || null;
+}
+
+export async function fetchTicketEnrichment(
+  ticketId: string,
+): Promise<TicketEnrichment> {
+  await new Promise((resolve) => setTimeout(resolve, 200));
+
+  const now = Date.now();
+  if (!_enrichmentTimers.has(ticketId)) {
+    _enrichmentTimers.set(ticketId, now);
+  }
+
+  const elapsed = now - _enrichmentTimers.get(ticketId)!;
+
+  // Simulate ~6s enrichment delay
+  if (elapsed < 6000) {
+    const existing = getMockTickets().find((t) => t.id === ticketId);
+    return {
+      ready: false,
+      summary: existing?.ai_summary ?? null,
+      next_steps: existing?.information ?? null,
+    };
+  }
+
+  // Enrichment "complete" — update the mock ticket store
+  const ticket = getMockTickets().find((t) => t.id === ticketId);
+  if (ticket) {
+    const comments = getMockComments().filter((c) => c.ticket_id === ticketId);
+    let summary =
+      "This is a mock AI-generated summary of the ticket for development testing.";
+    if (comments.length > 0) {
+      summary += ` Updated with ${comments.length} comment(s).`;
+    }
+    const information =
+      ticket.information ||
+      "1. **Review the request details** — confirm the reported issue matches a known category.\n2. **Check for prior tickets** from the same reporter for recurring patterns.";
+
+    _mockTickets = getMockTickets().map((t) =>
+      t.id === ticketId
+        ? {
+            ...t,
+            ai_summary: summary,
+            information,
+            updated_at: formatDate(new Date()),
+          }
+        : t,
+    );
+    saveMockTickets();
+  }
+
+  const updated = getMockTickets().find((t) => t.id === ticketId);
+  return {
+    ready: true,
+    summary: updated?.ai_summary ?? null,
+    next_steps: updated?.information ?? null,
+  };
 }

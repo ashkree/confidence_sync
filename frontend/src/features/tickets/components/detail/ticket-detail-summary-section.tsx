@@ -1,18 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/ui/markdown";
-import { FileText, Sparkles } from "lucide-react";
+import { FileText } from "lucide-react";
 import { useTicketDetail } from "../../context/ticket-detail";
 import { useTicketVisibility } from "../../hooks/use-ticket-visibility";
 
 export function TicketDetailSummarySection() {
-  const { ticket, aiSummary, isSummarizing, handleSummarize } =
-    useTicketDetail();
-  const { showAiSummary, showInformation, canGenerateSummary } =
-    useTicketVisibility();
+  const { summary } = useTicketDetail();
+  const { showAiSummary, showInformation } = useTicketVisibility();
 
   const showSummaryCard = showAiSummary;
-  const showInformationCard = showInformation && !!ticket.information;
+  const showInformationCard = showInformation;
 
   if (!showSummaryCard && !showInformationCard) {
     return null;
@@ -26,42 +23,64 @@ export function TicketDetailSummarySection() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">Summary</CardTitle>
-              {canGenerateSummary && !aiSummary && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleSummarize}
-                  disabled={isSummarizing}
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  {isSummarizing ? "Generating..." : "Generate Summary"}
-                </Button>
+              {summary.isRefreshing && (
+                <span className="text-xs text-muted-foreground animate-pulse">
+                  Updating…
+                </span>
               )}
             </div>
           </CardHeader>
           <CardContent>
-            {aiSummary ? (
-              <Markdown className="text-muted-foreground">{aiSummary}</Markdown>
+            {summary.summary ? (
+              <Markdown className="text-muted-foreground">
+                {summary.summary}
+              </Markdown>
+            ) : summary.isEnriching ? (
+              <div className="space-y-2 animate-pulse py-2">
+                <div className="h-4 bg-muted rounded w-full" />
+                <div className="h-4 bg-muted rounded w-5/6" />
+                <div className="h-4 bg-muted rounded w-4/6" />
+              </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-6 text-muted-foreground">
                 <FileText className="w-10 h-10 mb-2 opacity-40" />
-                <p className="text-sm">No AI summary generated yet.</p>
+                <p className="text-sm">Summary unavailable.</p>
               </div>
             )}
           </CardContent>
         </Card>
       )}
 
-      {/* Information Card — only rendered when the field has content and role permits */}
-      {showInformation && ticket.information && (
+      {/* Information Card — visible to admin even if not yet available, matching summary states */}
+      {showInformationCard && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Information</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Information</CardTitle>
+              {summary.isRefreshing && (
+                <span className="text-xs text-muted-foreground animate-pulse">
+                  Updating…
+                </span>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
-            <Markdown className="text-muted-foreground">
-              {ticket.information}
-            </Markdown>
+            {summary.information ? (
+              <Markdown className="text-muted-foreground">
+                {summary.information}
+              </Markdown>
+            ) : summary.isEnriching ? (
+              <div className="space-y-2 animate-pulse py-2">
+                <div className="h-4 bg-muted rounded w-full" />
+                <div className="h-4 bg-muted rounded w-5/6" />
+                <div className="h-4 bg-muted rounded w-4/6" />
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-6 text-muted-foreground">
+                <FileText className="w-10 h-10 mb-2 opacity-40" />
+                <p className="text-sm">Information unavailable.</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

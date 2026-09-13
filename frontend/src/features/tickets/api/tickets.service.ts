@@ -2,6 +2,7 @@ import { apiClient } from "@/lib/api-client";
 import type {
   Ticket,
   TicketComment,
+  TicketEnrichment,
   TicketPriority,
   TicketStatus,
 } from "../types";
@@ -81,5 +82,14 @@ export async function assignTicket(
 
 export async function summarizeTicket(id: string): Promise<Ticket> {
   const { data } = await apiClient.patch<Ticket>(`/tickets/${id}/summarize`);
+  return data;
+}
+
+export async function fetchTicketEnrichment(
+  ticketId: string,
+): Promise<TicketEnrichment> {
+  const { data } = await apiClient.get<TicketEnrichment>(
+    `/tickets/${ticketId}/enrichment`,
+  );
   return data;
 }

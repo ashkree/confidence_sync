@@ -254,6 +254,7 @@ async def patch_ticket_assignee(
 async def post_ticket_comment(
     id: uuid.UUID,
     payload: TicketCommentCreate,
+    background_tasks: BackgroundTasks,
     ticket_repo: TicketRepo = Depends(get_ticket_repo),
     current_user: User = Depends(require_authenticated),
 ):
@@ -267,7 +268,9 @@ async def post_ticket_comment(
     if not can_access(current_user, ticket):
         raise TicketAccessDeniedError(id)
 
-    return await create_ticket_comment(ticket_repo, payload, ticket, current_user.id)
+    return await create_ticket_comment(
+        ticket_repo, payload, ticket, current_user.id, background_tasks
+    )
 
 
 @ticket_router.get(

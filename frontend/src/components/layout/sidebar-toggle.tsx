@@ -18,12 +18,13 @@ export function SidebarToggle() {
         <SidebarMenuButton
           size="lg"
           onClick={toggleSidebar}
-          className="data-open:bg-sidebar-accent data-open:text-sidebar-accent-foreground"
+          tooltip="ConfidenceSync"
+          className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:size-8! data-open:bg-sidebar-accent data-open:text-sidebar-accent-foreground"
         >
           <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
             <PanelLeftIcon size="1em" />
           </div>
-          <div className="grid flex-1 text-left text-sm leading-tight">
+          <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
             <span className="truncate font-medium">ConfidenceSync</span>
           </div>
         </SidebarMenuButton>

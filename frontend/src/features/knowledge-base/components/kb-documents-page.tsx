@@ -1,8 +1,18 @@
 import { useState } from "react";
 import type { Document } from "@/features/knowledge-base/types";
 import { DataTable } from "@/components/ui/data-table";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "@tanstack/react-router";
 import {
   createColumnHelper,
   type ColumnDef,
@@ -44,33 +54,73 @@ interface DocumentTableProps<TData extends Document> {
 
 function RowActions({ row }: { row: Row<Document> }) {
   const doc = row.original;
+  const router = useRouter();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true);
+      await deleteDocument(doc.id);
+      await router.invalidate();
+      setDeleteDialogOpen(false);
+    } catch (err) {
+      console.error("Failed to delete document:", err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button variant="ghost" size="icon-sm">
-            <MoreHorizontalIcon />
-          </Button>
-        }
-      />
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => viewDocument(doc.id)}>
-          View
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => downloadDocument(doc.id)}>
-          Download
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          variant="destructive"
-          onClick={async () => {
-            await deleteDocument(doc.id);
-            window.location.reload();
-          }}
-        >
-          Delete
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button variant="ghost" size="icon-sm">
+              <MoreHorizontalIcon />
+            </Button>
+          }
+        />
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => viewDocument(doc.id)}>
+            View
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => downloadDocument(doc.id)}>
+            Download
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={() => setDeleteDialogOpen(true)}
+          >
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Document</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{doc.file_name}"? This action
+              cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose render={<Button variant="outline" />}>
+              Cancel
+            </DialogClose>
+            <Button
+              variant="destructive"
+              disabled={isDeleting}
+              onClick={handleDelete}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -122,7 +172,7 @@ export function DocumentsPage<TData extends Document>({
               }
             />
             <DialogContent>
-              <DocumentUploadForm />
+              <DocumentUploadForm onSuccess={() => setDialogOpen(false)} />
             </DialogContent>
           </Dialog>
         </div>
@@ -153,7 +203,12 @@ const formSchema = z.object({
     }),
 });
 
-function DocumentUploadForm() {
+interface DocumentUploadFormProps {
+  onSuccess?: () => void;
+}
+
+function DocumentUploadForm({ onSuccess }: DocumentUploadFormProps) {
+  const router = useRouter();
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const form = useForm({
@@ -164,8 +219,9 @@ function DocumentUploadForm() {
       try {
         setSubmitError(null);
         await createDocument(value.attachment, value.fileName);
-        // Reload the page so the document list refreshes automatically
-        window.location.reload();
+        await router.invalidate();
+        form.reset();
+        onSuccess?.();
       } catch {
         setSubmitError("Failed to upload document. Please try again.");
       }
@@ -181,6 +237,36 @@ function DocumentUploadForm() {
       }}
     >
       <FieldGroup>
+        <form.Field
+          name="attachment"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>File</FieldLabel>
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  type="file"
+                  accept="application/pdf"
+                  onBlur={field.handleBlur}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    field.handleChange(file);
+                    if (file) {
+                      const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+                      form.setFieldValue("fileName", nameWithoutExt);
+                    }
+                  }}
+                  aria-invalid={isInvalid}
+                />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
+        />
+
         <form.Field
           name="fileName"
           children={(field) => {
@@ -198,29 +284,6 @@ function DocumentUploadForm() {
                   aria-invalid={isInvalid}
                   placeholder="Document title"
                   autoComplete="off"
-                />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-              </Field>
-            );
-          }}
-        />
-
-        <form.Field
-          name="attachment"
-          children={(field) => {
-            const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
-            return (
-              <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>File</FieldLabel>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  type="file"
-                  accept="application/pdf"
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.files?.[0])}
-                  aria-invalid={isInvalid}
                 />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
