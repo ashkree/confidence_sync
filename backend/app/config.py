@@ -13,10 +13,10 @@ class Settings(BaseSettings):
     aws_secret_access_key: str | None = None
 
     # cognito settings
-    cognito_user_pool_id: str | None = None
+    cognito_endpoint_url: str | None = None
+    cognito_user_pool_id: str
     cognito_app_client_id: str
     cognito_app_client_secret: str
-    cognito_endpoint_url: str
 
     # s3 settings
     s3_endpoint_url: str | None = None
