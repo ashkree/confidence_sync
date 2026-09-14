@@ -17,4 +17,4 @@ class DocumentChunk(Base):
     content: Mapped[str] = mapped_column(Text, nullable=False)
     page_number: Mapped[int | None] = mapped_column(nullable=True)
     chunk_index: Mapped[int] = mapped_column(nullable=False)
-    embedding: Mapped[list[float]] = mapped_column(Vector(768), nullable=False)
+    embedding: Mapped[list[float]] = mapped_column(Vector(1024), nullable=False)

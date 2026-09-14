@@ -1,0 +1,625 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  confidence-sync infrastructure: VPC with public/private subnets, EC2 backend, RDS Postgres (pgvector), three S3 buckets, Cognito user pool, CloudFront distribution fronting both the static frontend and the /api backend.
+
+# ---------------------------------------------------------------------------
+# Parameters: everything you might reasonably change between environments.
+# Pass these with --parameter-overrides at deploy time.
+# ---------------------------------------------------------------------------
+Parameters:
+
+  EnvName:
+    Type: String
+    Default: prod
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Suffix applied to resource names so you can run several stacks.
+
+  BackendInstanceType:
+    Type: String
+    Default: t3.small
+    Description: |
+      t3.micro (1 GB) is too small once pymupdf and the embedding calls are running. t3.small is the realistic floor.
+
+  DbInstanceClass:
+    Type: String
+    Default: db.t3.micro
+
+  ChatModelId:
+    Type: String
+    Default: eu.anthropic.claude-haiku-4-5-20251001-v1:0
+    Description: |
+      Must match settings.chat_model on the instance. Newer Claude models need an inference profile ID rather than a bare model ID.
+
+  EmbeddingModelId:
+    Type: String
+    Default: cohere.embed-english-v3
+    Description: |
+      Must match settings.embedding_model. Changing this invalidates every stored vector - the document_chunks table has to be re-embedded. cohere.embed-english-v3 is 1024 dimensions.
+
+  DbEngineVersion:
+    Type: String
+    Default: '16'
+    Description: |
+      Major version only, so RDS picks the current default minor. Pin a full version (e.g. 16.15) if you need determinism.
+
+  DbAllocatedStorage:
+    Type: Number
+    Default: 20
+    MinValue: 20
+
+  DbPassword:
+    Type: String
+    NoEcho: true
+    MinLength: 16
+    MaxLength: 41
+    Description: |
+      RDS master password. Printable ASCII, but not / ' " @ or space. NoEcho keeps it out of stack events, outputs and the console. Generate one with: openssl rand -base64 32 | tr -d '/+=@"' | head -c 32
+
+  KeyName:
+    Type: String
+    Default: ''
+    Description: |
+      Optional EC2 key pair name. Leave blank to use SSM Session Manager instead, which needs no open SSH port and no key file to lose.
+
+  SshCidr:
+    Type: String
+    Default: 0.0.0.0/0
+    Description: Only used when KeyName is set. Narrow this to your own IP.
+
+# ---------------------------------------------------------------------------
+# Conditions: CloudFormation's if-statements. Resources or properties guarded
+# by a false condition are simply not created.
+# ---------------------------------------------------------------------------
+Conditions:
+
+  HasKeyName: !Not
+    - !Equals
+      - !Ref KeyName
+      - ''
+
+Resources:
+
+  # =========================================================================
+  # NETWORK
+  # The docker network from your compose file, spelled out. EC2 goes in the
+  # public subnet; RDS goes in two private subnets with no route to the
+  # internet gateway, so it is unreachable from outside the VPC.
+  # =========================================================================
+
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true # required for the instance to get a public DNS name
+      Tags:
+        - Key: Name
+          Value: !Sub confidence-sync-${EnvName}
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  GatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref Vpc
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: !Select
+        - 0
+        - !GetAZs ''
+
+  # RDS requires a subnet group spanning at least two availability zones,
+  # even when MultiAZ is false. Hence two private subnets.
+  PrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.0.11.0/24
+      AvailabilityZone: !Select
+        - 0
+        - !GetAZs ''
+
+  PrivateSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.0.12.0/24
+      AvailabilityZone: !Select
+        - 1
+        - !GetAZs ''
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: GatewayAttachment # explicit, because there is no Ref to infer it from
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetRouteAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+
+  # =========================================================================
+  # SECURITY GROUPS
+  # =========================================================================
+
+  BackendSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: FastAPI backend
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        # Open to the world today. Hardening step: replace this with the
+        # CloudFront origin-facing managed prefix list, and have the backend
+        # reject requests missing the shared secret header (see DEPLOY.md).
+        - IpProtocol: tcp
+          FromPort: 8000
+          ToPort: 8000
+          CidrIp: 0.0.0.0/0
+          Description: HTTP from CloudFront
+
+  BackendSshIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Condition: HasKeyName
+    Properties:
+      GroupId: !Ref BackendSecurityGroup
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+      CidrIp: !Ref SshCidr
+
+  DatabaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Postgres, reachable only from the backend
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        # Referencing a security group rather than a CIDR is the idiomatic
+        # way to say "whatever is in that group, wherever it happens to be".
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref BackendSecurityGroup
+
+  # =========================================================================
+  # S3
+  # Bucket names must be globally unique and cannot contain underscores.
+  # AES256 below is SSE-S3, which uses S3's own key management and needs no
+  # KMS permissions - unlike aws:kms, which would.
+  # =========================================================================
+
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub confidence-sync-frontend-${EnvName}-${AWS::AccountId}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  ItManualsBucket:
+    Type: AWS::S3::Bucket
+    # Retain means these survive a stack delete. While iterating on failed
+    # deploys you must remove them by hand before retrying:
+    #   aws s3 rb s3://<name> --force
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub confidence-sync-it-manuals-${EnvName}-${AWS::AccountId}
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  HrPoliciesBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub confidence-sync-hr-policies-${EnvName}-${AWS::AccountId}
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # Grants the CloudFront distribution (and only it) read access to the
+  # frontend bucket. The bucket itself stays fully private.
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub ${FrontendBucket.Arn}/*
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}
+
+  # =========================================================================
+  # IAM
+  # This is what lets you delete AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY
+  # from your .env. boto3 picks up rotating temporary credentials from the
+  # instance metadata service automatically when no keys are configured.
+  # =========================================================================
+
+  BackendRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        # Enables `aws ssm start-session` so you can get a shell with no SSH.
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Policies:
+
+        - PolicyName: DocumentBuckets
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource:
+                  - !Sub ${ItManualsBucket.Arn}/*
+                  - !Sub ${HrPoliciesBucket.Arn}/*
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource:
+                  - !GetAtt ItManualsBucket.Arn
+                  - !GetAtt HrPoliciesBucket.Arn
+
+        - PolicyName: BedrockInvoke
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                  - bedrock:InvokeModelWithResponseStream
+                Resource:
+                  # The inference profile
+                  - !Sub arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/${ChatModelId}
+                  # Every region the EU profile routes to, taken from
+                  #   aws bedrock get-inference-profile --inference-profile-identifier <id>
+                  # Update this list by hand if you change ChatModelId - !Sub
+                  # cannot strip the "eu." prefix to derive the base model ID.
+                  - arn:aws:bedrock:eu-central-1::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0
+                  - arn:aws:bedrock:eu-north-1::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0
+                  - arn:aws:bedrock:eu-south-1::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0
+                  - arn:aws:bedrock:eu-south-2::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0
+                  - arn:aws:bedrock:eu-west-1::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0
+                  - arn:aws:bedrock:eu-west-3::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0
+                  # Cohere is on-demand, single region
+                  - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/${EmbeddingModelId}
+
+        - PolicyName: CognitoAdmin
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cognito-idp:AdminInitiateAuth
+                  - cognito-idp:AdminCreateUser
+                  - cognito-idp:AdminSetUserPassword
+                  - cognito-idp:AdminGetUser
+                  - cognito-idp:AdminUpdateUserAttributes
+                  - cognito-idp:AdminRespondToAuthChallenge
+                Resource: !GetAtt UserPool.Arn
+
+        # The ReadDbSecret policy was removed along with
+        # ManageMasterUserPassword. There is no Secrets Manager secret to
+        # read now - the password goes straight into the backend .env.
+
+  BackendInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref BackendRole
+
+  # =========================================================================
+  # EC2
+  # Bare instance with Docker installed. You deploy onto it yourself.
+  # =========================================================================
+
+  BackendInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref BackendInstanceType
+      # Resolves the current Amazon Linux 2023 AMI at deploy time, so you
+      # never hardcode a region-specific AMI ID.
+      ImageId: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64}}'
+      SubnetId: !Ref PublicSubnet
+      SecurityGroupIds:
+        - !Ref BackendSecurityGroup
+      IamInstanceProfile: !Ref BackendInstanceProfile
+      KeyName: !If
+        - HasKeyName
+        - !Ref KeyName
+        - !Ref AWS::NoValue
+      BlockDeviceMappings:
+        # "Encrypted: true" removed - it needs kms:DescribeKey and
+        # kms:CreateGrant on alias/aws/ebs, which this IAM user lacks.
+        # Unlike RDS, EBS encryption can be added later: snapshot the
+        # volume, copy the snapshot with encryption on, swap it in.
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 30
+            VolumeType: gp3
+      UserData: !Base64 |
+        #!/bin/bash
+        set -eux
+        dnf update -y
+        dnf install -y docker git postgresql16
+        systemctl enable --now docker
+        usermod -aG docker ec2-user
+        curl -sSL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 \
+          -o /usr/local/lib/docker/cli-plugins/docker-compose || true
+        chmod +x /usr/local/lib/docker/cli-plugins/docker-compose || true
+      Tags:
+        - Key: Name
+          Value: !Sub confidence-sync-backend-${EnvName}
+
+  # =========================================================================
+  # RDS
+  # Three things removed here, all workarounds rather than choices:
+  #   StorageEncrypted            - needs KMS on alias/aws/rds
+  #   ManageMasterUserPassword    - needs KMS on alias/aws/secretsmanager
+  #   EnableCloudwatchLogsExports - restricted on the free tier plan
+  # Storage encryption cannot be turned on in place later. It needs a
+  # snapshot, an encrypted copy and a restore into a new instance with a
+  # new endpoint. Revisit before real HR documents go in.
+  # =========================================================================
+
+  DbSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Private subnets for Postgres
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+
+  Database:
+    Type: AWS::RDS::DBInstance
+    # Without these two lines, deleting the stack deletes your data with no
+    # warning and no way back.
+    DeletionPolicy: Snapshot
+    UpdateReplacePolicy: Snapshot
+    Properties:
+      Engine: postgres
+      EngineVersion: !Ref DbEngineVersion
+      DBInstanceClass: !Ref DbInstanceClass
+      AllocatedStorage: !Ref DbAllocatedStorage
+      StorageType: gp3
+      DBName: confidence_sync
+      MasterUsername: app
+      # ManageMasterUserPassword (RDS generates and stores the password in
+      # Secrets Manager) needs KMS access to aws/secretsmanager, which this
+      # IAM user lacks. Passing the password as a NoEcho parameter instead.
+      # Switch back once the KMS permissions exist - it is the better option:
+      # supports rotation, and the password never leaves AWS.
+      MasterUserPassword: !Ref DbPassword
+      DBSubnetGroupName: !Ref DbSubnetGroup
+      VPCSecurityGroups:
+        - !Ref DatabaseSecurityGroup
+      PubliclyAccessible: false
+      MultiAZ: false
+      BackupRetentionPeriod: 1
+
+  # =========================================================================
+  # COGNITO
+  # Mirrors what scripts/seed_local.py creates against cognito-local.
+  # =========================================================================
+
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub confidence-sync-${EnvName}
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true # no self-signup; admins provision users
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub confidence-sync-backend-${EnvName}
+      UserPoolId: !Ref UserPool
+      GenerateSecret: true # your config expects a client secret
+      ExplicitAuthFlows:
+        - ALLOW_ADMIN_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      AccessTokenValidity: 60
+      IdTokenValidity: 60
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        AccessToken: minutes
+        IdToken: minutes
+        RefreshToken: days
+
+  # =========================================================================
+  # CLOUDFRONT
+  # One distribution, two origins. Everything is same-origin to the browser,
+  # which is what keeps your auth cookies working without CORS.
+  # =========================================================================
+
+  OriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub confidence-sync-frontend-${EnvName}
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub confidence-sync ${EnvName}
+        DefaultRootObject: index.html
+        PriceClass: PriceClass_100
+        HttpVersion: http2
+
+        Origins:
+          - Id: frontend-s3
+            DomainName: !GetAtt FrontendBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt OriginAccessControl.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+
+          - Id: backend-ec2
+            # NOTE: this is captured when the instance is created. Stopping
+            # and starting the instance changes its public DNS name and you
+            # will have to update the stack. See DEPLOY.md.
+            DomainName: !GetAtt BackendInstance.PublicDnsName
+            CustomOriginConfig:
+              OriginProtocolPolicy: http-only
+              HTTPPort: 8000
+              # Cohere batches 96 texts per call, so a large PDF makes many
+              # sequential embedding requests inside a single HTTP request.
+              # Raise this if uploads start returning 504.
+              OriginReadTimeout: 60
+
+        DefaultCacheBehavior:
+          TargetOriginId: frontend-s3
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # Managed-CachingOptimized
+
+        CacheBehaviors:
+          - PathPattern: /api/*
+            TargetOriginId: backend-ec2
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+              - PUT
+              - POST
+              - PATCH
+              - DELETE
+            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # Managed-CachingDisabled
+            OriginRequestPolicyId: b689b0a8-53d0-40ab-baf2-68738e2966ac # Managed-AllViewerExceptHostHeader
+
+        # Your SPA uses client-side routing, so deep links must fall through
+        # to index.html rather than returning S3's 403.
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 0
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 0
+
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+
+# ---------------------------------------------------------------------------
+# Outputs: the values you need to fill in the backend .env on the instance.
+# Read them with: aws cloudformation describe-stacks --stack-name <name> \
+#   --query "Stacks[0].Outputs" --output table
+# ---------------------------------------------------------------------------
+Outputs:
+
+  AppUrl:
+    Description: Public URL for the whole application
+    Value: !Sub https://${Distribution.DomainName}
+
+  BackendPublicDns:
+    Description: SSH or SSM target, and the CloudFront origin
+    Value: !GetAtt BackendInstance.PublicDnsName
+
+  BackendInstanceId:
+    Description: Use with `aws ssm start-session --target <id>`
+    Value: !Ref BackendInstance
+
+  DbEndpoint:
+    Value: !GetAtt Database.Endpoint.Address
+
+  DbPort:
+    Value: !GetAtt Database.Endpoint.Port
+
+  CognitoUserPoolId:
+    Value: !Ref UserPool
+
+  CognitoAppClientId:
+    Value: !Ref UserPoolClient
+
+  ItManualsBucketName:
+    Value: !Ref ItManualsBucket
+
+  HrPoliciesBucketName:
+    Value: !Ref HrPoliciesBucket
+
+  FrontendBucketName:
+    Description: Sync your Vite build output here
+    Value: !Ref FrontendBucket
+
+  ChatModel:
+    Description: Set as CHAT_MODEL in the backend env
+    Value: !Ref ChatModelId
+
+  EmbeddingModel:
+    Description: |
+      Set as EMBEDDING_MODEL in the backend env. EMBEDDING_DIM must match: 1024 for cohere.embed-english-v3.
+    Value: !Ref EmbeddingModelId

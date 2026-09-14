@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import settings
 from app.database import get_db
 from app.exceptions.handlers import register_exception_handlers
 from app.routes.auth import auth_router
@@ -10,7 +11,11 @@ from app.routes.chat import chat_router
 from app.routes.documents import document_router
 from app.routes.tickets import ticket_router
 
-app = FastAPI(debug=True)
+app = FastAPI(
+    docs_url=None if settings.app_env == "production" else "/api/v1/docs",
+    redoc_url=None,
+    openapi_url=None if settings.app_env == "production" else "/api/v1/openapi.json",
+)
 
 # Exception Handlers
 register_exception_handlers(app)
