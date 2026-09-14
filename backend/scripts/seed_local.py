@@ -15,6 +15,7 @@ like a signing bug rather than a config one.
 """
 
 import asyncio
+import os
 import uuid
 
 from botocore.exceptions import ClientError
@@ -26,14 +27,14 @@ from app.models import User
 from app.models.user import UserDepartment, UserRole
 from app.repository.aws import AWSRepo
 
-PASSWORD = "Passw0rd!"
+PASSWORD = os.environ["SEED_PASSWORD"]
 
 # Mirrors frontend/src/mocks/users.json so mock mode and the real backend
 # present the same identities.
 SEED_USERS = [
     {
         "name": "Employee One",
-        "email": "employee_0@example.com",
+        "email": "employee_1@example.com",
         "phone_number": "+15551000001",
         "leave_days": 14,
         "role": UserRole.EMPLOYEE,
@@ -41,7 +42,7 @@ SEED_USERS = [
     },
     {
         "name": "Employee Two",
-        "email": "employee_1@example.com",
+        "email": "employee_2@example.com",
         "phone_number": "+15551000002",
         "leave_days": 10,
         "role": UserRole.EMPLOYEE,
@@ -165,8 +166,10 @@ async def upsert_local_user(session, spec: dict, cognito_sub: str) -> None:
 
 
 async def main() -> None:
-    if not settings.use_cognito_local:
-        raise SystemExit("Refusing to run: USE_COGNITO_LOCAL is false.")
+    import os
+
+    if not settings.use_cognito_local and os.environ.get("SEED_CONFIRM") != "yes":
+        raise SystemExit("Refusing to run against real AWS. Set SEED_CONFIRM=yes.")
 
     cognito = _client()
 

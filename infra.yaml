@@ -480,7 +480,7 @@ Resources:
       UserPoolId: !Ref UserPool
       GenerateSecret: true # your config expects a client secret
       ExplicitAuthFlows:
-        - ALLOW_ADMIN_USER_PASSWORD_AUTH
+        - ALLOW_USER_PASSWORD_AUTH
         - ALLOW_REFRESH_TOKEN_AUTH
       AccessTokenValidity: 60
       IdTokenValidity: 60
