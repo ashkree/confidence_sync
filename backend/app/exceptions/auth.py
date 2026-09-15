@@ -37,3 +37,18 @@ class UnknownSubjectError(AuthError, UnauthorizedError):
     exceptions/users.py::UserNotFoundError, which is the plain 404 raised
     by UserRepo on non-auth lookups.
     """
+
+
+class MissingRefreshCookieError(AuthError, UnauthorizedError):
+    """No refresh token or username cookie present on refresh request. -> 401"""
+
+    def __init__(self, detail: str = "Missing refresh session cookies"):
+        super().__init__(detail)
+
+
+class CognitoMissingRefreshTokenError(AuthError):
+    """Cognito authentication succeeded but did not issue a refresh token."""
+
+    def __init__(self, detail: str = "Cognito did not issue a refresh token"):
+        super().__init__(detail)
+

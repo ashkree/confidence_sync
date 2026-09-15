@@ -16,6 +16,18 @@ class ChatRepo:
         self.db = db
 
     # Chat Messages
+    def stage_message(self, message: ChatMessage) -> None:
+        """Add a message to the session without committing.
+
+        Use this when buffering a message to be committed together
+        with other changes in the same transaction.
+        """
+        self.db.add(message)
+
+    async def rollback(self) -> None:
+        """Roll back the current transaction, discarding uncommitted changes."""
+        await self.db.rollback()
+
     async def create_message(self, message: ChatMessage):
 
         # Add the message entry into the database

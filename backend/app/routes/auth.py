@@ -3,7 +3,10 @@ from fastapi import APIRouter, Depends, Request, Response, status
 
 from app.authorization.guards import require_authenticated
 from app.config import settings
-from app.exceptions.external import CognitoMissingRefreshTokenError
+from app.exceptions.auth import (
+    CognitoMissingRefreshTokenError,
+    MissingRefreshCookieError,
+)
 from app.models import User
 from app.schemas.auth import LoginRequest, TokenResponse
 from app.schemas.users import UserBase, UserProfile
@@ -14,12 +17,13 @@ from app.services.auth.cognito import (
 from app.services.users import to_user_base, to_user_profile
 
 REFRESH_COOKIE_KEY = "refresh_token"
+USERNAME_COOKIE_KEY = "refresh_username"
 EMAIL_COOKIE_KEY = "refresh_email"
 REFRESH_PATH = "/api/v1/auth/refresh"
 REFRESH_MAX_AGE = 60 * 60 * 24 * 30
 
 
-def _set_refresh_cookies(response: Response, email: str, token: str) -> None:
+def _set_refresh_cookies(response: Response, username: str, token: str) -> None:
     def set_cookie(key: str, value: str) -> None:
         response.set_cookie(
             key=key,
@@ -28,10 +32,10 @@ def _set_refresh_cookies(response: Response, email: str, token: str) -> None:
             secure=settings.cookie_secure,
             samesite="lax",  # not sent on cross-site requests
             path=REFRESH_PATH,  # only sent to the refresh endpoint
-            max_age=60 * 60 * 24 * 30,
+            max_age=REFRESH_MAX_AGE,
         )
 
-    set_cookie(EMAIL_COOKIE_KEY, email)
+    set_cookie(USERNAME_COOKIE_KEY, username)
     set_cookie(REFRESH_COOKIE_KEY, token)
 
 
@@ -48,12 +52,14 @@ async def post_login(
     response: Response,
 ):
 
-    accessToken, refreshToken = await authenticate(payload.email, payload.password)
+    accessToken, refreshToken, username = await authenticate(
+        payload.email, payload.password
+    )
 
     if not refreshToken:
         raise CognitoMissingRefreshTokenError()
 
-    _set_refresh_cookies(response, payload.email, refreshToken)
+    _set_refresh_cookies(response, username, refreshToken)
 
     return TokenResponse(token=accessToken)
 
@@ -65,12 +71,12 @@ async def post_login(
 )
 async def post_refresh(request: Request):
     refresh_token = request.cookies.get(REFRESH_COOKIE_KEY)
-    email = request.cookies.get(EMAIL_COOKIE_KEY)
+    username = request.cookies.get(USERNAME_COOKIE_KEY)
 
-    if not refresh_token or not email:
-        raise CognitoMissingRefreshTokenError()
+    if not refresh_token or not username:
+        raise MissingRefreshCookieError()
 
-    access_token, _ = await refresh_tokens(email, refresh_token)
+    access_token, _ = await refresh_tokens(username, refresh_token)
 
     return TokenResponse(token=access_token)
 
@@ -78,6 +84,7 @@ async def post_refresh(request: Request):
 @auth_router.post("/logout", status_code=status.HTTP_204_NO_CONTENT, summary="Log out")
 async def post_logout(response: Response):
     response.delete_cookie(REFRESH_COOKIE_KEY, path=REFRESH_PATH)
+    response.delete_cookie(USERNAME_COOKIE_KEY, path=REFRESH_PATH)
     response.delete_cookie(EMAIL_COOKIE_KEY, path=REFRESH_PATH)
 
 

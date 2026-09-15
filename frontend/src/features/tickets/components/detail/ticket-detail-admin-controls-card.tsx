@@ -28,13 +28,13 @@ export function TicketDetailAdminControlsCard() {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Status row */}
-        <div className="flex items-center gap-4">
-          <span className="text-sm font-medium w-20 shrink-0">Status</span>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+          <span className="text-sm font-medium sm:w-20 sm:shrink-0">Status</span>
           <Select
             value={status.draft}
             onValueChange={(val) => status.setDraft(val as TicketStatus)}
           >
-            <SelectTrigger className="w-45">
+            <SelectTrigger className="w-full sm:w-45">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -44,7 +44,7 @@ export function TicketDetailAdminControlsCard() {
               <SelectItem value="CLOSED">Closed</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={status.update} disabled={status.isPending}>
+          <Button onClick={status.update} disabled={status.isPending} className="w-full sm:w-auto">
             {status.isPending ? "Updating..." : "Update"}
           </Button>
         </div>
@@ -52,13 +52,13 @@ export function TicketDetailAdminControlsCard() {
         <Separator />
 
         {/* Priority row */}
-        <div className="flex items-center gap-4">
-          <span className="text-sm font-medium w-20 shrink-0">Priority</span>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+          <span className="text-sm font-medium sm:w-20 sm:shrink-0">Priority</span>
           <Select
             value={priority.draft}
             onValueChange={(val) => priority.setDraft(val as TicketPriority)}
           >
-            <SelectTrigger className="w-45">
+            <SelectTrigger className="w-full sm:w-45">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -67,7 +67,7 @@ export function TicketDetailAdminControlsCard() {
               <SelectItem value="LOW">Low</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={priority.update} disabled={priority.isPending}>
+          <Button onClick={priority.update} disabled={priority.isPending} className="w-full sm:w-auto">
             {priority.isPending ? "Updating..." : "Update"}
           </Button>
         </div>
@@ -75,8 +75,8 @@ export function TicketDetailAdminControlsCard() {
         <Separator />
 
         {/* Assignee row */}
-        <div className="flex items-center gap-4">
-          <span className="text-sm font-medium w-20 shrink-0">Assignee</span>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+          <span className="text-sm font-medium sm:w-20 sm:shrink-0">Assignee</span>
           <p className="text-sm text-muted-foreground flex-1">
             {assignee.assigneeName || "Unassigned"}
           </p>
@@ -84,6 +84,7 @@ export function TicketDetailAdminControlsCard() {
             variant="outline"
             onClick={assignee.toggle}
             disabled={assignee.isPending}
+            className="w-full sm:w-auto"
           >
             {assignee.isPending ? (
               "Updating..."

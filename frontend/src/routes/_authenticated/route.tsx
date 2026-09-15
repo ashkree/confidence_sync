@@ -1,5 +1,9 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { BookOpenIcon, LayoutDashboard, Plus, Tickets } from "lucide-react";
 import { useAuth } from "@/features/auth/auth-context";
@@ -95,10 +99,12 @@ function RouteComponent() {
     <div>
       <SidebarProvider>
         <AppSidebar groups={getGroup()} />
-        <SidebarInset>
-          <main>
-            <Outlet />
-          </main>
+        <SidebarInset className="min-w-0 overflow-x-clip">
+          <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden">
+            <SidebarTrigger className="size-10" />
+            <span className="font-heading text-sm font-medium">Confidence Sync</span>
+          </header>
+          <Outlet />
         </SidebarInset>
       </SidebarProvider>
       <ChatWidget />

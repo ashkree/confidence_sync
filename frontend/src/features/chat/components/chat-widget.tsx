@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm } from "@tanstack/react-form";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, RotateCcw } from "lucide-react";
 import * as z from "zod";
 
 import { cn } from "@/lib/utils";
@@ -9,8 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/features/auth/auth-context";
-import { fetchChatMessages, sendChatMessage } from "@/features/chat/api";
+import {
+  fetchChatMessages,
+  resetChatSession,
+  sendChatMessage,
+} from "@/features/chat/api";
 import { Markdown } from "@/components/ui/markdown";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { ChatMessage } from "../types";
 
 const messageSchema = z.object({
@@ -21,7 +26,13 @@ interface ChatWidgetProps {
   initialMessages?: ChatMessage[];
 }
 
+const getWelcomeMessage = (userName?: string): ChatMessage => ({
+  role: "ASSISTANT",
+  content: `Hello ${userName ?? "there"}! How may I help you today?`,
+});
+
 export function ChatWidget({ initialMessages }: ChatWidgetProps) {
+  const isMobile = useIsMobile();
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>(
@@ -44,36 +55,19 @@ export function ChatWidget({ initialMessages }: ChatWidgetProps) {
 
     const sessionId = localStorage.getItem("chat_session_id");
 
-    // Always call backend — pass null if no stored session.
-    // Backend creates a new session when session_id is omitted.
-    setIsLoadingHistory(true);
     fetchChatMessages(sessionId)
       .then((response) => {
-        // Store whatever session_id the backend returned
         localStorage.setItem("chat_session_id", response.session_id);
-
-        if (response.messages.length > 0) {
-          setMessages(response.messages);
-        } else {
-          setMessages([
-            {
-              role: "ASSISTANT",
-              content: `Hello ${user?.name ?? "there"}! How may I help you today?`,
-            },
-          ]);
-        }
-      })
-      .catch(() => {
-        // On error, still show greeting
         setMessages([
-          {
-            role: "ASSISTANT",
-            content: `Hello ${user?.name ?? "there"}! How may I help you today?`,
-          },
+          getWelcomeMessage(user?.name),
+          ...response.messages,
         ]);
       })
+      .catch(() => {
+        setMessages([getWelcomeMessage(user?.name)]);
+      })
       .finally(() => setIsLoadingHistory(false));
-  }, [isOpen]);
+  }, [isOpen, user]);
 
   const form = useForm({
     defaultValues: { message: "" },
@@ -122,22 +116,46 @@ export function ChatWidget({ initialMessages }: ChatWidgetProps) {
     [form],
   );
 
+  const handleOpen = useCallback(() => {
+    setIsLoadingHistory(true);
+    setIsOpen(true);
+  }, []);
+
   const handleClose = useCallback(() => {
     setIsOpen(false);
     setSendError(null);
     form.reset();
   }, [form]);
 
+  const handleNewChat = useCallback(async () => {
+    const sessionId = localStorage.getItem("chat_session_id");
+    setIsLoadingHistory(true);
+    setSendError(null);
+    form.reset();
+
+    try {
+      if (sessionId) {
+        const response = await resetChatSession(sessionId);
+        localStorage.setItem("chat_session_id", response.session_id);
+      }
+      setMessages([getWelcomeMessage(user?.name)]);
+    } catch {
+      setSendError("Failed to start a new chat. Please try again.");
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, [form, user]);
+
   return (
     <>
       {/* FAB Button — bottom right */}
       <Button
-        onClick={() => setIsOpen(true)}
+        onClick={handleOpen}
         size="icon-lg"
-        className="fixed bottom-6 right-6 z-40 size-14 rounded-full shadow-lg"
+        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] right-4 z-40 size-12 rounded-full shadow-lg md:bottom-6 md:right-6 md:size-14"
         aria-label="Open chat"
       >
-        <MessageCircle className="size-6" />
+        <MessageCircle className="size-5 md:size-6" />
       </Button>
 
       {/* Chat Modal */}
@@ -157,20 +175,34 @@ export function ChatWidget({ initialMessages }: ChatWidgetProps) {
           <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-black/40 supports-backdrop-filter:backdrop-blur-sm data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0" />
 
           {/* Modal popup */}
-          <DialogPrimitive.Popup className="fixed top-1/2 left-1/2 z-50 flex h-[min(600px,80vh)] w-full max-w-lg -translate-x-1/2 -translate-y-1/2 flex-col rounded-xl bg-popover text-popover-foreground ring-1 ring-foreground/10 shadow-2xl outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95">
+          <DialogPrimitive.Popup className="fixed top-1/2 left-1/2 z-50 flex h-[min(600px,80dvh)] w-[calc(100vw-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 flex-col rounded-xl bg-popover text-popover-foreground ring-1 ring-foreground/10 shadow-2xl outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95">
             {/* Header */}
             <div className="flex items-center justify-between border-b px-4 py-3">
               <DialogPrimitive.Title className="font-heading font-medium">
                 Chat Assistant
               </DialogPrimitive.Title>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={handleClose}
-                aria-label="Close chat"
-              >
-                <X />
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative size-9 sm:size-8 after:absolute after:-inset-2 after:content-['']"
+                  onClick={handleNewChat}
+                  disabled={isLoadingHistory || isSending}
+                  aria-label="New chat"
+                  title="New chat"
+                >
+                  <RotateCcw className="size-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative size-9 sm:size-8 after:absolute after:-inset-2 after:content-['']"
+                  onClick={handleClose}
+                  aria-label="Close chat"
+                >
+                  <X className="size-4" />
+                </Button>
+              </div>
             </div>
 
             {/* Messages area */}
@@ -234,7 +266,7 @@ export function ChatWidget({ initialMessages }: ChatWidgetProps) {
                         field.handleChange(e.target.value);
                       }}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
+                        if (e.key === "Enter" && !e.shiftKey && !isMobile) {
                           e.preventDefault();
                           form.handleSubmit();
                         }

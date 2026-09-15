@@ -11,6 +11,8 @@ import { pageTitle } from "@/lib/page-title";
 
 const helper = createColumnHelper<ItTicket>();
 
+import "@/components/ui/data-table-types";
+
 const ticket_columns = [
   helper.accessor("request_type", {
     header: "Issue Type",
@@ -18,6 +20,7 @@ const ticket_columns = [
       const val = info.getValue();
       return <span>{CATALOG_BY_REQUEST_TYPE[val]?.label ?? val}</span>;
     },
+    meta: { mobile: "field" },
   }),
 ];
 
@@ -39,7 +42,7 @@ function RouteComponent() {
   return (
     <>
       <HeroSection title="IT Tickets" />
-      <div className="p-6 space-y-6">
+      <div className="p-4 md:p-6 space-y-4 md:space-y-6">
         <div className="grid gap-4 md:grid-cols-3">
           <StatCard
             label="Unassigned"

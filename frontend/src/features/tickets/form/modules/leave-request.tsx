@@ -25,7 +25,7 @@ function LeaveRequestFields({ form }: { form: any }) {
   const [toOpen, setToOpen] = useState(false);
 
   return (
-    <div className="grid md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <form.Field name="from_date">
         {(fromField: any) => (
           <DateField

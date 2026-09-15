@@ -8,10 +8,13 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import type { LinkGroup } from "./app-sidebar";
 
 export function NavMain({ groups }: { groups: LinkGroup[] }) {
+  const { isMobile, setOpenMobile } = useSidebar();
+
   return (
     <>
       {groups.map((group) => (
@@ -21,7 +24,14 @@ export function NavMain({ groups }: { groups: LinkGroup[] }) {
             {group.items.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
-                  render={<Link to={item.url} />}
+                  render={
+                    <Link
+                      to={item.url}
+                      onClick={() => {
+                        if (isMobile) setOpenMobile(false);
+                      }}
+                    />
+                  }
                   tooltip={item.title}
                 >
                   {item.icon && <item.icon />}

@@ -37,16 +37,16 @@ export default function QuickActions() {
       <CardHeader>
         <CardTitle>Quick Actions</CardTitle>
       </CardHeader>
-      <CardContent className="grid grid-cols-4 gap-2">
+      <CardContent className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {quick_actions.map((action) => (
           <Link
             key={action.slug}
             to="/ticket/submit/$requestType"
             params={{ requestType: action.slug }}
           >
-            <Button className="w-full justify-start" variant="outline">
+            <Button className="w-full justify-start min-w-0" variant="outline">
               <action.icon />
-              <span> {action.name} </span>
+              <span className="truncate"> {action.name} </span>
             </Button>
           </Link>
         ))}

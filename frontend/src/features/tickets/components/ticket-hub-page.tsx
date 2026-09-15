@@ -24,11 +24,11 @@ export function TicketHubPage() {
         title="Submit a Request"
         subtitle="Choose the type of request you'd like to submit."
       />
-      <div className="container mx-auto p-6 max-w-5xl mt-6 space-y-10">
+      <div className="container mx-auto p-4 md:p-6 max-w-5xl mt-4 md:mt-6 space-y-6 md:space-y-10">
         {groups.map((group) => (
           <section key={group.department}>
             <h2 className="text-lg font-semibold mb-4">{group.label}</h2>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-4 md:gap-6">
               {group.slugs.map((slug) => {
                 const entry = CATALOG[slug];
                 const Icon = entry.icon;
@@ -39,7 +39,7 @@ export function TicketHubPage() {
                     params={{ requestType: slug }}
                     className="block group"
                   >
-                    <Card className="h-full transition-all duration-200 hover:shadow-md hover:border-primary/50 group-hover:scale-[1.01]">
+                    <Card className="h-full transition-all duration-200 hover:shadow-md hover:border-primary/50 md:group-hover:scale-[1.01]">
                       <CardContent className="p-6 flex flex-col justify-between h-full space-y-4">
                         <div className="p-3 rounded-lg bg-primary/10 w-fit">
                           <Icon className="h-6 w-6 text-primary" />

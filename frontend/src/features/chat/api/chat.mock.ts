@@ -27,3 +27,14 @@ export async function sendChatMessage(
   mockHistory.push(reply);
   return { session_id: sessionId, message: reply };
 }
+
+export async function resetChatSession(
+  _sessionId: string,
+): Promise<MessagesResponse> {
+  void _sessionId;
+  await new Promise((r) => setTimeout(r, 300));
+  mockSessionId = crypto.randomUUID();
+  mockHistory.length = 0;
+  return { session_id: mockSessionId, messages: [] };
+}
+

@@ -6,7 +6,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className="relative w-full overflow-x-auto [background:linear-gradient(to_right,var(--card)_30%,transparent),linear-gradient(to_left,var(--card)_30%,transparent),radial-gradient(farthest-side_at_0_50%,rgba(0,0,0,0.12),transparent),radial-gradient(farthest-side_at_100%_50%,rgba(0,0,0,0.12),transparent)] [background-attachment:local,local,scroll,scroll] [background-position:0_0,100%_0,0_0,100%_0] [background-repeat:no-repeat] [background-size:40px_100%,40px_100%,14px_100%,14px_100%]"
     >
       <table
         data-slot="table"

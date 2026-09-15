@@ -21,7 +21,7 @@ export default function PendingRequestsSection({
 }) {
   return (
     <Card>
-      <CardHeader className="items-center flex justify-between">
+      <CardHeader>
         <CardTitle>My Requests</CardTitle>
         <CardAction>
           <Link to="/ticket/submit">
@@ -45,14 +45,14 @@ export default function PendingRequestsSection({
               params={{ ticketId: ticket.id }}
               className="block"
             >
-              <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">{ticket.subject}</p>
+              <div className="flex items-center justify-between gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="text-sm font-medium truncate">{ticket.subject}</p>
                   <p className="text-xs text-muted-foreground capitalize">
                     {ticket.type.replace("_", " ")}
                   </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
                   <StatusBadge value={ticket.status} className="text-xs" />
                   {ticket.priority && (
                     <PriorityBadge value={ticket.priority} className="text-xs" />

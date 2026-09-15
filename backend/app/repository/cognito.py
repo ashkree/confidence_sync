@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import hmac
+import logging
 from functools import lru_cache
 
 from botocore.exceptions import ClientError
@@ -12,6 +13,8 @@ from app.exceptions.auth import (
 )
 from app.exceptions.external import CognitoUnavailableError
 from app.repository.aws import AWSRepo
+
+logger = logging.getLogger(__name__)
 
 
 class CognitoRepo(AWSRepo):
@@ -42,8 +45,9 @@ class CognitoRepo(AWSRepo):
                     ),
                 },
             )
-        except self.client.exceptions.NotAuthorizedException:
-            raise InvalidCredentialsError()
+        except self.client.exceptions.NotAuthorizedException as e:
+            logger.warning("Cognito NotAuthorizedException in login_user: %s", e)
+            raise InvalidCredentialsError() from e
         except self.client.exceptions.UserNotFoundException:
             raise InvalidCredentialsError()
         except self.client.exceptions.UserNotConfirmedException:
@@ -67,8 +71,9 @@ class CognitoRepo(AWSRepo):
                     ),
                 },
             )
-        except self.client.exceptions.NotAuthorizedException:
-            raise InvalidCredentialsError()
+        except self.client.exceptions.NotAuthorizedException as e:
+            logger.warning("Cognito NotAuthorizedException in refresh_token: %s", e)
+            raise InvalidCredentialsError() from e
         except self.client.exceptions.UserNotFoundException:
             raise InvalidCredentialsError()
         except ClientError as e:

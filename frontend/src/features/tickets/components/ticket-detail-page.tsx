@@ -14,7 +14,7 @@ export function TicketDetailPage() {
 
   if (!ticket) {
     return (
-      <div className="container mx-auto p-6 max-w-4xl">
+      <div className="container mx-auto p-4 md:p-6 max-w-4xl">
         <button
           onClick={() => window.history.back()}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
@@ -39,7 +39,7 @@ export function TicketDetailPage() {
       initial={ticket}
       initialComments={initialComments ?? []}
     >
-      <div className="container mx-auto p-6 max-w-4xl space-y-6">
+      <div className="container mx-auto p-4 md:p-6 max-w-4xl space-y-4 md:space-y-6">
         {/* Back link */}
         <button
           onClick={() => window.history.back()}

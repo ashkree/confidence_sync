@@ -16,7 +16,7 @@ export function KnowledgeBaseDetailPage() {
   return (
     <>
       <HeroSection title={title} subtitle={subtitle} />
-      <div className="container mx-auto p-6 max-w-4xl space-y-6">
+      <div className="container mx-auto p-4 md:p-6 max-w-4xl space-y-4 md:space-y-6">
         {/* Back Link & Header info */}
         <div className="flex items-center justify-between">
           <Link

@@ -15,7 +15,7 @@ export default function HeroSection({
   return (
     <header
       className={cn(
-        "relative overflow-hidden border-b bg-card px-6 py-6 md:px-10",
+        "relative overflow-hidden border-b bg-card px-4 py-5 md:px-10 md:py-6",
         className,
       )}
     >
@@ -25,14 +25,18 @@ export default function HeroSection({
       />
       <div className="relative flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0 space-y-1">
-          <h1 className="font-heading text-2xl font-semibold tracking-tight text-balance md:text-3xl">
+          <h1 className="font-heading text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight text-balance">
             {title}
           </h1>
           {subtitle && (
             <p className="max-w-prose text-sm text-muted-foreground">{subtitle}</p>
           )}
         </div>
-        {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+        {actions && (
+          <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto [&>*]:flex-1 sm:[&>*]:flex-none">
+            {actions}
+          </div>
+        )}
       </div>
     </header>
   );

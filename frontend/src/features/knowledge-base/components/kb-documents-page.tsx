@@ -18,6 +18,7 @@ import {
   type ColumnDef,
   type Row,
 } from "@tanstack/react-table";
+import "@/components/ui/data-table-types";
 import HeroSection from "@/components/sections/HeroSection";
 import {
   DropdownMenu,
@@ -45,14 +46,14 @@ import {
 import { formatDate } from "@/lib/date";
 
 interface DocumentTableProps<TData extends Document> {
-  columns?: ColumnDef<TData, any>[];
+  columns?: ColumnDef<TData, unknown>[];
   data: TData[];
   title?: string;
 }
 
 // Page Components
 
-function RowActions({ row }: { row: Row<Document> }) {
+function RowActions<TData extends Document>({ row }: { row: Row<TData> }) {
   const doc = row.original;
   const router = useRouter();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -76,7 +77,12 @@ function RowActions({ row }: { row: Row<Document> }) {
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button variant="ghost" size="icon-sm">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-10 sm:size-8"
+              onClick={(e) => e.stopPropagation()}
+            >
               <MoreHorizontalIcon />
             </Button>
           }
@@ -124,7 +130,7 @@ function RowActions({ row }: { row: Row<Document> }) {
   );
 }
 
-function getBaseColumns<TData extends Document>(): ColumnDef<TData, any>[] {
+function getBaseColumns<TData extends Document>(): ColumnDef<TData, unknown>[] {
   const helper = createColumnHelper<TData>();
 
   return [
@@ -132,21 +138,25 @@ function getBaseColumns<TData extends Document>(): ColumnDef<TData, any>[] {
       id: "file_name",
       header: "File Name",
       cell: (info) => info.getValue(),
+      meta: { mobile: "title" },
     }),
     helper.accessor((row) => formatDate(row.created_at), {
       id: "created_at",
       header: "Created",
       cell: (info) => info.getValue(),
+      meta: { mobile: "field", mobileLabel: "Created" },
     }),
     helper.accessor((row) => formatDate(row.updated_at), {
       id: "updated_at",
       header: "Updated",
       cell: (info) => info.getValue(),
+      meta: { mobile: "field", mobileLabel: "Updated" },
     }),
     helper.display({
       id: "actions",
       header: "Actions",
       cell: (props) => <RowActions row={props.row} />,
+      meta: { mobile: "hidden" },
     }),
   ];
 }
@@ -161,7 +171,7 @@ export function DocumentsPage<TData extends Document>({
   return (
     <>
       <HeroSection title={title} />
-      <div className="p-6 space-y-6">
+      <div className="p-4 md:p-6 space-y-4 md:space-y-6">
         <div className="flex justify-end">
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger

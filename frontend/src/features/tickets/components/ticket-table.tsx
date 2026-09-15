@@ -4,6 +4,8 @@ import { useNavigate } from "@tanstack/react-router";
 import type { Ticket } from "../types";
 import { PriorityBadge, StatusBadge } from "./ticket-badges";
 
+import "@/components/ui/data-table-types";
+
 function getBaseColumns<TData extends Ticket>(options: {
   showPoster: boolean;
   showAssignee: boolean;
@@ -16,6 +18,7 @@ function getBaseColumns<TData extends Ticket>(options: {
     helper.accessor("subject" as any, {
       header: "Subject",
       cell: (info) => info.getValue(),
+      meta: { mobile: "title" },
     }),
     ...(options.showType
       ? [
@@ -29,6 +32,7 @@ function getBaseColumns<TData extends Ticket>(options: {
                 </span>
               );
             },
+            meta: { mobile: "field" },
           }),
         ]
       : []),
@@ -37,6 +41,7 @@ function getBaseColumns<TData extends Ticket>(options: {
           helper.accessor("poster_name" as any, {
             header: "Poster",
             cell: (info) => info.getValue(),
+            meta: { mobile: "field" },
           }),
         ]
       : []),
@@ -45,6 +50,7 @@ function getBaseColumns<TData extends Ticket>(options: {
           helper.accessor("assignee_name" as any, {
             header: "Assignee",
             cell: (info) => info.getValue() ?? "Unassigned",
+            meta: { mobile: "field" },
           }),
         ]
       : []),
@@ -56,6 +62,7 @@ function getBaseColumns<TData extends Ticket>(options: {
               const value = info.getValue() as string;
               return <PriorityBadge value={value} />;
             },
+            meta: { mobile: "badge" },
           }),
         ]
       : []),
@@ -65,6 +72,7 @@ function getBaseColumns<TData extends Ticket>(options: {
         const value = info.getValue() as string;
         return <StatusBadge value={value} />;
       },
+      meta: { mobile: "badge" },
     }),
     helper.accessor("updated_at" as any, {
       header: "Updated At",
@@ -72,6 +80,7 @@ function getBaseColumns<TData extends Ticket>(options: {
         const value = info.getValue() as string;
         return new Date(value).toLocaleDateString();
       },
+      meta: { mobile: "field", mobileLabel: "Updated" },
     }),
   ];
 }

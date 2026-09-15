@@ -29,7 +29,7 @@ function MyTicketsPage() {
           </Link>
         }
       />
-      <div className="p-6 space-y-8">
+      <div className="p-4 md:p-6 space-y-6 md:space-y-8">
         <TicketTable<Ticket> showType data={data} />
       </div>
     </>

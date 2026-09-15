@@ -38,8 +38,8 @@ export function KnowledgeBaseHubPage() {
         title="Knowledge Base"
         subtitle="Find all important policies, guidelines, and manuals in one place."
       />
-      <div className="container mx-auto p-6 max-w-5xl mt-6">
-        <div className="grid md:grid-cols-2 gap-6">
+      <div className="container mx-auto p-4 md:p-6 max-w-5xl mt-4 md:mt-6">
+        <div className="grid md:grid-cols-2 gap-4 md:gap-6">
           {categories.map((cat) => {
             const Icon = cat.icon;
             return (
@@ -49,7 +49,7 @@ export function KnowledgeBaseHubPage() {
                 params={{ category: cat.id }}
                 className="block group"
               >
-                <Card className="h-full transition-all duration-200 hover:shadow-md hover:border-primary/50 group-hover:scale-[1.01]">
+                <Card className="h-full transition-all duration-200 hover:shadow-md hover:border-primary/50 md:group-hover:scale-[1.01]">
                   <CardContent className="p-6 flex flex-col justify-between h-full space-y-4">
                     <div className="flex items-start justify-between">
                       <div className={`p-3 rounded-lg ${cat.bgColor}`}>

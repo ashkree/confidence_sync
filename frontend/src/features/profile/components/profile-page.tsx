@@ -28,7 +28,7 @@ export function ProfilePage() {
         title="My Profile"
         subtitle="View your personal information, employment details, and leave balances."
       />
-      <div className="container mx-auto p-6 max-w-4xl space-y-8">
+      <div className="container mx-auto p-4 md:p-6 max-w-4xl space-y-6 md:space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Left Column: Leave Balance & Employment Info */}
           <div className="md:col-span-1 space-y-6">

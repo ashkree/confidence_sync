@@ -2,6 +2,7 @@ import datetime
 import uuid
 from datetime import UTC, datetime, timedelta, timezone
 
+from app.exceptions.chat import SessionNotFoundError
 from app.models import ChatMessage
 from app.models.chat_message import MessageRole
 from app.repository.bedrock import get_bedrock_client
@@ -82,33 +83,49 @@ async def write_message(
     session = await chat_repo.read_session_by_id(session_id)
     history = chat_repo.as_history(session)
 
-    # Create the message first
+    # Stage the user message without committing yet
     user_message = ChatMessage(
         chat_session_id=session.id, role=MessageRole.USER, content=content
     )
-    await chat_repo.create_message(user_message)  # add + commit
+    chat_repo.stage_message(user_message)
 
-    # Get context from documents
-    query = await get_bedrock_client().embed_text(content)
-    chunks = await document_repo.cosine_distance(query, threshold=0.6)
+    try:
+        # Get context from documents
+        query = await get_bedrock_client().embed_text(content)
+        chunks = await document_repo.cosine_distance(query, threshold=0.6)
 
-    if chunks:
-        excerpts = "\n\n".join(
-            f"[Excerpt {i}]\n{chunk}" for i, chunk in enumerate(chunks, start=1)
+        if chunks:
+            excerpts = "\n\n".join(
+                f"[Excerpt {i}]\n{chunk}" for i, chunk in enumerate(chunks, start=1)
+            )
+            turn = f"<excerpts>\n{excerpts}\n</excerpts>\n\n{content}"
+        else:
+            turn = content
+
+        response = await get_bedrock_client().chat(
+            messages=[*history, (MessageRole.USER, turn)],
+            system_prompt=CHAT_SYSTEM_PROMPT,
         )
-        turn = f"<excerpts>\n{excerpts}\n</excerpts>\n\n{content}"
-    else:
-        turn = content
 
-    response = await get_bedrock_client().chat(
-        messages=[*history, (MessageRole.USER, turn)],
-        system_prompt=CHAT_SYSTEM_PROMPT,
-    )
+        ai_message = ChatMessage(
+            chat_session_id=session.id, role=MessageRole.ASSISTANT, content=response
+        )
+        session.updated_at = datetime.now(UTC)
+        # Commit both the staged user message and the AI message atomically
+        await chat_repo.create_message(ai_message)
 
-    ai_message = ChatMessage(
-        chat_session_id=session.id, role=MessageRole.ASSISTANT, content=response
-    )
-    session.updated_at = datetime.now(UTC)
-    await chat_repo.create_message(ai_message)
+        return {"session_id": str(session.session_id), "message": ai_message}
+    except Exception:
+        await chat_repo.rollback()
+        raise
 
-    return {"session_id": str(session.session_id), "message": ai_message}
+
+async def reset_session(chat_repo: ChatRepo, session_id: uuid.UUID):
+    """Delete the given session and all its messages, then return a fresh one."""
+    try:
+        session = await chat_repo.read_session_by_id(session_id)
+        await chat_repo.delete_session(session)
+    except SessionNotFoundError:
+        pass
+    return await create_new_session(chat_repo)
+

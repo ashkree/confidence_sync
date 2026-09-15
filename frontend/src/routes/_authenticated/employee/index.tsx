@@ -23,13 +23,13 @@ function Component() {
   return (
     <>
       <HeroSection title={`Hello, ${user?.name}`} />
-      <div className="flex flex-1 flex-col gap-4 px-6 md:px-10 py-6">
+      <div className="flex flex-1 flex-col gap-4 px-4 py-4 md:px-10 md:py-6">
         <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-          <div className="flex flex-col gap-4 col-span-2">
+          <div className="flex flex-col gap-4 md:col-span-2">
             <QuickActions />
             <TopicSection />
           </div>
-          <div className="flex flex-col gap-4 col-span-1">
+          <div className="flex flex-col gap-4 md:col-span-1">
             <PendingRequestsSection tickets={myTickets} />
           </div>
         </div>

@@ -337,6 +337,15 @@ Resources:
                   # Cohere is on-demand, single region
                   - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/${EmbeddingModelId}
 
+              - Effect: Allow
+                Action:
+                  - aws-marketplace:ViewSubscriptions
+                  - aws-marketplace:Subscribe
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    aws:CalledViaLast: bedrock.amazonaws.com
+
         - PolicyName: CognitoAdmin
           PolicyDocument:
             Version: '2012-10-17'

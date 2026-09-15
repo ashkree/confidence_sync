@@ -19,11 +19,11 @@ export function TicketDetailFields({ ticket }: { ticket: Ticket }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm bg-muted/20 p-3.5 rounded-lg border">
       {rows.map((row) => (
-        <div key={row.label}>
+        <div key={row.label} className="min-w-0">
           <span className="font-medium text-muted-foreground text-xs uppercase tracking-wider block mb-0.5">
             {row.label}
           </span>
-          <p className="font-medium">{row.value}</p>
+          <p className="font-medium truncate">{row.value}</p>
         </div>
       ))}
     </div>

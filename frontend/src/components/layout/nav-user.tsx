@@ -47,7 +47,7 @@ export function NavUser({
   onLogout: () => void;
   onSwitchUser?: (email: string, password: string) => Promise<void>;
 }) {
-  const { isMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
   const [sheetOpen, setSheetOpen] = useState(false);
   const { appEnv } = useAppEnv();
   const navigate = useNavigate();
@@ -129,6 +129,7 @@ export function NavUser({
               <DropdownMenuGroup>
                 <DropdownMenuItem
                   onClick={() => {
+                    if (isMobile) setOpenMobile(false);
                     navigate({ to: "/profile" });
                   }}
                 >

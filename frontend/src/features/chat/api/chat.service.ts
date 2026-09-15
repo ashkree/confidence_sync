@@ -34,3 +34,14 @@ export async function sendChatMessage(
   });
   return data;
 }
+
+/** Delete the current session and get a fresh one */
+export async function resetChatSession(
+  sessionId: string,
+): Promise<MessagesResponse> {
+  const { data } = await apiClient.delete<MessagesResponse>("/chat/session", {
+    params: { session_id: sessionId },
+  });
+  return data;
+}
+

@@ -44,8 +44,13 @@ apiClient.interceptors.response.use(
   async (error) => {
     const config = error.config as RetriableConfig | undefined;
     const status = error.response?.status;
+    const url = config?.url ?? "";
+    const isAuthEndpoint =
+      url.includes("/auth/login") ||
+      url.includes("/auth/refresh") ||
+      url.includes("/auth/logout");
 
-    if (status !== 401 || !config || config._retried) {
+    if (status !== 401 || !config || config._retried || isAuthEndpoint) {
       return Promise.reject(error);
     }
 
@@ -56,8 +61,13 @@ apiClient.interceptors.response.use(
       config.headers.set("Authorization", `Bearer ${token}`);
       return apiClient(config);
     } catch (refreshError) {
-      setAccessToken(null);
-      notifyAuthFailure();
+      if (
+        axios.isAxiosError(refreshError) &&
+        refreshError.response?.status === 401
+      ) {
+        setAccessToken(null);
+        notifyAuthFailure();
+      }
       return Promise.reject(refreshError);
     }
   },

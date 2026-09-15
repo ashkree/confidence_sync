@@ -1,10 +1,10 @@
-"use client";
-
+import * as React from "react";
 import {
   type ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
+  type VisibilityState,
 } from "@tanstack/react-table";
 
 import {
@@ -15,6 +15,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { DataTableCards } from "./data-table-cards";
 
 interface DataTableProps<TData, TValue = any> {
   columns: ColumnDef<TData, TValue>[];
@@ -27,11 +30,39 @@ export function DataTable<TData, TValue>({
   data,
   onRowClick,
 }: DataTableProps<TData, TValue>) {
+  const isMobile = useIsMobile();
+  const isTablet = useMediaQuery("(max-width: 1023px)");
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+
+  React.useEffect(() => {
+    if (isTablet) {
+      setColumnVisibility((prev) => ({
+        ...prev,
+        poster_name: false,
+        updated_at: false,
+      }));
+    } else {
+      setColumnVisibility((prev) => ({
+        ...prev,
+        poster_name: true,
+        updated_at: true,
+      }));
+    }
+  }, [isTablet]);
+
   const table = useReactTable({
     data,
     columns,
+    state: {
+      columnVisibility,
+    },
+    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  if (isMobile) {
+    return <DataTableCards table={table} onRowClick={onRowClick} />;
+  }
 
   return (
     <div className="overflow-hidden rounded-md border">
