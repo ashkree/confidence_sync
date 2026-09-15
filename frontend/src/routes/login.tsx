@@ -2,13 +2,14 @@ import { GalleryVerticalEnd } from "lucide-react";
 
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { LoginForm } from "@/features/auth/components/login-form";
+import { pageTitle } from "@/lib/page-title";
 
 export const Route = createFileRoute("/login")({
+  head: () => ({ meta: [{ title: pageTitle("Sign in") }] }),
   validateSearch: (search) => ({
     redirect: (search.redirect as string) || "/employee",
   }),
   beforeLoad: ({ context, search }) => {
-    console.log(import.meta.env.VITE_API_URL);
     // Redirect if already authenticated
     if (context.auth.isAuthenticated) {
       throw redirect({ to: search.redirect });
@@ -19,28 +20,18 @@ export const Route = createFileRoute("/login")({
 
 function LoginComponent() {
   return (
-    <div className="grid min-h-svh lg:grid-cols-2">
-      <div className="flex flex-col gap-4 p-6 md:p-10">
-        <div className="flex justify-center gap-2 md:justify-start">
-          <a href="#" className="flex items-center gap-2 font-medium">
-            <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <GalleryVerticalEnd className="size-4" />
-            </div>
-            Confidence Sync
-          </a>
-        </div>
-        <div className="flex flex-1 items-center justify-center">
-          <div className="w-full max-w-xs">
-            <LoginForm />
+    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
+      <div className="flex w-full max-w-sm flex-col gap-6">
+        <div className="flex items-center justify-center gap-2 font-medium">
+          <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <GalleryVerticalEnd className="size-4" />
           </div>
+          Confidence Sync
         </div>
-      </div>
-      <div className="relative hidden bg-muted lg:block">
-        <img
-          src="/placeholder.svg"
-          alt="Image"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-        />
+
+        <div className="rounded-xl border bg-background p-6 shadow-sm md:p-8">
+          <LoginForm />
+        </div>
       </div>
     </div>
   );

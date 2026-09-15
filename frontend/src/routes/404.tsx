@@ -8,8 +8,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { pageTitle } from "@/lib/page-title";
 
 export const Route = createFileRoute("/404")({
+  head: () => ({ meta: [{ title: pageTitle("Page not found") }] }),
   component: NotFoundPage,
 });
 

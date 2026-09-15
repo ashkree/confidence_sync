@@ -5,8 +5,10 @@ import { buttonVariants } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import type { Ticket } from "@/features/tickets/types";
 import HeroSection from "@/components/sections/HeroSection";
+import { pageTitle } from "@/lib/page-title";
 
 export const Route = createFileRoute("/_authenticated/ticket/my")({
+  head: () => ({ meta: [{ title: pageTitle("My Tickets") }] }),
   component: MyTicketsPage,
   loader: () => fetchMyTickets(),
 });

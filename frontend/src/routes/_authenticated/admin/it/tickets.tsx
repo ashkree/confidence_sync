@@ -7,6 +7,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import type { ItTicket } from "@/features/tickets/types";
 import { CATALOG_BY_REQUEST_TYPE } from "@/features/tickets/catalog";
 import HeroSection from "@/components/sections/HeroSection";
+import { pageTitle } from "@/lib/page-title";
 
 const helper = createColumnHelper<ItTicket>();
 
@@ -21,6 +22,7 @@ const ticket_columns = [
 ];
 
 export const Route = createFileRoute("/_authenticated/admin/it/tickets")({
+  head: () => ({ meta: [{ title: pageTitle("IT Tickets") }] }),
   component: RouteComponent,
   loader: () => fetchTickets(),
 });

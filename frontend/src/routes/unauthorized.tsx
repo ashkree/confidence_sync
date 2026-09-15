@@ -8,8 +8,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { pageTitle } from "@/lib/page-title";
 
 export const Route = createFileRoute("/unauthorized")({
+  head: () => ({ meta: [{ title: pageTitle("Access denied") }] }),
   validateSearch: (search) => ({
     redirect: (search.redirect as string) || "/employee",
     reason: (search.reason as string) || "insufficient_permissions",

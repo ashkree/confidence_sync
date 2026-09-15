@@ -3,10 +3,21 @@ import { CATALOG, type RequestTypeSlug } from "@/features/tickets/catalog";
 import { REGISTRY } from "@/features/tickets/form/registry";
 import { useTicketForm } from "@/features/tickets/form/use-ticket-form";
 import { TicketFormShell } from "@/features/tickets/form/ticket-form-shell";
+import { pageTitle } from "@/lib/page-title";
 
 export const Route = createFileRoute(
   "/_authenticated/ticket/submit/$requestType",
 )({
+  head: ({ params }) => ({
+    meta: [
+      {
+        title: pageTitle(
+          CATALOG[params.requestType as RequestTypeSlug]?.label ??
+            "Submit a request",
+        ),
+      },
+    ],
+  }),
   beforeLoad: ({ params }) => {
     if (!(params.requestType in CATALOG)) {
       throw redirect({ to: "/ticket/submit" });

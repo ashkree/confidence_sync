@@ -8,6 +8,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import type { HrRequest } from "@/features/tickets/types";
 import { CATALOG_BY_REQUEST_TYPE, humanizeEnum } from "@/features/tickets/catalog";
 import HeroSection from "@/components/sections/HeroSection";
+import { pageTitle } from "@/lib/page-title";
 
 const helper = createColumnHelper<HrRequest>();
 
@@ -29,6 +30,7 @@ const ticket_columns = [
 ];
 
 export const Route = createFileRoute("/_authenticated/admin/hr/requests")({
+  head: () => ({ meta: [{ title: pageTitle("HR Requests") }] }),
   component: RouteComponent,
   loader: () => fetchTickets(),
 });

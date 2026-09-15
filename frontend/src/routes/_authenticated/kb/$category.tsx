@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { KnowledgeBaseDetailPage } from "@/features/knowledge-base/components/kb-detail-page";
 import { fetchDocuments } from "@/features/knowledge-base/api";
+import { pageTitle } from "@/lib/page-title";
 
 const CATEGORY_CONFIG: Record<
   string,
@@ -51,5 +52,8 @@ export const Route = createFileRoute("/_authenticated/kb/$category")({
       documents: documents ?? [],
     };
   },
+  head: ({ loaderData }) => ({
+    meta: [{ title: pageTitle(loaderData?.title) }],
+  }),
   component: KnowledgeBaseDetailPage,
 });

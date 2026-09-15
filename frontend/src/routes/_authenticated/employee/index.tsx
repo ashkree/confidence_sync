@@ -6,7 +6,10 @@ import TopicSection from "@/components/sections/TopicsSection";
 import { useAuth } from "@/features/auth/auth-context";
 import type { Ticket } from "@/features/tickets/types";
 import { fetchMyTickets } from "@/features/tickets/api";
+import { pageTitle } from "@/lib/page-title";
+
 export const Route = createFileRoute("/_authenticated/employee/")({
+  head: () => ({ meta: [{ title: pageTitle("Overview") }] }),
   component: Component,
   loader: async () => {
     return await fetchMyTickets();
