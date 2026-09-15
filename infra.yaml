@@ -23,6 +23,12 @@ Parameters:
     Description: |
       t3.micro (1 GB) is too small once pymupdf and the embedding calls are running. t3.small is the realistic floor.
 
+  BackendAmiId:
+    Type: AWS::EC2::Image::Id
+    Description: |
+      AMI for the backend instance. Deliberately has no default: you must pass the ID of the AMI the instance is ALREADY running, or CloudFormation will replace the instance and destroy its root volume. Get it with:
+        aws ec2 describe-instances --instance-ids <id> --query "Reservations[].Instances[].ImageId" --output text
+
   DbInstanceClass:
     Type: String
     Default: db.t3.micro
@@ -337,6 +343,20 @@ Resources:
                   # Cohere is on-demand, single region
                   - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/${EmbeddingModelId}
 
+              # Cohere and Anthropic are third-party models, so the first
+              # invocation makes Bedrock open an AWS Marketplace subscription
+              # on the caller's behalf. Without these two actions that
+              # subscription fails and InvokeModel returns AccessDeniedException,
+              # even though the bedrock:InvokeModel grant above is correct.
+              #
+              # This is needed only until the subscription exists. Once the
+              # model is activated, every role in the account can invoke it
+              # with no Marketplace permissions, and this statement can go.
+              #
+              # CalledViaLast restricts the grant to subscriptions Bedrock
+              # itself initiates - the role cannot subscribe to arbitrary
+              # Marketplace products on its own. Tighten further by adding
+              # aws-marketplace:ProductId once you know the product IDs.
               - Effect: Allow
                 Action:
                   - aws-marketplace:ViewSubscriptions
@@ -381,7 +401,14 @@ Resources:
       InstanceType: !Ref BackendInstanceType
       # Resolves the current Amazon Linux 2023 AMI at deploy time, so you
       # never hardcode a region-specific AMI ID.
-      ImageId: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64}}'
+      # Pinned deliberately. This was previously
+      #   {{resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64}}
+      # which re-resolves on every deploy. When Amazon publishes a new
+      # Amazon Linux AMI the value changes, ImageId requires recreation,
+      # and CloudFormation replaces the instance - taking the root volume,
+      # the .env, the git checkout and the running container with it.
+      # Bump BackendAmiId only when you intend to rebuild the instance.
+      ImageId: !Ref BackendAmiId
       SubnetId: !Ref PublicSubnet
       SecurityGroupIds:
         - !Ref BackendSecurityGroup
