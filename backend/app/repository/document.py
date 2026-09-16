@@ -6,6 +6,7 @@ from langchain_core.documents import Document as LcDocument
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import settings
 from app.database import get_db
 from app.exceptions.documents import DocumentNotFoundError
 from app.models import Document, DocumentChunk
@@ -65,7 +66,7 @@ class DocumentRepo:
         self,
         query: Sequence[float],
         limit: int = 5,
-        threshold: float = 0.3,
+        threshold: float = settings.retrieval_distance_threshold,
     ):
         chunks = await self.db.scalars(
             select(DocumentChunk.content)

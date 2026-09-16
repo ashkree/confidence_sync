@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     embedding_model: str
     llm: str
 
+    # retrieval settings
+    retrieval_distance_threshold: float = 0.6
+
     # development settings
     app_env: str = "development"
     use_cognito_local: bool = True

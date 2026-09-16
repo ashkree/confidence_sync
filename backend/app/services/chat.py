@@ -92,7 +92,7 @@ async def write_message(
     try:
         # Get context from documents
         query = await get_bedrock_client().embed_text(content)
-        chunks = await document_repo.cosine_distance(query, threshold=0.6)
+        chunks = await document_repo.cosine_distance(query)
 
         if chunks:
             excerpts = "\n\n".join(

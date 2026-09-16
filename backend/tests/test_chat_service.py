@@ -38,6 +38,9 @@ async def test_write_message_success():
             content="I need help with my laptop",
         )
 
+    # Document retrieval used cosine distance without explicit threshold override
+    document_repo.cosine_distance.assert_called_once_with([0.1, 0.2])
+
     # User message was staged (not committed via create_message)
     chat_repo.stage_message.assert_called_once()
     staged_msg = chat_repo.stage_message.call_args[0][0]
